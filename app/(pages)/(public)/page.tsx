@@ -1,10 +1,10 @@
 "use client";
 
-import Navbar from "../components/(public)/Navbar";
-import Hero from "../components/(public)/Hero";
-import SearchBar from "../components/(public)/SearchBar";
-import Footer from "../components/(public)/Footer";
-import Eventos from "../components/(public)/Section";
+import Navbar from "../../components/(public)/Navbar";
+import Hero from "../../components/(public)/Hero";
+import SearchBar from "../../components/(public)/SearchBar";
+import Footer from "../../components/(public)/Footer";
+import Eventos from "../../components/(public)/Section";
 
 export default function Home() {
   return (
@@ -19,8 +19,7 @@ export default function Home() {
         </main>
       </div>
 
-      <Footer/>
-      
+      <Footer />
     </div>
   );
 }
