@@ -1,12 +1,14 @@
 import { Home, Ticket, Plus, Users, MessageCircle, Calendar } from 'lucide-react'
 import Link from 'next/link'
 
+import { ROUTES } from '@/app/lib/routes'
+
 const menuItems = [
-    { label: 'Eventos', icon: Ticket, href: '/events' },
-    { label: 'Criar Evento', icon: Plus, href: '/events/create' },
-    { label: 'Amigos', icon: Users, href: '/friends' },
-    { label: 'Mensagens', icon: MessageCircle, href: '/chat' },
-    { label: 'Agenda', icon: Calendar, href: '/agenda' },
+    { label: 'Eventos', icon: Ticket, href: ROUTES.events },
+    { label: 'Criar Evento', icon: Plus, href: ROUTES.eventsCreate },
+    { label: 'Amigos', icon: Users, href: ROUTES.friends },
+    { label: 'Mensagens', icon: MessageCircle, href: ROUTES.chat },
+    { label: 'Agenda', icon: Calendar, href: ROUTES.agenda },
 ]
 
 export default function Sidebar() {
