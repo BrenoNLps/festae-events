@@ -2,7 +2,7 @@ import { Home, Ticket, Plus, Users, MessageCircle, Calendar } from 'lucide-react
 import Link from 'next/link'
 
 const menuItems = [
-    { label: 'Início', icon: Home, href: '/events' },
+    { label: 'Eventos', icon: Ticket, href: '/events' },
     { label: 'Criar Evento', icon: Plus, href: '/events/create' },
     { label: 'Amigos', icon: Users, href: '/friends' },
     { label: 'Mensagens', icon: MessageCircle, href: '/chat' },
