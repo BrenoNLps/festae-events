@@ -7,8 +7,7 @@ const PROTECTED_ROUTES = [
     '/profile',
     '/chat',
     '/friends',
-    '/events/create',
-    '/events/edit',
+    '/events',
 ]
 
 function isProtectedRoute(pathname: string): boolean {
@@ -40,6 +39,12 @@ export async function middleware(request: NextRequest) {
     )
 
     const { data: { user } } = await supabase.auth.getUser()
+
+    if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/')) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/events'
+        return NextResponse.redirect(url)
+    }
 
     if (!user && isProtectedRoute(request.nextUrl.pathname)) {
         const url = request.nextUrl.clone()
