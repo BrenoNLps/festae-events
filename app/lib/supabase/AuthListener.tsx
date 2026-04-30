@@ -1,15 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { createClient } from "./client";
 import LoadingOverlay from "@/app/components/LoadingOverlay";
 import { PROTECTED_ROUTES, ROUTES } from "../routes";
 import { getUserById } from "../services/database/userService";
+import { getSupabaseClient } from "./singleton";
 
 export default function AuthListener() {
   const router = useRouter();
   const pathname = usePathname();
-  const supabase = createClient();
+  const supabase = getSupabaseClient();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

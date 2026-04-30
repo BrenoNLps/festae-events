@@ -1,6 +1,7 @@
-import { createClient } from "../../supabase/client";
+import { getSupabaseClient } from "../../supabase/singleton";
 
-const supabase = createClient();
+
+const supabase = getSupabaseClient();
 
 export async function addFriend(values: {
   id_usuario: string;
