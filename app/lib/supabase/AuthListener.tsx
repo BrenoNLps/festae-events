@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '../../lib/supabase/client'
-import LoadingOverlay from '@/app/components/(protected)/LoadingOverlay'
+import LoadingOverlay from '@/app/components/LoadingOverlay'
 import { PROTECTED_ROUTES, ROUTES } from '../routes'
 
 export default function AuthListener() {
