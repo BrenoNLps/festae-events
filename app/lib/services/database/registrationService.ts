@@ -1,34 +1,32 @@
-import { createClient } from '../supabase/client'
+import { createClient } from "../../supabase/client";
 
-const supabase = createClient()
+const supabase = createClient();
 
 export async function createRegistration(values: {
-    id_usuario: string
-    id_evento: number
+  id_usuario: string;
+  id_evento: number;
 }) {
-    const { data, error } = await supabase
-        .from('inscricao')
-        .insert(values)
+  const { data, error } = await supabase.from("inscricao").insert(values);
 
-    return { data, error }
+  return { data, error };
 }
 
 export async function getRegistrationsByUser(id_usuario: string) {
-    const { data, error } = await supabase
-        .from('inscricao')
-        .select('*, evento(*)')
-        .eq('id_usuario', id_usuario)
+  const { data, error } = await supabase
+    .from("inscricao")
+    .select("*, evento(*)")
+    .eq("id_usuario", id_usuario);
 
-    return { data, error }
+  return { data, error };
 }
 
 export async function getRegistrationsByEvent(id_evento: number) {
-    const { data, error } = await supabase
-        .from('inscricao')
-        .select('*, usuario(*)')
-        .eq('id_evento', id_evento)
+  const { data, error } = await supabase
+    .from("inscricao")
+    .select("*, usuario(*)")
+    .eq("id_evento", id_evento);
 
-    return { data, error }
+  return { data, error };
 }
 
 /*
