@@ -1,6 +1,7 @@
 'use client'
 import { useState } from "react"
 import styles from '@/app/styles/fields.module.css'
+import { getCepData } from '@/app/lib/services/api/cepService'
 
 interface AddressFieldProps {
     onChange: (endereco: {
@@ -25,9 +26,8 @@ export default function AddressField({ onChange }: AddressFieldProps) {
 
     async function buscarCep(cep: string) {
         if (cep.length === 8) {
-            const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
-            const data = await response.json()
-            if (!data.erro) {
+            const data = await getCepData(cep);
+            if (data && !data.erro) {
                 const novoEndereco = {
                     ...endereco,
                     cep,
