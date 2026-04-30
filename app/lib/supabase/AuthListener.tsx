@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from './client'
 import LoadingOverlay from '@/app/components/LoadingOverlay'
 import { PROTECTED_ROUTES, ROUTES } from '../routes'
+import { getUserById } from '../services/userService'
 
 export default function AuthListener() {
     const router = useRouter()
@@ -16,11 +17,8 @@ export default function AuthListener() {
             if (event === 'SIGNED_IN' && !PROTECTED_ROUTES.some(r => pathname.startsWith(r))) {
                 setLoading(true)
                 setTimeout(async () => {
-                    const { data: usuario } = await supabase
-                        .from('usuario')
-                        .select('username')
-                        .eq('id', session?.user.id)
-                        .single()
+                    if (!session?.user.id) return
+                    const { data: usuario } = await getUserById(session.user.id)
 
                     if (!usuario?.username) {
                         router.push(ROUTES.completeProfile)
