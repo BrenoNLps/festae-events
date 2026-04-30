@@ -22,7 +22,10 @@ export default function AuthListener() {
       ) {
         setLoading(true);
         setTimeout(async () => {
-          if (!session?.user.id) return;
+          if (!session?.user.id) {
+            setLoading(false);
+            return;
+          }
           const { data: usuario } = await getUserById(session.user.id);
 
           if (!usuario?.username) {
