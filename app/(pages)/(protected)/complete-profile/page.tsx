@@ -1,0 +1,46 @@
+'use client'
+import { useState } from 'react'
+import ImageUpload from '@/app/components/(protected)/ImageUpload'
+import FormField from '@/app/components/(protected)/FormField'
+
+export default function CompleteProfile() {
+    const [tipo, setTipo] = useState<'USUARIO' | 'EMPRESA'>('USUARIO')
+    const [form, setForm] = useState({username: '',cnpj: '',})
+    const [imagem, setImagem] = useState<File | null>(null)
+
+    function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+        setForm({ ...form, [e.target.name]: e.target.value })
+    }
+
+    return (
+        <div className="w-full max-w-md mx-auto py-10">
+            <h1 className="text-3xl font-bold mb-2 text-gray-900">Complete seu perfil</h1>
+            <p className="text-gray-500 text-sm mb-8">Essas informações serão visíveis para outros usuários</p>
+            <div className="flex flex-col gap-6">
+                <ImageUpload onChange={(file) => setImagem(file)} shape="circle" />
+                <FormField label="Username" name="username" value={form.username} onChange={handleChange} placeholder="@seu_username" />
+                <div>
+                    <label className="text-sm font-bold text-gray-900">Tipo de conta</label>
+                    <div className="flex gap-4 mt-2">
+                        <button  onClick={() => setTipo('USUARIO')}
+                            className={`flex-1 py-2 rounded-lg border text-sm font-medium transition ${tipo === 'USUARIO' ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-300 text-gray-700'}`}
+                        >
+                            Usuário
+                        </button>
+                        <button onClick={() => setTipo('EMPRESA')}
+                            className={`flex-1 py-2 rounded-lg border text-sm font-medium transition ${tipo === 'EMPRESA' ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-300 text-gray-700'}`}
+                        >
+                            Empresa
+                        </button>
+                    </div>
+                </div>
+                {tipo === 'EMPRESA' && (
+                    <FormField label="CNPJ" name="cnpj" value={form.cnpj} onChange={handleChange} placeholder="00.000.000/0000-00" />
+                )}
+                <button className="bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition">
+                    Salvar e continuar
+                </button>
+            </div>
+        </div>
+    )
+}

@@ -3,6 +3,7 @@ export const ROUTES = {
     login: '/login',
     events: '/events',
     eventsCreate: '/events/create',
+    completeProfile: '/complete-profile',
     friends: '/friends',
     chat: '/chat',
     agenda: '/agenda',
@@ -15,6 +16,7 @@ export const PROTECTED_ROUTES = [
     ROUTES.chat,
     ROUTES.agenda,
     ROUTES.profile,
+    ROUTES.completeProfile,
 ]
 
 export const PUBLIC_ROUTES = [
