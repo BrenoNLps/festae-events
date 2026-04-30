@@ -1,6 +1,6 @@
 'use client'
 import { useState } from "react"
-import FormField from "./FormField"
+import styles from '@/app/styles/fields.module.css'
 
 interface AddressFieldProps {
     onChange: (endereco: {
@@ -58,15 +58,33 @@ export default function AddressField({ onChange }: AddressFieldProps) {
 
     return (
         <div className="flex flex-col gap-4">
-            <FormField label="CEP" name="cep" value={endereco.cep} onChange={handleCepChange} placeholder="00000000" />
-            <FormField label="Logradouro" name="logradouro" value={endereco.logradouro} onChange={() => {}} placeholder="Preenchido automaticamente" readOnly />
-            <div className="flex gap-4">
-                <FormField label="Número" name="numero" value={endereco.numero} onChange={handleNumeroChange} placeholder="000" />
-                <FormField label="Bairro" name="bairro" value={endereco.bairro} onChange={() => {}} placeholder="Preenchido automaticamente" readOnly />
+            <div>
+                <label className={styles.label}>CEP</label>
+                <input name="cep" value={endereco.cep} onChange={handleCepChange} className={styles.input} placeholder="00000000" />
+            </div>
+            <div>
+                <label className={styles.label}>Logradouro</label>
+                <input name="logradouro" value={endereco.logradouro} className={styles.inputReadonly} placeholder="Preenchido automaticamente" readOnly />
             </div>
             <div className="flex gap-4">
-                <FormField label="Cidade" name="cidade" value={endereco.cidade} onChange={() => {}} placeholder="Preenchido automaticamente" readOnly />
-                <FormField label="Estado" name="estado" value={endereco.estado} onChange={() => {}} placeholder="Preenchido automaticamente" readOnly />
+                <div className="flex-1">
+                    <label className={styles.label}>Número</label>
+                    <input name="numero" value={endereco.numero} onChange={handleNumeroChange} className={styles.input} placeholder="000" />
+                </div>
+                <div className="flex-1">
+                    <label className={styles.label}>Bairro</label>
+                    <input name="bairro" value={endereco.bairro} className={styles.inputReadonly} placeholder="Preenchido automaticamente" readOnly />
+                </div>
+            </div>
+            <div className="flex gap-4">
+                <div className="flex-1">
+                    <label className={styles.label}>Cidade</label>
+                    <input name="cidade" value={endereco.cidade} className={styles.inputReadonly} placeholder="Preenchido automaticamente" readOnly />
+                </div>
+                <div className="flex-1">
+                    <label className={styles.label}>Estado</label>
+                    <input name="estado" value={endereco.estado} className={styles.inputReadonly} placeholder="Preenchido automaticamente" readOnly />
+                </div>
             </div>
         </div>
     )
