@@ -23,7 +23,7 @@ export async function completeProfile(
 ) {
   const { data, error } = await supabase
     .from("usuario")
-    .update(values)
+    .update({ ...values, perfil_completo: true })
     .eq("id", id);
 
   return { data, error };
