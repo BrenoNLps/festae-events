@@ -8,4 +8,7 @@ export interface Adress {
     estado: string;
 }
 
-export type AccountType = 'USUARIO' | 'EMPRESA'
+export enum AccountType {
+    USUARIO = 'USUARIO',
+    EMPRESA = 'EMPRESA'
+}
