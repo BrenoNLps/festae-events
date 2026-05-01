@@ -3,14 +3,10 @@ import { useState } from 'react'
 import ImageUpload from '@/app/components/(protected)/ImageUpload'
 import AddressField from '@/app/components/(protected)/AddressField'
 import styles from '@/app/styles/fields.module.css'
-import { useRouter } from 'next/navigation'
-import { useCurrentUser } from '@/app/lib/hooks/useCurrentUser'
-import { createEvent } from '@/app/lib/services/database/eventService'
-import { ROUTES } from '@/app/lib/routes'
+import { useCreateEvent } from '@/app/lib/hooks/forms/useCreateEvent'
 
 export default function Create() {
-    const user = useCurrentUser()
-    const router = useRouter()
+    const {handleSubmit, loading} = useCreateEvent()
     const [imagem, setImagem] = useState<File | null>(null)
     const [form, setForm] = useState({
         nome: '',
@@ -22,7 +18,7 @@ export default function Create() {
         hora_inicio: '',
         hora_fim: '',
     })
-    const [endereco, setEndereco] = useState({
+    const [adress, setAdress] = useState({
         cep: '',
         logradouro: '',
         bairro: '',
@@ -35,25 +31,6 @@ export default function Create() {
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
         setForm({ ...form, [e.target.name]: e.target.value })
-    }
-
-    async function handleSubmit() {
-        if (!user) return
-
-        const { error } = await createEvent({
-            nome: form.nome,
-            descricao: form.descricao,
-            endereco,
-            vagas: Number(form.vagas),
-            valor: Number(form.valor),
-            data_inicio: form.data_inicio,
-            data_fim: form.data_fim,
-            hora_inicio: form.hora_inicio,
-            hora_fim: form.hora_fim,
-            id_organizador: user.id,
-        })
-
-        if (!error) router.push(ROUTES.events)
     }
 
     return (
@@ -69,7 +46,7 @@ export default function Create() {
                     <label className={styles.label}>Descrição</label>
                     <textarea name="descricao" value={form.descricao} onChange={handleChange} className={styles.input} placeholder="Descrição do evento" rows={4} />
                 </div>
-                <AddressField onChange={(end) => setEndereco(end)} />
+                <AddressField onChange={(end) => setAdress(end)} />
                 <div className="flex gap-4">
                     <div className="flex-1">
                         <label className={styles.label}>Data início</label>
@@ -100,7 +77,11 @@ export default function Create() {
                         <input name="valor" type="number" value={form.valor} onChange={handleChange} className={styles.input} placeholder="0.00" />
                     </div>
                 </div>
-                <button onClick={handleSubmit} className="bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition mt-4">
+                <button disabled={loading} onClick={
+                    () => handleSubmit(
+                        {...form,vagas: Number(form.vagas),valor: Number(form.valor),endereco: adress}
+                    )  
+                } className="bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-900 transition mt-4">
                     Criar Evento
                 </button>
             </div>
