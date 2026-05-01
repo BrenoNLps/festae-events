@@ -1,18 +1,13 @@
 import { getSupabaseClient } from "../../supabase/singleton";
+import { Adress } from "../../types";
+
 
 const supabase = getSupabaseClient();
 
 export async function createEvent(values: {
     nome: string;
     descricao?: string;
-    endereco: {
-        cep: string;
-        logradouro: string;
-        numero: string;
-        bairro: string;
-        cidade: string;
-        estado: string;
-    };
+    endereco: Adress;
     vagas: number;
     valor: number;
     data_inicio: string;
