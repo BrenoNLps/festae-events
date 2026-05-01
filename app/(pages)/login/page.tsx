@@ -19,7 +19,7 @@ export default function Login() {
     return (
         <div className="w-full h-screen flex">
             <div className="w-1/3 h-screen bg-indigo-900 flex items-center justify-center">
-                <Image src="/images/login/logo.png" alt="Login Image" width={400} height={400} />
+                <Image src="/images/logo.png" alt="Login Image" width={400} height={400} />
             </div>
 
             <div className="w-2/3 h-screen flex flex-col items-center justify-center">
