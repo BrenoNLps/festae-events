@@ -2,9 +2,12 @@
 import { useState } from 'react'
 import ImageUpload from '@/app/components/(protected)/ImageUpload'
 import styles from '@/app/styles/fields.module.css'
+import { useCompleteProfile } from '@/app/lib/hooks/forms/useCompleteProfile'
+import { AccountType } from '@/app/lib/types'
 
 export default function CompleteProfile() {
-    const [tipo, setTipo] = useState<'USUARIO' | 'EMPRESA'>('USUARIO')
+    const {handleSubmit, loading} = useCompleteProfile()
+    const [tipo, setTipo] = useState<AccountType>(AccountType.USUARIO)
     const [form, setForm] = useState({ username: '', cnpj: '' })
     const [imagem, setImagem] = useState<File | null>(null)
 
@@ -25,25 +28,30 @@ export default function CompleteProfile() {
                 <div>
                     <label className={styles.label}>Tipo de conta</label>
                     <div className="flex gap-4 mt-2">
-                        <button type="button" onClick={() => setTipo('USUARIO')}
-                            className={`flex-1 py-2 rounded-lg border text-sm font-medium transition ${tipo === 'USUARIO' ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-300 text-gray-700'}`}
+                        <button type="button" onClick={() => setTipo(AccountType.USUARIO)}
+                            className={`flex-1 py-2 rounded-lg border text-sm font-medium transition ${tipo === AccountType.USUARIO ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-300 text-gray-700'}`}
                         >
                             Usuário
                         </button>
-                        <button type="button" onClick={() => setTipo('EMPRESA')}
-                            className={`flex-1 py-2 rounded-lg border text-sm font-medium transition ${tipo === 'EMPRESA' ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-300 text-gray-700'}`}
+                        <button type="button" onClick={() => setTipo(AccountType.EMPRESA)}
+                            className={`flex-1 py-2 rounded-lg border text-sm font-medium transition ${tipo === AccountType.EMPRESA ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-300 text-gray-700'}`}
                         >
                             Empresa
                         </button>
                     </div>
                 </div>
-                {tipo === 'EMPRESA' && (
+                {tipo === AccountType.EMPRESA && (
                     <div>
                         <label className={styles.label}>CNPJ</label>
                         <input name="cnpj" value={form.cnpj} onChange={handleChange} className={styles.input} placeholder="00.000.000/0000-00" maxLength={18} />
                     </div>
                 )}
-                <button className="bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition">
+                <button 
+                className="bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-900 transition"
+                disabled={loading} 
+                onClick={() => handleSubmit({
+                    username: form.username, tipo_conta: tipo, cnpj: tipo === AccountType.EMPRESA ? form.cnpj : undefined
+                })}>
                     Salvar e continuar
                 </button>
             </div>
