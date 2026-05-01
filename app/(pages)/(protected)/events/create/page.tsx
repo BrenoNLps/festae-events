@@ -3,8 +3,14 @@ import { useState } from 'react'
 import ImageUpload from '@/app/components/(protected)/ImageUpload'
 import AddressField from '@/app/components/(protected)/AddressField'
 import styles from '@/app/styles/fields.module.css'
+import { useRouter } from 'next/navigation'
+import { useCurrentUser } from '@/app/lib/hooks/useCurrentUser'
+import { createEvent } from '@/app/lib/services/database/eventService'
+import { ROUTES } from '@/app/lib/routes'
 
 export default function Create() {
+    const user = useCurrentUser()
+    const router = useRouter()
     const [imagem, setImagem] = useState<File | null>(null)
     const [form, setForm] = useState({
         nome: '',
@@ -29,6 +35,25 @@ export default function Create() {
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
         setForm({ ...form, [e.target.name]: e.target.value })
+    }
+
+    async function handleSubmit() {
+        if (!user) return
+
+        const { error } = await createEvent({
+            nome: form.nome,
+            descricao: form.descricao,
+            endereco,
+            vagas: Number(form.vagas),
+            valor: Number(form.valor),
+            data_inicio: form.data_inicio,
+            data_fim: form.data_fim,
+            hora_inicio: form.hora_inicio,
+            hora_fim: form.hora_fim,
+            id_organizador: user.id,
+        })
+
+        if (!error) router.push(ROUTES.events)
     }
 
     return (
@@ -75,7 +100,7 @@ export default function Create() {
                         <input name="valor" type="number" value={form.valor} onChange={handleChange} className={styles.input} placeholder="0.00" />
                     </div>
                 </div>
-                <button className="bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition mt-4">
+                <button onClick={handleSubmit} className="bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition mt-4">
                     Criar Evento
                 </button>
             </div>
