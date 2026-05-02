@@ -43,15 +43,19 @@ export default function CompleteProfile() {
                 {tipo === AccountType.EMPRESA && (
                     <div>
                         <label className={styles.label}>CNPJ</label>
-                        <input name="cnpj" value={form.cnpj} onChange={handleChange} className={styles.input} placeholder="00.000.000/0000-00" maxLength={18} />
+                        <input name="cnpj" value={form.cnpj} onChange={handleChange} className={styles.input} placeholder="00.000.000/0000-00" maxLength={14} />
                     </div>
                 )}
                 <button 
-                className="bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-900 transition"
-                disabled={loading} 
-                onClick={() => handleSubmit({
-                    username: form.username, tipo_conta: tipo, cnpj: tipo === AccountType.EMPRESA ? form.cnpj : undefined
-                })}>
+                    className="bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-900 transition"
+                    disabled={loading} 
+                    onClick={
+                        () => {
+                            if (!form.username.trim()) return
+                            if (tipo === AccountType.EMPRESA && !form.cnpj.trim()) return
+                            handleSubmit({username: form.username, tipo_conta: tipo, cnpj: tipo === AccountType.EMPRESA ? form.cnpj : undefined})
+                        }}
+                >
                     Salvar e continuar
                 </button>
             </div>
