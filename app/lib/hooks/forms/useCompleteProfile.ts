@@ -1,22 +1,30 @@
 import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useCurrentUser } from "../useCurrentUser"
 import { ROUTES } from "../../routes"
 import { completeProfile } from "../../services/database/userService"
+import { profileSchema, ProfileFormData } from "../../validation/profileSchema"
 import { AccountType } from "../../types"
 
 export function useCompleteProfile() {
-    const {user, loading} = useCurrentUser()
+    const { user, loading } = useCurrentUser()
     const router = useRouter()
 
-    async function handleSubmit(data: {
-        username: string
-        tipo_conta: AccountType
-        cnpj?: string
-    }) {
-        if (loading || !user) return
+    const form = useForm<ProfileFormData>({
+        resolver: zodResolver(profileSchema),
+        defaultValues: {
+            username: '',
+            tipo_conta: AccountType.USUARIO,
+            cnpj: '',
+        }
+    })
+
+    async function onSubmit(data: ProfileFormData) {
+        if (!user) return
         const { error } = await completeProfile(user.id, data)
         if (!error) router.push(ROUTES.events)
     }
 
-    return { handleSubmit, loading }
+    return { form, onSubmit, loading }
 }
