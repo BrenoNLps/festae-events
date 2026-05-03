@@ -38,3 +38,58 @@
     mt-1
     ;
 }
+
+.formWrapper {
+    @apply
+    w-full
+    mx-auto
+    py-10
+    ;
+}
+
+.form {
+    @apply
+    flex
+    flex-col
+    ;
+}
+
+.accountTypeButton {
+    @apply
+    flex-1
+    py-2
+    rounded-lg
+    border
+    text-sm
+    font-medium
+    transition
+    ;
+}
+
+.accountTypeButtonActive {
+    @apply
+    bg-purple-600
+    text-white
+    border-purple-600
+    ;
+}
+
+.accountTypeButtonInactive {
+    @apply
+    border-gray-300
+    text-gray-700
+    ;
+}
+
+.submitButton {
+    @apply
+    bg-purple-600
+    text-white
+    font-bold
+    py-3
+    rounded-lg
+    hover:bg-purple-900
+    transition
+    disabled:opacity-50
+    ;
+}

@@ -12,9 +12,9 @@ export default function Create() {
     const dataInicio = watch('data_inicio')
 
     return (
-        <div className="w-full max-w-2xl mx-auto py-10">
+        <div className={`${styles.formWrapper} max-w-2xl`}>
             <h1 className="text-3xl font-bold mb-8 text-purple-800">Criar Evento</h1>
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit(onSubmit)} className={`${styles.form} gap-4`}>
                 <ImageUpload onChange={() => {}} />
                 <div>
                     <label className={styles.label}>Nome</label>
@@ -68,7 +68,7 @@ export default function Create() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-900 transition disabled:opacity-50 mt-4"
+                    className={`${styles.submitButton} mt-4`}
                 >
                     Criar Evento
                 </button>
