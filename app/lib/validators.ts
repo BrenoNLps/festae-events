@@ -1,3 +1,11 @@
+export function validatorUsername(username: string): boolean {
+    return /^[a-zA-Z0-9._-]{3,30}$/.test(username)
+}
+
+export function validatorCEP(cep: string): boolean {
+    return /^\d{8}$/.test(cep)
+}
+
 export function validatorCNPJ(cnpj: string): boolean {
     const digits = cnpj.replace(/\D/g, '')
 
