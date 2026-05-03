@@ -30,3 +30,11 @@
     text-gray-900
     ;
 }
+
+.error {
+    @apply
+    text-xs
+    text-red-500
+    mt-1
+    ;
+}
