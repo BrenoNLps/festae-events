@@ -15,7 +15,7 @@ export const eventSchema = z.object({
     vagas: z.number({ invalid_type_error: 'Informe um número' }).int('Deve ser número inteiro').positive('Mínimo 1 vaga'),
     valor: z.preprocess(
         (val) => typeof val === 'number' && isNaN(val) ? 0 : val,
-        z.number({ invalid_type_error: 'Informe um número' }).min(0, 'Valor não pode ser negativo')
+        z.number({ invalid_type_error: 'Informe um número' }).min(0, 'Valor não pode ser negativo').max(999999.99, 'Valor máximo R$ 999.999,99')
     ),
     data_inicio: z.string().min(1, 'Data de início obrigatória'),
     data_fim: z.string().min(1, 'Data de fim obrigatória'),

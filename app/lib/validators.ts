@@ -24,6 +24,17 @@ export function validatorCNPJ(cnpj: string): boolean {
     return d1 === Number(digits[12]) && d2 === Number(digits[13])
 }
 
+export function maskCurrency(digits: string): string {
+    const d = digits.replace(/\D/g, '').slice(0, 8)
+    if (!d) return ''
+    return (parseInt(d, 10) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+export function parseCurrency(input: string): number {
+    const d = input.replace(/\D/g, '').slice(0, 8)
+    return d ? parseInt(d, 10) / 100 : 0
+}
+
 export function maskCNPJ(value: string): string {
     const d = value.replace(/\D/g, '').slice(0, 14)
     if (d.length <= 2) return d

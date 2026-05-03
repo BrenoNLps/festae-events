@@ -3,6 +3,7 @@ import ImageUpload from '@/app/components/(protected)/ImageUpload'
 import AddressField from '@/app/components/(protected)/AddressField'
 import styles from '@/app/styles/fields.module.css'
 import { useCreateEvent } from '@/app/lib/hooks/forms/useCreateEvent'
+import { maskCurrency, parseCurrency } from '@/app/lib/validators'
 
 export default function Create() {
     const { form, onSubmit, loading } = useCreateEvent()
@@ -61,15 +62,14 @@ export default function Create() {
                     </div>
                     <div className="flex-1">
                         <label className={styles.label}>Valor (R$)</label>
-                        <input {...register('valor', { valueAsNumber: true })} type="number" className={styles.input} placeholder="0.00" min={0} step="0.01" />
+                        <input className={styles.input} type="text" inputMode="numeric" placeholder="0,00"
+                            value={(() => { const v = watch('valor'); return (!v || isNaN(v)) ? '' : maskCurrency(Math.round(v * 100).toString()) })()}
+                            onChange={(e) => setValue('valor', parseCurrency(e.target.value), { shouldValidate: true })}
+                        />
                         {errors.valor && <span className={styles.error}>{errors.valor.message}</span>}
                     </div>
                 </div>
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className={`${styles.submitButton} mt-4`}
-                >
+                <button className={`${styles.submitButton} mt-4`} type="submit" disabled={loading}>
                     Criar Evento
                 </button>
             </form>
