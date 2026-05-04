@@ -1,13 +1,6 @@
 import { Calendar, MapPin, Ticket } from "lucide-react";
 import { Evento } from "@/app/lib/types";
-
-function formatDateRange(inicio: string, fim: string): string {
-  const fmt = (d: string) => {
-    const [year, month, day] = d.split("-");
-    return `${day}/${month}/${year}`;
-  };
-  return inicio === fim ? fmt(inicio) : `${fmt(inicio)} – ${fmt(fim)}`;
-}
+import { formatDateRange } from "@/app/lib/utils/date";
 
 export function EventCard({ event }: { event: Evento }) {
   const dateLabel = formatDateRange(event.data_inicio, event.data_fim);
