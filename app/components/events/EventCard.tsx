@@ -1,0 +1,68 @@
+import { Calendar, MapPin, Ticket } from "lucide-react";
+import { Evento } from "@/app/lib/types";
+
+function formatDateRange(inicio: string, fim: string): string {
+  const fmt = (d: string) => {
+    const [year, month, day] = d.split("-");
+    return `${day}/${month}/${year}`;
+  };
+  return inicio === fim ? fmt(inicio) : `${fmt(inicio)} – ${fmt(fim)}`;
+}
+
+export function EventCard({ event }: { event: Evento }) {
+  const dateLabel = formatDateRange(event.data_inicio, event.data_fim);
+  const location = [event.endereco?.cidade, event.endereco?.estado]
+    .filter(Boolean)
+    .join(", ");
+  const price =
+    !event.valor || event.valor === 0
+      ? "Gratuito"
+      : `R$ ${event.valor.toFixed(2).replace(".", ",")}`;
+
+  return (
+    <div className="flex-shrink-0 w-64 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+      <div className="relative h-36 bg-purple-100">
+        {event.imagem_url ? (
+          <img
+            src={event.imagem_url}
+            alt={event.nome}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Ticket className="h-10 w-10 text-purple-300" />
+          </div>
+        )}
+        <span
+          className={`absolute top-2 right-2 text-xs font-semibold px-2 py-1 rounded-full ${
+            price === "Gratuito"
+              ? "bg-green-100 text-green-700"
+              : "bg-white text-gray-700"
+          }`}
+        >
+          {price}
+        </span>
+      </div>
+
+      <div className="p-3 flex flex-col gap-1.5">
+        <p className="font-semibold text-sm text-gray-900 leading-tight line-clamp-2">
+          {event.nome}
+        </p>
+
+        <div className="flex items-center gap-1 text-xs text-gray-500">
+          <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+          <span>{dateLabel}</span>
+        </div>
+
+        {location && (
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate">{location}</span>
+          </div>
+        )}
+
+        <div className="text-xs text-gray-400 mt-0.5">{event.vagas} vagas</div>
+      </div>
+    </div>
+  );
+}
