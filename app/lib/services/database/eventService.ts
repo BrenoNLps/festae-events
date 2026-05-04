@@ -28,6 +28,15 @@ export async function getEvents() {
     return { data, error };
 }
 
+export async function getEventsByOrganizer(id_organizador: string) {
+    const { data, error } = await supabase
+        .from("evento")
+        .select("*")
+        .eq("id_organizador", id_organizador);
+
+    return { data, error };
+}
+
 export async function getEventById(id: number) {
     const { data, error } = await supabase
     .from("evento")
