@@ -1,3 +1,4 @@
+import { Usuario } from "../../types";
 import { getSupabaseClient } from "../../supabase/singleton";
 
 const supabase = getSupabaseClient();
@@ -43,4 +44,36 @@ export async function updateProfile(
     .eq("id", id);
 
   return { data, error };
+}
+
+export async function searchUsers(
+  query: string,
+  excludeId?: string,
+  limit = 5,
+): Promise<Usuario[]> {
+  let q = supabase
+    .from("usuario")
+    .select("id, username, nome, imagem_url, tipo_conta, perfil_completo")
+    .ilike("username", `%${query}%`)
+    .limit(limit * 3);
+
+  if (excludeId) q = q.neq("id", excludeId);
+
+  const { data } = await q;
+  if (!data) return [];
+
+  const lower = query.toLowerCase();
+  return data
+    .sort((a, b) => {
+      const score = (u: typeof a) => {
+        const un = u.username?.toLowerCase() ?? "";
+        if (un === lower) return 0;
+        if (un.startsWith(lower)) return 1;
+        return 2;
+      };
+      const diff = score(a) - score(b);
+      if (diff !== 0) return diff;
+      return (a.username?.length ?? 0) - (b.username?.length ?? 0);
+    })
+    .slice(0, limit) as Usuario[];
 }
