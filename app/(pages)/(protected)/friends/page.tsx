@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { UserPlus, UserCheck, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { UserPlus, UserCheck, Users, MessageCircle, UserMinus } from "lucide-react";
 
 import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { useSearch } from "@/app/lib/hooks/useSearch";
@@ -9,13 +10,16 @@ import { searchUsers } from "@/app/lib/services/database/userService";
 import {
   addFriend,
   getFriends,
+  removeFriend,
 } from "@/app/lib/services/database/friendshipService";
 import { SearchInput } from "@/app/components/(protected)/SearchInput";
 import { Avatar } from "@/app/components/(protected)/Avatar";
 import { Usuario } from "@/app/lib/types";
+import { ROUTES } from "@/app/lib/routes";
 
 export default function Friends() {
   const { user } = useCurrentUser();
+  const router = useRouter();
 
   const searchFn = useCallback(
     (q: string) => searchUsers(q, user?.id ?? undefined),
@@ -46,6 +50,26 @@ export default function Friends() {
     setFriends((prev) => [...prev, target]);
   }
 
+  async function handleRemove(target: Usuario) {
+    if (!user?.id) return;
+    await removeFriend(user.id, target.id);
+    setFriendIds((prev) => {
+      const next = new Set(prev);
+      next.delete(target.id);
+      return next;
+    });
+    setFriends((prev) => prev.filter((f) => f.id !== target.id));
+    setAdded((prev) => {
+      const next = new Set(prev);
+      next.delete(target.id);
+      return next;
+    });
+  }
+
+  function handleMessage(target: Usuario) {
+    router.push(`${ROUTES.chat}?userId=${target.id}`);
+  }
+
   const showSearch = query.trim().length > 0;
 
   return (
@@ -74,6 +98,8 @@ export default function Friends() {
               isAlreadyFriend={friendIds.has(u.id)}
               justAdded={added.has(u.id)}
               onAdd={() => handleAdd(u)}
+              onRemove={() => handleRemove(u)}
+              onMessage={() => handleMessage(u)}
             />
           ))}
         </div>
@@ -89,7 +115,13 @@ export default function Friends() {
           </div>
           <div className="flex flex-col gap-2">
             {friends.map((u) => (
-              <UserCard key={u.id} user={u} isAlreadyFriend />
+              <UserCard
+                key={u.id}
+                user={u}
+                isAlreadyFriend
+                onRemove={() => handleRemove(u)}
+                onMessage={() => handleMessage(u)}
+              />
             ))}
           </div>
         </div>
@@ -103,9 +135,11 @@ interface UserCardProps {
   isAlreadyFriend?: boolean;
   justAdded?: boolean;
   onAdd?: () => void;
+  onRemove?: () => void;
+  onMessage?: () => void;
 }
 
-function UserCard({ user, isAlreadyFriend, justAdded, onAdd }: UserCardProps) {
+function UserCard({ user, isAlreadyFriend, justAdded, onAdd, onRemove, onMessage }: UserCardProps) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white shadow-sm">
       <Avatar nome={user.nome} imagem_url={user.imagem_url} size={44} />
@@ -117,20 +151,41 @@ function UserCard({ user, isAlreadyFriend, justAdded, onAdd }: UserCardProps) {
           <p className="text-xs text-gray-500 truncate">{user.nome}</p>
         )}
       </div>
-      {!isAlreadyFriend && onAdd && (
-        <button
-          onClick={onAdd}
-          disabled={justAdded}
-          className="flex items-center gap-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-60 px-3 py-2 rounded-full transition-colors"
-        >
-          {justAdded ? (
-            <UserCheck className="h-4 w-4" />
-          ) : (
-            <UserPlus className="h-4 w-4" />
-          )}
-          {justAdded ? "Adicionado" : "Adicionar"}
-        </button>
-      )}
+      <div className="flex items-center gap-2">
+        {isAlreadyFriend ? (
+          <>
+            <button
+              onClick={onMessage}
+              className="flex items-center gap-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded-full transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Mensagem
+            </button>
+            <button
+              onClick={onRemove}
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-red-600 border border-gray-200 hover:border-red-300 px-3 py-2 rounded-full transition-colors"
+            >
+              <UserMinus className="h-4 w-4" />
+              Remover
+            </button>
+          </>
+        ) : (
+          onAdd && (
+            <button
+              onClick={onAdd}
+              disabled={justAdded}
+              className="flex items-center gap-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-60 px-3 py-2 rounded-full transition-colors"
+            >
+              {justAdded ? (
+                <UserCheck className="h-4 w-4" />
+              ) : (
+                <UserPlus className="h-4 w-4" />
+              )}
+              {justAdded ? "Adicionado" : "Adicionar"}
+            </button>
+          )
+        )}
+      </div>
     </div>
   );
 }
