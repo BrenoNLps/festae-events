@@ -1,40 +1,34 @@
-import Image from 'next/image'
+"use client";
 
-const eventos = [
-    { id: 1, nome: 'Rock in Rio', cidade: 'Rio de Janeiro', data: '10 maio', preco: 150, imagem: '/images/eventos/evento1.jpg' },
-    { id: 2, nome: 'Festival de Jazz', cidade: 'São Paulo', data: '22 junho', preco: 0, imagem: '/images/eventos/evento2.jpg' },
-    { id: 3, nome: 'Carnaval de Olinda', cidade: 'Olinda', data: '01 março', preco: 0, imagem: '/images/eventos/evento3.jpg' },
-    { id: 4, nome: 'Lollapalooza', cidade: 'São Paulo', data: '05 abril', preco: 200, imagem: '/images/eventos/evento4.jpg' },
-    { id: 5, nome: 'Festa Junina Cultural', cidade: 'Fortaleza', data: '15 junho', preco: 30, imagem: '/images/eventos/evento5.jpg' },
-    { id: 6, nome: 'Festival Gastronômico', cidade: 'Curitiba', data: '18 agosto', preco: 0, imagem: '/images/eventos/evento6.jpg' },
-]
+import { useEffect, useState } from "react";
+import { getEvents } from "@/app/lib/services/database/eventService";
+import { Evento } from "@/app/lib/types";
+import { EventShelf } from "@/app/components/events/EventShelf";
 
 export default function Eventos() {
-    return (
-        <section className="w-full py-14">
-            <h2 className="text-2xl font-bold mb-6 text-black">Eventos</h2>
+  const [events, setEvents] = useState<Evento[]>([]);
+  const [loading, setLoading] = useState(true);
 
-            <div className="grid grid-cols-3 gap-6">
-                {eventos.map((evento) => (
-                    <div key={evento.id} className="flex flex-col gap-2">
-                        <Image src={evento.imagem} alt={evento.nome} className="w-full h-48 object-cover rounded-2xl bg-gray-200" width={400} height={300}/>
-                        <h3 className="font-bold text-base">{evento.nome}</h3>
-                        <p className="text-sm text-gray-500">{evento.cidade} - {evento.data}</p>
-                        <div>
-                            {evento.preco === 0 ? 
-                                (<span className="text-sm border border-gray-300 rounded-full px-3 py-1">Grátis</span>) : 
-                                (<span className="text-sm border border-gray-300 rounded-full px-3 py-1">R$ {evento.preco.toFixed(2)}</span>)
-                            }
-                        </div>
-                    </div>
-                ))}
-            </div>
+  useEffect(() => {
+    getEvents().then(({ data }) => {
+      if (data) setEvents(data as Evento[]);
+      setLoading(false);
+    });
+  }, []);
 
-            <div className="flex justify-end mt-6">
-                <button className="bg-purple-600 text-white text-sm px-6 py-3 rounded-full hover:bg-purple-700 transition">
-                Ver mais
-                </button>
-            </div>
-        </section>
-    )
+  const today = new Date().toISOString().split("T")[0];
+
+  const latest = [...events].sort((a, b) => b.id - a.id).slice(0, 10);
+
+  const upcoming = [...events]
+    .filter((e) => e.data_inicio >= today)
+    .sort((a, b) => a.data_inicio.localeCompare(b.data_inicio))
+    .slice(0, 10);
+
+  return (
+    <section className="w-full py-14 flex flex-col gap-12">
+      <EventShelf title="Últimos adicionados" events={latest} loading={loading} />
+      <EventShelf title="Em breve" events={upcoming} loading={loading} />
+    </section>
+  );
 }
