@@ -1,4 +1,20 @@
 // app/lib/types.ts
+export interface Evento {
+    id: number;
+    nome: string;
+    descricao?: string;
+    endereco: Adress;
+    vagas: number;
+    valor: number;
+    data_inicio: string;
+    data_fim: string;
+    hora_inicio: string;
+    hora_fim: string;
+    imagem_url?: string;
+    id_organizador: string;
+    created_at?: string;
+}
+
 export interface Usuario {
     id: string
     username: string
