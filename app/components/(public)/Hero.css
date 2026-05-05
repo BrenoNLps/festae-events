@@ -1,10 +1,10 @@
-.swiper {
+.mySwiper {
     width: 100%;
     height: 250px;
     background: #000;
 }
 
-.swiper-slide {
+.mySwiper .swiper-slide {
     font-size: 18px;
     color: #fff;
     box-sizing: border-box;
@@ -21,7 +21,8 @@
     background-position: center;
     background-repeat: no-repeat;
 }
-.swiper-slide {
+
+.mySwiper .swiper-slide {
     position: relative;
     overflow: hidden;
     font-size: 18px;
@@ -32,16 +33,16 @@
     font-weight: 600;
 }
 
-.swiper-slide .title {
+.mySwiper .swiper-slide .title {
     font-size: 41px;
     font-weight: 300;
 }
 
-.swiper-slide .subtitle {
+.mySwiper .swiper-slide .subtitle {
     font-size: 21px;
 }
 
-.swiper-slide .text {
+.mySwiper .swiper-slide .text {
     font-size: 14px;
     max-width: 400px;
     line-height: 1.3;
