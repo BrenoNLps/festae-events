@@ -1,8 +1,17 @@
-import Navbar from "@/app/components/(protected)/Navbar";
-import Sidebar from "@/app/components/(protected)/Sidebar";
+import { redirect } from 'next/navigation'
+import { createClient } from '@/app/lib/supabase/server'
+import { ROUTES } from '@/app/lib/routes'
+import Navbar from "@/app/components/(protected)/Navbar"
+import Sidebar from "@/app/components/(protected)/Sidebar"
 
+export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-export default function ProtectedLayout({children,}: {children: React.ReactNode}) {
+    if (!user) {
+        redirect(ROUTES.login)
+    }
+
     return (
         <div className="w-full h-screen flex flex-col">
             <Navbar />
