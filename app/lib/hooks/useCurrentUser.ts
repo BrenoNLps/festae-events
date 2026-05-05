@@ -10,8 +10,8 @@ export function useCurrentUser() {
 
     useEffect(() => {
         // Busca o usuário atual ao montar o componente
-        supabase.auth.getUser().then(({ data: { user } }) => {
-            setUser(user)
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setUser(session?.user ?? null)
             setLoading(false)
         })
 
