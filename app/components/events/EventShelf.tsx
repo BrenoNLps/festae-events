@@ -1,10 +1,14 @@
+"use client";
+
+import { Swiper, SwiperSlide } from "swiper/react";
+import { FreeMode, Scrollbar } from "swiper/modules";
 import { ChevronRight } from "lucide-react";
 import { Evento } from "@/app/lib/types";
 import { EventCard } from "./EventCard";
 
 function SkeletonCard() {
   return (
-    <div className="flex-shrink-0 w-64 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden animate-pulse">
+    <div className="w-64 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden animate-pulse">
       <div className="h-36 bg-gray-100" />
       <div className="p-3 flex flex-col gap-2">
         <div className="h-4 bg-gray-100 rounded w-3/4" />
@@ -36,11 +40,27 @@ export function EventShelf({
       {empty ? (
         <p className="text-sm text-gray-400 py-4">Nenhum evento encontrado.</p>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+        <Swiper
+          modules={[FreeMode, Scrollbar]}
+          freeMode
+          grabCursor
+          slidesPerView="auto"
+          spaceBetween={16}
+          scrollbar={{ draggable: true }}
+          style={{ paddingBottom: 24 }}
+        >
           {loading
-            ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-            : events.map((event) => <EventCard key={event.id} event={event} />)}
-        </div>
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <SwiperSlide key={i} className="!w-64">
+                  <SkeletonCard />
+                </SwiperSlide>
+              ))
+            : events.map((event) => (
+                <SwiperSlide key={event.id} className="!w-64">
+                  <EventCard event={event} />
+                </SwiperSlide>
+              ))}
+        </Swiper>
       )}
     </section>
   );

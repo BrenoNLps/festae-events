@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "swiper/css";
+import "swiper/css/scrollbar";
 import AuthListener from "./lib/supabase/AuthListener";
 
 const geistSans = Geist({
