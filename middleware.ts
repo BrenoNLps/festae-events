@@ -2,10 +2,14 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { CookieOptions } from '@supabase/ssr'
 
-import { PROTECTED_ROUTES, ROUTES } from './app/lib/routes'
+import { PROTECTED_ROUTES, PUBLIC_ROUTES, ROUTES } from './app/lib/routes'
 
 function isProtectedRoute(pathname: string): boolean {
     return PROTECTED_ROUTES.some(route => pathname.startsWith(route))
+}
+
+function isPublicOnlyRoute(pathname: string): boolean {
+    return PUBLIC_ROUTES.some(route => pathname === route)
 }
 
 export async function middleware(request: NextRequest) {
@@ -33,18 +37,22 @@ export async function middleware(request: NextRequest) {
     )
 
     const { data: { user } } = await supabase.auth.getUser()
+    const { pathname } = request.nextUrl
 
-    if (user && (request.nextUrl.pathname === ROUTES.login || request.nextUrl.pathname === ROUTES.home)) {
+    if (user && isPublicOnlyRoute(pathname)) {
         const url = request.nextUrl.clone()
         url.pathname = ROUTES.events
         return NextResponse.redirect(url)
     }
 
-    if (!user && isProtectedRoute(request.nextUrl.pathname)) {
+    if (!user && isProtectedRoute(pathname)) {
         const url = request.nextUrl.clone()
         url.pathname = ROUTES.login
         return NextResponse.redirect(url)
     }
+
+    //Impede que o bfcache forneça informações de autenticação desatualizadas ao navegar (de trás/para frente).
+    supabaseResponse.headers.set('Cache-Control', 'no-store')
 
     return supabaseResponse
 }
