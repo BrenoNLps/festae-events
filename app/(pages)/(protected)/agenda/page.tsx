@@ -7,6 +7,7 @@ import { getEventsByOrganizer } from "@/app/lib/services/database/eventService";
 import { Evento } from "@/app/lib/types";
 import { EventDetailCard } from "@/app/components/events/EventDetailCard";
 import { formatDateRange, formatDay } from "@/app/lib/utils/date";
+import { formatLocation } from "@/app/lib/utils/event";
 
 const MONTHS_PT = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -215,9 +216,7 @@ function AgendaTab({ events, loading }: { events: Evento[]; loading: boolean }) 
 }
 
 function AgendaListItem({ event }: { event: Evento }) {
-  const location = [event.endereco?.cidade, event.endereco?.estado]
-    .filter(Boolean)
-    .join(", ");
+  const location = formatLocation(event.endereco);
 
   return (
     <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white shadow-sm">

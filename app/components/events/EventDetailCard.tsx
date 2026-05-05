@@ -1,16 +1,11 @@
 import { Clock, MapPin, Ticket } from "lucide-react";
 import { Evento } from "@/app/lib/types";
 import { formatDateRange } from "@/app/lib/utils/date";
+import { formatPrice, formatLocation } from "@/app/lib/utils/event";
 
 export function EventDetailCard({ event }: { event: Evento }) {
-  const location = [event.endereco?.cidade, event.endereco?.estado]
-    .filter(Boolean)
-    .join(", ");
-
-  const price =
-    !event.valor || event.valor === 0
-      ? "Gratuito"
-      : `R$ ${event.valor.toFixed(2).replace(".", ",")}`;
+  const location = formatLocation(event.endereco);
+  const price = formatPrice(event.valor);
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
