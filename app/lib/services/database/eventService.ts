@@ -1,6 +1,5 @@
 import { getSupabaseClient } from "../../supabase/singleton";
-import { Adress } from "../../types";
-
+import { Adress, Evento } from "../../types";
 
 const supabase = getSupabaseClient();
 
@@ -22,29 +21,29 @@ export async function createEvent(values: {
     return { data, error };
 }
 
-export async function getEvents() {
+export async function getEvents(): Promise<{ data: Evento[] | null; error: unknown }> {
     const { data, error } = await supabase.from("evento").select("*");
 
-    return { data, error };
+    return { data: data as Evento[] | null, error };
 }
 
-export async function getEventsByOrganizer(id_organizador: string) {
+export async function getEventsByOrganizer(id_organizador: string): Promise<{ data: Evento[] | null; error: unknown }> {
     const { data, error } = await supabase
         .from("evento")
         .select("*")
         .eq("id_organizador", id_organizador);
 
-    return { data, error };
+    return { data: data as Evento[] | null, error };
 }
 
-export async function getEventById(id: number) {
+export async function getEventById(id: number): Promise<{ data: Evento | null; error: unknown }> {
     const { data, error } = await supabase
-    .from("evento")
-    .select("*")
-    .eq("id", id)
-    .single();
+        .from("evento")
+        .select("*")
+        .eq("id", id)
+        .single();
 
-    return { data, error };
+    return { data: data as Evento | null, error };
 }
 
 export async function deleteEvent(id: number) {

@@ -10,8 +10,8 @@ export default function Eventos() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getEvents().then(({ data }) => {
-      if (data) setEvents(data as Evento[]);
+    getEvents().then(({ data: events }) => {
+      if (events) setEvents(events);
       setLoading(false);
     });
   }, []);

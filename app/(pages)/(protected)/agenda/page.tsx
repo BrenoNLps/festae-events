@@ -26,8 +26,8 @@ export default function Agenda() {
 
   useEffect(() => {
     if (!user?.id) return;
-    getEventsByOrganizer(user.id).then(({ data }) => {
-      if (data) setMyEvents(data as Evento[]);
+    getEventsByOrganizer(user.id).then(({ data: events }) => {
+      if (events) setMyEvents(events);
       setLoading(false);
     });
   }, [user?.id]);
