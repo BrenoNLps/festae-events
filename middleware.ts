@@ -36,16 +36,16 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
     const { pathname } = request.nextUrl
 
-    if (user && isPublicOnlyRoute(pathname)) {
+    if (session && isPublicOnlyRoute(pathname)) {
         const url = request.nextUrl.clone()
         url.pathname = ROUTES.events
         return NextResponse.redirect(url)
     }
 
-    if (!user && isProtectedRoute(pathname)) {
+    if (!session && isProtectedRoute(pathname)) {
         const url = request.nextUrl.clone()
         url.pathname = ROUTES.login
         return NextResponse.redirect(url)
