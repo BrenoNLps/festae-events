@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation"
-import { useForm, UseFormReturn } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useCurrentUser } from "../useCurrentUser"
 import { ROUTES } from "../../routes"
@@ -7,11 +7,11 @@ import { completeProfile } from "../../services/database/userService"
 import { profileSchema, ProfileFormData } from "../../validation/profileSchema"
 import { AccountType } from "../../types"
 
-export function useCompleteProfile(): { form: UseFormReturn<ProfileFormData>; onSubmit: (data: ProfileFormData) => Promise<void>; loading: boolean } {
+export function useCompleteProfile() {
     const { user, loading } = useCurrentUser()
     const router = useRouter()
 
-    const form = useForm<ProfileFormData>({
+    const form = useForm({
         resolver: zodResolver(profileSchema),
         defaultValues: {
             username: '',
