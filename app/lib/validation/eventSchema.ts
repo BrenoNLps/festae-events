@@ -12,11 +12,8 @@ const enderecoSchema = z.object({
 export const eventSchema = z.object({
     nome: z.string().min(3, 'Mínimo 3 caracteres').max(100, 'Máximo 100 caracteres'),
     descricao: z.string().optional(),
-    vagas: z.number({ invalid_type_error: 'Informe um número' }).int('Deve ser número inteiro').positive('Mínimo 1 vaga'),
-    valor: z.preprocess(
-        (val) => typeof val === 'number' && isNaN(val) ? 0 : val,
-        z.number({ invalid_type_error: 'Informe um número' }).min(0, 'Valor não pode ser negativo').max(999999.99, 'Valor máximo R$ 999.999,99')
-    ),
+    vagas: z.number({ error: 'Informe um número' }).int('Deve ser número inteiro').positive('Mínimo 1 vaga'),
+    valor: z.number({ error: 'Informe um número' }).min(0, 'Valor não pode ser negativo').max(999999.99, 'Valor máximo R$ 999.999,99'),
     data_inicio: z.string().min(1, 'Data de início obrigatória'),
     data_fim: z.string().min(1, 'Data de fim obrigatória'),
     hora_inicio: z.string().min(1, 'Hora de início obrigatória'),
