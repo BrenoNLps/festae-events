@@ -1,12 +1,12 @@
 import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
+import { useForm, UseFormReturn } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useCurrentUser } from "../useCurrentUser"
 import { ROUTES } from "../../routes"
 import { createEvent } from "../../services/database/eventService"
 import { eventSchema, EventFormData } from "../../validation/eventSchema"
 
-export function useCreateEvent() {
+export function useCreateEvent(): { form: UseFormReturn<EventFormData>; onSubmit: (data: EventFormData) => Promise<void>; loading: boolean } {
     const { user, loading } = useCurrentUser()
     const router = useRouter()
 
