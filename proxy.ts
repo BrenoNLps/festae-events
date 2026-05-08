@@ -12,7 +12,7 @@ function isPublicOnlyRoute(pathname: string): boolean {
     return PUBLIC_ROUTES.some(route => pathname === route)
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request })
 
     const supabase = createServerClient(
