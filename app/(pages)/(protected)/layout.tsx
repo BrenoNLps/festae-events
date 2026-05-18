@@ -16,7 +16,9 @@ export default async function ProtectedLayout({ children }: { children: React.Re
         <div className="w-full h-screen flex flex-col">
             <Navbar />
             <div className="flex flex-1 overflow-hidden">
-                <Sidebar />
+                <div className="hidden md:block">
+                    <Sidebar />
+                </div>
                 <main className="flex-1 overflow-y-auto p-8">
                     {children}
                 </main>
