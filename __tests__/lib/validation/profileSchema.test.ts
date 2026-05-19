@@ -98,4 +98,31 @@ describe('profileSchema', () => {
             expect(issue.message).toBe('Use apenas letras, números, ponto (.), traço (-) e underline (_)')
         }
     })
+
+    // Boundary: username com exatamente 3 caracteres é o mínimo válido
+    it('aceita username com exatamente 3 caracteres', () => {
+        const result = profileSchema.safeParse({
+            username: 'abc',
+            tipo_conta: AccountType.USUARIO,
+        })
+        expect(result.success).toBe(true)
+    })
+
+    // Boundary: username com exatamente 30 caracteres é o máximo válido
+    it('aceita username com exatamente 30 caracteres', () => {
+        const result = profileSchema.safeParse({
+            username: 'a'.repeat(30),
+            tipo_conta: AccountType.USUARIO,
+        })
+        expect(result.success).toBe(true)
+    })
+
+    // Edge case: tipo_conta com valor fora do enum deve ser rejeitado
+    it('rejeita tipo_conta inválido', () => {
+        const result = profileSchema.safeParse({
+            username: 'joao123',
+            tipo_conta: 'INVALIDO',
+        })
+        expect(result.success).toBe(false)
+    })
 })

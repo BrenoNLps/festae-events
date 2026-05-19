@@ -147,4 +147,95 @@ describe('eventSchema', () => {
             expect(issue?.message).toBe('Logradouro obrigatório')
         }
     })
+
+    // Edge case: número do endereço é obrigatório, string vazia deve ser rejeitada
+    it('rejeita endereço sem número', () => {
+        const result = eventSchema.safeParse({
+            ...eventoValido,
+            endereco: { ...enderecoValido, numero: '' },
+        })
+        expect(result.success).toBe(false)
+        if (!result.success) {
+            const issue = result.error.issues.find(i => JSON.stringify(i.path) === JSON.stringify(['endereco', 'numero']))
+            expect(issue?.path).toEqual(['endereco', 'numero'])
+            expect(issue?.message).toBe('Número obrigatório')
+        }
+    })
+
+    // Edge case: bairro é obrigatório, string vazia deve ser rejeitada
+    it('rejeita endereço sem bairro', () => {
+        const result = eventSchema.safeParse({
+            ...eventoValido,
+            endereco: { ...enderecoValido, bairro: '' },
+        })
+        expect(result.success).toBe(false)
+        if (!result.success) {
+            const issue = result.error.issues.find(i => JSON.stringify(i.path) === JSON.stringify(['endereco', 'bairro']))
+            expect(issue?.path).toEqual(['endereco', 'bairro'])
+            expect(issue?.message).toBe('Bairro obrigatório')
+        }
+    })
+
+    // Edge case: cidade é obrigatória, string vazia deve ser rejeitada
+    it('rejeita endereço sem cidade', () => {
+        const result = eventSchema.safeParse({
+            ...eventoValido,
+            endereco: { ...enderecoValido, cidade: '' },
+        })
+        expect(result.success).toBe(false)
+        if (!result.success) {
+            const issue = result.error.issues.find(i => JSON.stringify(i.path) === JSON.stringify(['endereco', 'cidade']))
+            expect(issue?.path).toEqual(['endereco', 'cidade'])
+            expect(issue?.message).toBe('Cidade obrigatória')
+        }
+    })
+
+    // Edge case: estado é obrigatório, string vazia deve ser rejeitada
+    it('rejeita endereço sem estado', () => {
+        const result = eventSchema.safeParse({
+            ...eventoValido,
+            endereco: { ...enderecoValido, estado: '' },
+        })
+        expect(result.success).toBe(false)
+        if (!result.success) {
+            const issue = result.error.issues.find(i => JSON.stringify(i.path) === JSON.stringify(['endereco', 'estado']))
+            expect(issue?.path).toEqual(['endereco', 'estado'])
+            expect(issue?.message).toBe('Estado obrigatório')
+        }
+    })
+
+    // Boundary: nome com exatamente 3 caracteres é o mínimo válido
+    it('aceita nome com exatamente 3 caracteres', () => {
+        expect(eventSchema.safeParse({ ...eventoValido, nome: 'ABC' }).success).toBe(true)
+    })
+
+    // Boundary: nome com exatamente 100 caracteres é o máximo válido
+    it('aceita nome com exatamente 100 caracteres', () => {
+        expect(eventSchema.safeParse({ ...eventoValido, nome: 'A'.repeat(100) }).success).toBe(true)
+    })
+
+    // Boundary: vagas igual a 0 deve ser rejeitado, pois .positive() exige estritamente > 0
+    it('rejeita vagas igual a 0', () => {
+        const result = eventSchema.safeParse({ ...eventoValido, vagas: 0 })
+        expect(result.success).toBe(false)
+        const issue = getIssue(result, 'vagas')
+        expect(issue?.path).toEqual(['vagas'])
+        expect(issue?.message).toBe('Mínimo 1 vaga')
+    })
+
+    // Boundary: vagas igual a 1 é o mínimo válido e deve ser aceito
+    it('aceita vagas igual a 1 (mínimo válido)', () => {
+        expect(eventSchema.safeParse({ ...eventoValido, vagas: 1 }).success).toBe(true)
+    })
+
+    // Boundary: valor no limite máximo exato (999999.99) deve ser aceito
+    it('aceita valor no limite máximo exato (999999.99)', () => {
+        expect(eventSchema.safeParse({ ...eventoValido, valor: 999999.99 }).success).toBe(true)
+    })
+
+    // Edge case: campo obrigatório ausente deve ser rejeitado
+    it('rejeita evento sem nome', () => {
+        const { nome, ...semNome } = eventoValido
+        expect(eventSchema.safeParse(semNome).success).toBe(false)
+    })
 })

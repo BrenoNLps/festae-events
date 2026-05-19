@@ -101,6 +101,11 @@ describe('validatorCNPJ', () => {
     it('rejeita CNPJ com menos de 14 dígitos', () => {
         expect(validatorCNPJ('1144477700016')).toBe(false)
     })
+
+    // Edge case: CNPJ com mais de 14 dígitos deve ser rejeitado após strip de não-dígitos
+    it('rejeita CNPJ com mais de 14 dígitos', () => {
+        expect(validatorCNPJ('114447770001610')).toBe(false)
+    })
 })
 
 describe('maskCurrency', () => {
@@ -122,6 +127,11 @@ describe('maskCurrency', () => {
     // Edge case: caracteres não numéricos devem ser ignorados antes de formatar
     it('ignora caracteres não numéricos', () => {
         expect(maskCurrency('R$ 1,00')).toBe('1,00')
+    })
+
+    // Boundary: entrada acima do limite de 8 dígitos deve ser truncada antes de formatar
+    it('trunca entrada com mais de 8 dígitos', () => {
+        expect(maskCurrency('1000000000')).toBe('100.000,00')
     })
 })
 
