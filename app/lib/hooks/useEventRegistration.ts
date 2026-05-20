@@ -10,19 +10,20 @@ export function useEventRegistration(
   eventId: number | null
 ) {
   const [isRegistered, setIsRegistered] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const [checking, setChecking] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!userId || !eventId) {
-      setChecking(false);
-      return;
-    }
+    if (!userId || !eventId) return;
+    let cancelled = false;
     setChecking(true);
     checkRegistration(userId, eventId).then(({ data }) => {
-      setIsRegistered(!!data);
-      setChecking(false);
+      if (!cancelled) {
+        setIsRegistered(!!data);
+        setChecking(false);
+      }
     });
+    return () => { cancelled = true; };
   }, [userId, eventId]);
 
   async function register() {
