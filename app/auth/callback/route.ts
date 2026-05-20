@@ -6,7 +6,8 @@ import { supabaseConfig } from '@/app/lib/supabase/config'
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-  const next = requestUrl.searchParams.get('next') ?? '/events'
+  const nextParam = requestUrl.searchParams.get('next') ?? ''
+  const next = nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : '/events'
 
   if (code) {
     const cookieStore = await cookies()
