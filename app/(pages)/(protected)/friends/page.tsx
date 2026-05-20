@@ -50,7 +50,7 @@ export default function Friends() {
 
     getPendingReceived(user.id).then(({ data }) => {
       if (!data) return;
-      setPendingReceived(data.map((r: { remetente: Usuario }) => r.remetente));
+      setPendingReceived(data.map((r: { remetente: Usuario }) => r.remetente).filter(Boolean));
     });
 
     getPendingSent(user.id).then(({ data }) => {
@@ -61,7 +61,7 @@ export default function Friends() {
 
   async function handleAdd(target: Usuario) {
     if (!user?.id) return;
-    if (pendingReceived.some((p) => p.id === target.id)) return;
+    if (pendingReceived.some((p) => p?.id === target.id)) return;
     setPendingSent((prev) => [...prev, target]);
     await sendFriendRequest({ id_usuario: user.id, id_amigo: target.id });
   }
