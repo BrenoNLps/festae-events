@@ -29,22 +29,23 @@ export async function getRegistrationsByEvent(id_evento: number) {
   return { data, error };
 }
 
-/*
-export async function updateRegistration(id: number, status: 'PENDENTE' | 'CONFIRMADO' | 'CANCELADO') {
-    const { data, error } = await supabase
-        .from('inscricao')
-        .update({ status })
-        .eq('id', id)
+export async function checkRegistration(id_usuario: string, id_evento: number) {
+  const { data, error } = await supabase
+    .from("inscricao")
+    .select("id")
+    .eq("id_usuario", id_usuario)
+    .eq("id_evento", id_evento)
+    .maybeSingle();
 
-    return { data, error }
+  return { data, error };
 }
 
-export async function deleteRegistration(id: number) {
-    const { data, error } = await supabase
-        .from('inscricao')
-        .delete()
-        .eq('id', id)
+export async function deleteRegistration(id_usuario: string, id_evento: number) {
+  const { error } = await supabase
+    .from("inscricao")
+    .delete()
+    .eq("id_usuario", id_usuario)
+    .eq("id_evento", id_evento);
 
-    return { data, error }
+  return { error };
 }
-*/

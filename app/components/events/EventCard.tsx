@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Calendar, MapPin, Ticket } from "lucide-react";
 import { Evento } from "@/app/lib/types";
 import { formatDateRange } from "@/app/lib/utils/date";
@@ -9,7 +10,7 @@ export function EventCard({ event }: { event: Evento }) {
   const price = formatPrice(event.valor);
 
   return (
-    <div className="flex-shrink-0 w-64 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+    <Link href={`/events/${event.id}`} className="flex-shrink-0 w-64 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer block">
       <div className="relative h-36 bg-purple-100">
         {event.imagem_url ? (
           <img
@@ -52,6 +53,6 @@ export function EventCard({ event }: { event: Evento }) {
 
         <div className="text-xs text-gray-400 mt-0.5">{event.vagas} vagas</div>
       </div>
-    </div>
+    </Link>
   );
 }
