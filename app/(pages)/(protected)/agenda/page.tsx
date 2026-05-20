@@ -59,7 +59,8 @@ export default function Agenda() {
 
       {tab === "agenda" && (
         <AgendaTab
-          events={[...myEvents, ...registeredEvents].filter((e, i, arr) => arr.findIndex((x) => x.id === e.id) === i)}
+          createdEvents={myEvents}
+          registeredEvents={registeredEvents}
           loading={loading || registrationsLoading}
         />
       )}
@@ -69,7 +70,8 @@ export default function Agenda() {
   );
 }
 
-function AgendaTab({ events, loading }: { events: Evento[]; loading: boolean }) {
+function AgendaTab({ createdEvents, registeredEvents, loading }: { createdEvents: Evento[]; registeredEvents: Evento[]; loading: boolean }) {
+  const events = [...createdEvents, ...registeredEvents].filter((e, i, arr) => arr.findIndex((x) => x.id === e.id) === i);
   const today = new Date().toISOString().split("T")[0];
   const [currentMonth, setCurrentMonth] = useState(() => {
     const d = new Date();
@@ -96,9 +98,9 @@ function AgendaTab({ events, loading }: { events: Evento[]; loading: boolean }) 
     return days;
   }, [currentMonth]);
 
-  const eventDays = useMemo(() => {
+  const createdDays = useMemo(() => {
     const set = new Set<string>();
-    for (const event of events) {
+    for (const event of createdEvents) {
       const cur = new Date(event.data_inicio);
       const end = new Date(event.data_fim);
       while (cur <= end) {
@@ -107,21 +109,47 @@ function AgendaTab({ events, loading }: { events: Evento[]; loading: boolean }) 
       }
     }
     return set;
-  }, [events]);
+  }, [createdEvents]);
 
-  const visibleEvents = useMemo(() => {
+  const registeredDays = useMemo(() => {
+    const set = new Set<string>();
+    for (const event of registeredEvents) {
+      const cur = new Date(event.data_inicio);
+      const end = new Date(event.data_fim);
+      while (cur <= end) {
+        set.add(cur.toISOString().split("T")[0]);
+        cur.setDate(cur.getDate() + 1);
+      }
+    }
+    return set;
+  }, [registeredEvents]);
+
+
+  const visibleCreated = useMemo(() => {
     const year = currentMonth.getFullYear();
     const month = String(currentMonth.getMonth() + 1).padStart(2, "0");
     const monthStr = `${year}-${month}`;
-
-    return events
+    return createdEvents
       .filter((e) =>
         selectedDay
           ? e.data_inicio <= selectedDay && e.data_fim >= selectedDay
           : e.data_inicio.startsWith(monthStr) || e.data_fim.startsWith(monthStr)
       )
       .sort((a, b) => a.data_inicio.localeCompare(b.data_inicio));
-  }, [events, currentMonth, selectedDay]);
+  }, [createdEvents, currentMonth, selectedDay]);
+
+  const visibleRegistered = useMemo(() => {
+    const year = currentMonth.getFullYear();
+    const month = String(currentMonth.getMonth() + 1).padStart(2, "0");
+    const monthStr = `${year}-${month}`;
+    return registeredEvents
+      .filter((e) =>
+        selectedDay
+          ? e.data_inicio <= selectedDay && e.data_fim >= selectedDay
+          : e.data_inicio.startsWith(monthStr) || e.data_fim.startsWith(monthStr)
+      )
+      .sort((a, b) => a.data_inicio.localeCompare(b.data_inicio));
+  }, [registeredEvents, currentMonth, selectedDay]);
 
   function prevMonth() {
     setCurrentMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
@@ -175,7 +203,8 @@ function AgendaTab({ events, loading }: { events: Evento[]; loading: boolean }) 
             if (!day) return <div key={i} />;
             const isToday = day === today;
             const isSelected = day === selectedDay;
-            const hasEvent = eventDays.has(day);
+            const hasCreated = createdDays.has(day);
+            const hasRegistered = registeredDays.has(day);
             const dayNum = day.split("-")[2].replace(/^0/, "");
 
             return (
@@ -191,8 +220,15 @@ function AgendaTab({ events, loading }: { events: Evento[]; loading: boolean }) 
                   }`}
               >
                 {dayNum}
-                {hasEvent && (
-                  <span className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected ? "bg-white" : "bg-purple-400"}`} />
+                {(hasCreated || hasRegistered) && (
+                  <span className="absolute bottom-1 flex gap-0.5">
+                    {hasCreated && (
+                      <span className={`w-1 h-1 rounded-full ${isSelected ? "bg-white" : "bg-purple-400"}`} />
+                    )}
+                    {hasRegistered && (
+                      <span className={`w-1 h-1 rounded-full ${isSelected ? "bg-white" : "bg-green-400"}`} />
+                    )}
+                  </span>
                 )}
               </button>
             );
@@ -212,28 +248,54 @@ function AgendaTab({ events, loading }: { events: Evento[]; loading: boolean }) 
             <div key={i} className="h-16 rounded-xl bg-gray-100 animate-pulse" />
           ))}
         </div>
-      ) : visibleEvents.length === 0 ? (
+      ) : visibleCreated.length === 0 && visibleRegistered.length === 0 ? (
         <p className="text-sm text-gray-400 py-6 text-center">
           Nenhum evento{selectedDay ? " neste dia" : " neste mês"}.
         </p>
       ) : (
-        <div className="flex flex-col gap-2">
-          {visibleEvents.map((e) => (
-            <AgendaListItem key={e.id} event={e} />
-          ))}
+        <div className="flex flex-col gap-4">
+          {visibleCreated.length > 0 && (
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="w-2 h-2 rounded-full bg-purple-400" />
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Criados</span>
+              </div>
+              <div className="flex flex-col gap-2">
+                {visibleCreated.map((e) => (
+                  <AgendaListItem key={e.id} event={e} type="created" />
+                ))}
+              </div>
+            </div>
+          )}
+          {visibleRegistered.length > 0 && (
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="w-2 h-2 rounded-full bg-green-400" />
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Inscrições</span>
+              </div>
+              <div className="flex flex-col gap-2">
+                {visibleRegistered.map((e) => (
+                  <AgendaListItem key={e.id} event={e} type="registered" />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>
   );
 }
 
-function AgendaListItem({ event }: { event: Evento }) {
+function AgendaListItem({ event, type }: { event: Evento; type: "created" | "registered" }) {
   const location = formatLocation(event.endereco);
+  const iconStyle = type === "created"
+    ? "bg-purple-100 text-purple-400"
+    : "bg-green-100 text-green-400";
 
   return (
     <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white shadow-sm">
-      <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-purple-100 flex items-center justify-center">
-        <Ticket className="h-4 w-4 text-purple-400" />
+      <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${iconStyle}`}>
+        <Ticket className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-sm text-gray-900 truncate">{event.nome}</p>
