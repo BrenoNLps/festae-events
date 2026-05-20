@@ -23,10 +23,14 @@ export default function EventDetail() {
     useEventRegistration(user?.id ?? null, event?.id ?? null);
 
   useEffect(() => {
+    let cancelled = false;
     getEventById(Number(id)).then(({ data }) => {
-      setEvent(data);
-      setLoading(false);
+      if (!cancelled) {
+        setEvent(data);
+        setLoading(false);
+      }
     });
+    return () => { cancelled = true; };
   }, [id]);
 
   if (loading) {
