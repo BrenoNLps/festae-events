@@ -5,6 +5,7 @@ import { createClient } from '../../lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ROUTES } from '@/app/lib/routes'
+import { useNotifications } from '@/app/lib/hooks/useNotifications'
 
 const menuItems = [
     { label: 'Eventos', icon: Ticket, href: ROUTES.events },
@@ -18,6 +19,7 @@ export default function Navbar() {
     const supabase = createClient()
     const router = useRouter()
     const [open, setOpen] = useState(false)
+    const badges = useNotifications()
 
     async function handleLogout() {
         await supabase.auth.signOut()
@@ -54,17 +56,27 @@ export default function Navbar() {
                             <X className="h-5 w-5" />
                         </button>
                         <nav className="flex flex-col gap-2">
-                            {menuItems.map((item) => (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    onClick={() => setOpen(false)}
-                                    className="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg px-3 py-2 transition"
-                                >
-                                    <item.icon className="h-5 w-5" />
-                                    <span className="text-sm">{item.label}</span>
-                                </Link>
-                            ))}
+                            {menuItems.map((item) => {
+                                const badge = badges[item.href] ?? 0
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        onClick={() => setOpen(false)}
+                                        className="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg px-3 py-2 transition"
+                                    >
+                                        <div className="relative">
+                                            <item.icon className="h-5 w-5" />
+                                            {badge > 0 && (
+                                                <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+                                                    {badge > 9 ? '9+' : badge}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className="text-sm">{item.label}</span>
+                                    </Link>
+                                )
+                            })}
                         </nav>
                     </div>
                 </div>

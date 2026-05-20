@@ -12,6 +12,17 @@ export async function sendMessage(values: {
   return { data, error };
 }
 
+export async function getUnreadSenderIds(id_destinatario: string, after: string) {
+  const { data, error } = await supabase
+    .from("mensagem")
+    .select("id_remetente")
+    .eq("id_destinatario", id_destinatario)
+    .gt("data_criacao", after);
+
+  const ids = [...new Set((data ?? []).map((m: { id_remetente: string }) => m.id_remetente))];
+  return { data: ids, error };
+}
+
 export async function getMessagesBetweenUsers(
   id_remetente: string,
   id_destinatario: string,

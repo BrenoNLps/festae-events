@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Send, MessageCircle } from "lucide-react";
 import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { getFriends } from "@/app/lib/services/database/friendshipService";
-import { getMessagesBetweenUsers, sendMessage } from "@/app/lib/services/database/messageService";
+import { getMessagesBetweenUsers, sendMessage, getUnreadSenderIds } from "@/app/lib/services/database/messageService";
 import { Avatar } from "@/app/components/(protected)/Avatar";
 import { Usuario } from "@/app/lib/types";
 import { getSupabaseClient } from "@/app/lib/supabase/singleton";
@@ -26,9 +26,15 @@ export default function Chat() {
   const [friends, setFriends] = useState<Usuario[]>([]);
   const [selected, setSelected] = useState<Usuario | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [unreadIds, setUnreadIds] = useState<Set<string>>(new Set());
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastVisitRef = useRef(
+    typeof window !== "undefined"
+      ? (localStorage.getItem("lastChatVisit") ?? new Date(0).toISOString())
+      : new Date(0).toISOString()
+  );
 
   useEffect(() => {
     if (!user?.id) return;
@@ -43,7 +49,35 @@ export default function Chat() {
         if (friend) setSelected(friend);
       }
     });
+
+    getUnreadSenderIds(user.id, lastVisitRef.current).then(({ data }) => {
+      if (data) setUnreadIds(new Set(data));
+    });
   }, [user?.id, searchParams]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const globalChannel = supabase
+      .channel(`inbox-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "mensagem" },
+        (payload) => {
+          const msg = payload.new as Message;
+          if (msg.id_destinatario !== user.id) return;
+          setUnreadIds((prev) => {
+            if (prev.has(msg.id_remetente)) return prev;
+            const next = new Set(prev);
+            next.add(msg.id_remetente);
+            return next;
+          });
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(globalChannel); };
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user?.id || !selected) return;
@@ -63,7 +97,12 @@ export default function Chat() {
           const isRelevant =
             (msg.id_remetente === user.id && msg.id_destinatario === selected.id) ||
             (msg.id_remetente === selected.id && msg.id_destinatario === user.id);
-          if (isRelevant) setMessages((prev) => [...prev, msg]);
+          if (isRelevant) {
+            setMessages((prev) => [...prev, msg]);
+            if (msg.id_remetente === selected.id) {
+              setUnreadIds((prev) => { const next = new Set(prev); next.delete(selected.id); return next; });
+            }
+          }
         }
       )
       .subscribe();
@@ -106,7 +145,10 @@ export default function Chat() {
             friends.map((f) => (
               <button
                 key={f.id}
-                onClick={() => setSelected(f)}
+                onClick={() => {
+                  setSelected(f);
+                  setUnreadIds((prev) => { const next = new Set(prev); next.delete(f.id); return next; });
+                }}
                 className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-left ${
                   selected?.id === f.id ? "bg-purple-50" : ""
                 }`}
@@ -116,6 +158,9 @@ export default function Chat() {
                   <p className="font-semibold text-sm text-gray-900 truncate">@{f.username}</p>
                   {f.nome && <p className="text-xs text-gray-900 truncate">{f.nome}</p>}
                 </div>
+                {unreadIds.has(f.id) && (
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0" />
+                )}
               </button>
             ))
           )}
