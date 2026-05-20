@@ -11,6 +11,49 @@ import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
 import { Evento } from "@/app/lib/types";
 
+function RegistrationAction({
+  isOrganizer,
+  checking,
+  isRegistered,
+  registering,
+  onRegister,
+  onUnregister,
+}: {
+  isOrganizer: boolean;
+  checking: boolean;
+  isRegistered: boolean;
+  registering: boolean;
+  onRegister: () => void;
+  onUnregister: () => void;
+}) {
+  if (isOrganizer)
+    return <p className="text-center text-sm text-gray-400 py-2">Você é o organizador deste evento</p>;
+  if (checking)
+    return <div className="h-11 bg-gray-100 rounded-xl animate-pulse" />;
+  if (isRegistered)
+    return (
+      <>
+        <p className="text-center text-sm text-green-600 font-medium">Você está inscrito</p>
+        <button
+          onClick={onUnregister}
+          disabled={registering}
+          className="w-full py-3 rounded-xl text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition disabled:opacity-60"
+        >
+          {registering ? "Cancelando..." : "Cancelar inscrição"}
+        </button>
+      </>
+    );
+  return (
+    <button
+      onClick={onRegister}
+      disabled={registering}
+      className="w-full py-3 rounded-xl text-sm font-semibold bg-indigo-900 text-white hover:bg-indigo-800 transition disabled:opacity-60"
+    >
+      {registering ? "Inscrevendo..." : "Participar"}
+    </button>
+  );
+}
+
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -106,7 +149,6 @@ export default function EventDetail() {
           </span>
         </div>
 
-        {/* Inscrição */}
         <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-5 flex flex-col gap-4 mt-2">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Valor</span>
@@ -123,34 +165,14 @@ export default function EventDetail() {
 
           <hr className="border-gray-100" />
 
-          {isOrganizer ? (
-            <p className="text-center text-sm text-gray-400 py-2">
-              Você é o organizador deste evento
-            </p>
-          ) : checking ? (
-            <div className="h-11 bg-gray-100 rounded-xl animate-pulse" />
-          ) : isRegistered ? (
-            <>
-              <p className="text-center text-sm text-green-600 font-medium">
-                Você está inscrito
-              </p>
-              <button
-                onClick={unregister}
-                disabled={registering}
-                className="w-full py-3 rounded-xl text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition disabled:opacity-60"
-              >
-                {registering ? "Cancelando..." : "Cancelar inscrição"}
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={register}
-              disabled={registering}
-              className="w-full py-3 rounded-xl text-sm font-semibold bg-indigo-900 text-white hover:bg-indigo-800 transition disabled:opacity-60"
-            >
-              {registering ? "Inscrevendo..." : "Participar"}
-            </button>
-          )}
+          <RegistrationAction
+            isOrganizer={isOrganizer}
+            checking={checking}
+            isRegistered={isRegistered}
+            registering={registering}
+            onRegister={register}
+            onUnregister={unregister}
+          />
         </div>
       </div>
     </div>
