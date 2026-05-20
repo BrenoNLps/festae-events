@@ -1,17 +1,25 @@
+"use client";
+
 import Link from "next/link";
 import { Calendar, MapPin } from "lucide-react";
 import { Evento } from "@/app/lib/types";
 import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
 import { EventImage } from "./EventImage";
+import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 
 export function EventCard({ event }: { event: Evento }) {
+  const { user, loading } = useCurrentUser();
   const dateLabel = formatDateRange(event.data_inicio, event.data_fim);
   const location = formatLocation(event.endereco);
   const price = formatPrice(event.valor);
+  const href =
+    !loading && !user
+      ? `/login?callbackUrl=/events/${event.id}`
+      : `/events/${event.id}`;
 
   return (
-    <Link href={`/events/${event.id}`} className="flex-shrink-0 w-64 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer block">
+    <Link href={href} className="flex-shrink-0 w-64 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer block">
       <div className="relative h-36 bg-purple-100">
         <EventImage src={event.imagem_url} alt={event.nome} iconSize="h-10 w-10" />
         <span

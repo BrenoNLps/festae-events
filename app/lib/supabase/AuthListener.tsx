@@ -16,10 +16,7 @@ export default function AuthListener() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (
-        event === "SIGNED_IN" &&
-        !PROTECTED_ROUTES.some((r) => pathname.startsWith(r))
-      ) {
+      if (event === "SIGNED_IN") {
         setLoading(true);
         setTimeout(async () => {
           if (!session?.user.id) {
@@ -30,7 +27,7 @@ export default function AuthListener() {
 
           if (!usuario?.username) {
             router.push(ROUTES.completeProfile);
-          } else {
+          } else if (!PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
             router.push(ROUTES.events);
           }
           setLoading(false);

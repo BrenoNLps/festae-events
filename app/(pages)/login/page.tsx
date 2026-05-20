@@ -1,17 +1,20 @@
 'use client'
 import Image from "next/image";
 import { FcGoogle } from 'react-icons/fc'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '../../lib/supabase/client'
 
 
 export default function Login() {
     const supabase = createClient()
+    const searchParams = useSearchParams()
 
     async function loginWithGoogle() {
+        const next = searchParams.get('callbackUrl') ?? '/events'
         await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: `${window.location.origin}/events`
+                redirectTo: `${window.location.origin}/auth/callback?next=${next}`
             }
         })
     }
