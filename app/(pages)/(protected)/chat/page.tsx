@@ -34,12 +34,12 @@ export default function Chat() {
     if (!user?.id) return;
     getFriends(user.id).then(({ data }) => {
       if (!data) return;
-      const users = data.map((row: { usuario: Usuario }) => row.usuario);
+      const users = data as Usuario[];
       setFriends(users);
 
       const userId = searchParams.get("userId");
       if (userId) {
-        const friend = users.find((u: Usuario) => u.id === userId);
+        const friend = users.find((u) => u.id === userId);
         if (friend) setSelected(friend);
       }
     });
@@ -99,7 +99,7 @@ export default function Chat() {
         </div>
         <div className="flex-1 overflow-y-auto">
           {friends.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8 px-4">
+            <p className="text-sm text-gray-900 text-center py-8 px-4">
               Adicione amigos para começar a conversar.
             </p>
           ) : (
@@ -114,7 +114,7 @@ export default function Chat() {
                 <Avatar nome={f.nome} imagem_url={f.imagem_url} size={38} />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-gray-900 truncate">@{f.username}</p>
-                  {f.nome && <p className="text-xs text-gray-500 truncate">{f.nome}</p>}
+                  {f.nome && <p className="text-xs text-gray-900 truncate">{f.nome}</p>}
                 </div>
               </button>
             ))
@@ -126,7 +126,7 @@ export default function Chat() {
         {!selected ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
             <MessageCircle className="h-10 w-10 text-gray-200" />
-            <p className="text-sm text-gray-400">Selecione um amigo para conversar.</p>
+            <p className="text-sm text-gray-900">Selecione um amigo para conversar.</p>
           </div>
         ) : (
           <>
@@ -134,13 +134,13 @@ export default function Chat() {
               <Avatar nome={selected.nome} imagem_url={selected.imagem_url} size={36} />
               <div>
                 <p className="font-semibold text-sm text-gray-900">@{selected.username}</p>
-                {selected.nome && <p className="text-xs text-gray-500">{selected.nome}</p>}
+                {selected.nome && <p className="text-xs text-gray-900">{selected.nome}</p>}
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-2">
               {messages.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center mt-8">
+                <p className="text-sm text-gray-900 text-center mt-8">
                   Nenhuma mensagem ainda. Diga oi!
                 </p>
               ) : (
@@ -152,7 +152,7 @@ export default function Chat() {
                         className={`max-w-xs lg:max-w-md px-3 py-2 rounded-2xl text-sm break-words ${
                           isMine
                             ? "bg-purple-600 text-white rounded-br-sm"
-                            : "bg-gray-100 text-gray-900 rounded-bl-sm"
+                            : "bg-gray-100 text-black rounded-bl-sm"
                         }`}
                       >
                         {msg.conteudo}
@@ -171,7 +171,7 @@ export default function Chat() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Digite uma mensagem..."
-                className="flex-1 text-sm border border-gray-200 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
+                className="flex-1 text-sm text-black border border-gray-200 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
               />
               <button
                 onClick={handleSend}

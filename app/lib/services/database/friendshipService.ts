@@ -27,7 +27,7 @@ export async function getFriends(id_usuario: string) {
   const friends = [
     ...(sent.data ?? []).map((r: { amigo: unknown }) => r.amigo),
     ...(received.data ?? []).map((r: { remetente: unknown }) => r.remetente),
-  ];
+  ].filter(Boolean);
 
   return { data: friends, error: sent.error ?? received.error };
 }

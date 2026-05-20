@@ -258,7 +258,7 @@ function AgendaTab({ createdEvents, registeredEvents, loading }: { createdEvents
             <div>
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="w-2 h-2 rounded-full bg-purple-400" />
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Criados</span>
+                <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Criados</span>
               </div>
               <div className="flex flex-col gap-2">
                 {visibleCreated.map((e) => (
@@ -271,7 +271,7 @@ function AgendaTab({ createdEvents, registeredEvents, loading }: { createdEvents
             <div>
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="w-2 h-2 rounded-full bg-green-400" />
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Inscrições</span>
+                <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Inscrições</span>
               </div>
               <div className="flex flex-col gap-2">
                 {visibleRegistered.map((e) => (
