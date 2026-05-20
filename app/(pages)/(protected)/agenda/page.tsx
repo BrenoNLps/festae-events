@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Clock, MapPin, Ticket, CalendarDays } from "lucide-react";
 import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { getEventsByOrganizer } from "@/app/lib/services/database/eventService";
+import { getRegistrationsByUser } from "@/app/lib/services/database/registrationService";
 import { Evento } from "@/app/lib/types";
 import { EventDetailCard } from "@/app/components/events/EventDetailCard";
 import { formatDateRange, formatDay } from "@/app/lib/utils/date";
@@ -22,13 +23,19 @@ export default function Agenda() {
   const { user } = useCurrentUser();
   const [tab, setTab] = useState<Tab>("agenda");
   const [myEvents, setMyEvents] = useState<Evento[]>([]);
+  const [registeredEvents, setRegisteredEvents] = useState<Evento[]>([]);
   const [loading, setLoading] = useState(true);
+  const [registrationsLoading, setRegistrationsLoading] = useState(true);
 
   useEffect(() => {
     if (!user?.id) return;
     getEventsByOrganizer(user.id).then(({ data: events }) => {
       if (events) setMyEvents(events);
       setLoading(false);
+    });
+    getRegistrationsByUser(user.id).then(({ data }) => {
+      if (data) setRegisteredEvents(data.map((r: { evento: Evento }) => r.evento));
+      setRegistrationsLoading(false);
     });
   }, [user?.id]);
 
@@ -50,9 +57,14 @@ export default function Agenda() {
         ))}
       </div>
 
-      {tab === "agenda" && <AgendaTab events={myEvents} loading={loading} />}
+      {tab === "agenda" && (
+        <AgendaTab
+          events={[...myEvents, ...registeredEvents].filter((e, i, arr) => arr.findIndex((x) => x.id === e.id) === i)}
+          loading={loading || registrationsLoading}
+        />
+      )}
       {tab === "criados" && <EventListTab events={myEvents} loading={loading} empty="Você ainda não criou nenhum evento." />}
-      {tab === "inscricoes" && <EventListTab events={[]} loading={false} empty="Você ainda não está inscrito em nenhum evento." />}
+      {tab === "inscricoes" && <EventListTab events={registeredEvents} loading={registrationsLoading} empty="Você ainda não está inscrito em nenhum evento." />}
     </div>
   );
 }
