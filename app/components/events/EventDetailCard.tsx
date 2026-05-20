@@ -1,4 +1,5 @@
-import { Clock, MapPin, Ticket } from "lucide-react";
+import { Clock, MapPin } from "lucide-react";
+import { EventImage } from "./EventImage";
 import { Evento } from "@/app/lib/types";
 import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
@@ -9,16 +10,8 @@ export function EventDetailCard({ event }: { event: Evento }) {
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
-      <div className="h-28 bg-purple-100 flex items-center justify-center">
-        {event.imagem_url ? (
-          <img
-            src={event.imagem_url}
-            alt={event.nome}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <Ticket className="h-8 w-8 text-purple-300" />
-        )}
+      <div className="h-28 bg-purple-100">
+        <EventImage src={event.imagem_url} alt={event.nome} iconSize="h-8 w-8" />
       </div>
 
       <div className="p-4 flex flex-col gap-2">

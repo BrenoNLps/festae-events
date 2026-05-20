@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Calendar, MapPin, Ticket } from "lucide-react";
+import { Calendar, MapPin } from "lucide-react";
 import { Evento } from "@/app/lib/types";
 import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
+import { EventImage } from "./EventImage";
 
 export function EventCard({ event }: { event: Evento }) {
   const dateLabel = formatDateRange(event.data_inicio, event.data_fim);
@@ -12,17 +13,7 @@ export function EventCard({ event }: { event: Evento }) {
   return (
     <Link href={`/events/${event.id}`} className="flex-shrink-0 w-64 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer block">
       <div className="relative h-36 bg-purple-100">
-        {event.imagem_url ? (
-          <img
-            src={event.imagem_url}
-            alt={event.nome}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Ticket className="h-10 w-10 text-purple-300" />
-          </div>
-        )}
+        <EventImage src={event.imagem_url} alt={event.nome} iconSize="h-10 w-10" />
         <span
           className={`absolute top-2 right-2 text-xs font-semibold px-2 py-1 rounded-full ${
             price === "Gratuito"

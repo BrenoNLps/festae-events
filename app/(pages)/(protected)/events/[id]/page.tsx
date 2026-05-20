@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Calendar, Clock, MapPin, Ticket, Users } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Users } from "lucide-react";
+import { EventImage } from "@/app/components/events/EventImage";
 import { getEventById } from "@/app/lib/services/database/eventService";
 import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { useEventRegistration } from "@/app/lib/hooks/useEventRegistration";
@@ -68,16 +69,8 @@ export default function EventDetail() {
       </button>
 
       {/* Hero */}
-      <div className="relative w-full h-72 rounded-2xl bg-purple-100 overflow-hidden flex items-center justify-center">
-        {event.imagem_url ? (
-          <img
-            src={event.imagem_url}
-            alt={event.nome}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <Ticket className="h-16 w-16 text-purple-300" />
-        )}
+      <div className="relative w-full h-72 rounded-2xl bg-purple-100 overflow-hidden">
+        <EventImage src={event.imagem_url} alt={event.nome} iconSize="h-16 w-16" />
       </div>
 
       {/* Conteúdo */}
