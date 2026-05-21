@@ -21,11 +21,19 @@ export async function createEvent(values: {
     return { data, error };
 }
 
-export async function getEvents(): Promise<{ data: Evento[] | null; error: unknown }> {
-    const { data, error } = await supabase.from("evento").select("*");
+export async function getEvents(filters?: {
+    estado?: string;
+    cidade?: string;
+}): Promise<{ data: Evento[] | null; error: unknown }> {
+    let query = supabase.from("evento").select("*");
 
+    if (filters?.estado) query = query.eq("endereco->>estado", filters.estado);
+    if (filters?.cidade) query = query.eq("endereco->>cidade", filters.cidade);
+
+    const { data, error } = await query;
     return { data: data as Evento[] | null, error };
 }
+
 
 export async function getEventsByOrganizer(id_organizador: string): Promise<{ data: Evento[] | null; error: unknown }> {
     const { data, error } = await supabase
