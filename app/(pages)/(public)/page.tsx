@@ -2,7 +2,6 @@
 
 import Navbar from "../../components/(public)/Navbar";
 import Hero from "../../components/(public)/Hero";
-import SearchBar from "../../components/(public)/SearchBar";
 import Footer from "../../components/(public)/Footer";
 import Eventos from "../../components/(public)/Section";
 
@@ -11,8 +10,7 @@ export default function Home() {
     <div className="w-full">
       <Navbar />
 
-      <div className="w-[80%] min-h-screen mx-auto">
-        <SearchBar />
+      <div className="w-[80%] min-h-screen mx-auto pt-14">
         <main className="w-full">
           <Hero />
           <Eventos />
