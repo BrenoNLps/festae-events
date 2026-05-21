@@ -16,15 +16,21 @@ function RegistrationAction({
   checking,
   isRegistered,
   registering,
+  isPaid,
+  purchasing,
   onRegister,
   onUnregister,
+  onPurchase,
 }: {
   isOrganizer: boolean;
   checking: boolean;
   isRegistered: boolean;
   registering: boolean;
+  isPaid: boolean;
+  purchasing: boolean;
   onRegister: () => void;
   onUnregister: () => void;
+  onPurchase: () => void;
 }) {
   if (isOrganizer)
     return <p className="text-center text-sm text-gray-400 py-2">Você é o organizador deste evento</p>;
@@ -42,6 +48,16 @@ function RegistrationAction({
           {registering ? "Cancelando..." : "Cancelar inscrição"}
         </button>
       </>
+    );
+  if (isPaid)
+    return (
+      <button
+        onClick={onPurchase}
+        disabled={purchasing}
+        className="w-full py-3 rounded-xl text-sm font-semibold bg-indigo-900 text-white hover:bg-indigo-800 transition disabled:opacity-60"
+      >
+        {purchasing ? "Redirecionando..." : "Comprar ingresso"}
+      </button>
     );
   return (
     <button
@@ -61,9 +77,31 @@ export default function EventDetail() {
 
   const [event, setEvent] = useState<Evento | null>(null);
   const [loading, setLoading] = useState(true);
+  const [purchasing, setPurchasing] = useState(false);
 
   const { isRegistered, checking, loading: registering, register, unregister } =
     useEventRegistration(user?.id ?? null, event?.id ?? null);
+
+  async function handlePurchase() {
+    if (!event) return;
+    setPurchasing(true);
+    try {
+      const res = await fetch('/api/pagamento/criar-preferencia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventoId: event.id,
+          eventoNome: event.nome,
+          valor: event.valor,
+        }),
+      });
+      const { init_point, error } = await res.json();
+      if (error || !init_point) throw new Error(error ?? 'Erro ao criar preferência');
+      window.location.href = init_point;
+    } catch {
+      setPurchasing(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -170,8 +208,11 @@ export default function EventDetail() {
             checking={checking}
             isRegistered={isRegistered}
             registering={registering}
+            isPaid={event.valor > 0}
+            purchasing={purchasing}
             onRegister={register}
             onUnregister={unregister}
+            onPurchase={handlePurchase}
           />
         </div>
       </div>
