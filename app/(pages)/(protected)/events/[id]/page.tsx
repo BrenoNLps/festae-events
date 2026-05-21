@@ -146,7 +146,11 @@ export default function EventDetail() {
   return (
     <div className="flex flex-col gap-6">
       <button
-        onClick={() => router.back()}
+        onClick={() => {
+          const ref = document.referrer;
+          const isInternal = ref && new URL(ref).origin === window.location.origin && !ref.includes('/login');
+          isInternal ? router.back() : router.push('/events');
+        }}
         className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition w-fit"
       >
         <ArrowLeft className="h-4 w-4" />
