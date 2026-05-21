@@ -2,6 +2,8 @@
 
 import { useCallback } from "react";
 import { useDiscoverEvents } from "@/app/lib/hooks/useDiscoverEvents";
+import { useFriendsEvents } from "@/app/lib/hooks/useFriendsEvents";
+import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { useSearch } from "@/app/lib/hooks/useSearch";
 import { searchEvents } from "@/app/lib/services/database/eventService";
 import { EventShelf } from "@/app/components/events/EventShelf";
@@ -10,6 +12,8 @@ import { SearchInput } from "@/app/components/(protected)/SearchInput";
 import { EventCard } from "@/app/components/events/EventCard";
 
 export default function Events() {
+  const { user } = useCurrentUser();
+  const { events: friendsEvents, loading: friendsLoading } = useFriendsEvents(user?.id ?? null);
   const {
     latest, ongoing, upcoming, finished, loading,
     estado, cidade, setEstado, setCidade, clearFilter,
@@ -53,6 +57,7 @@ export default function Events() {
         </div>
       ) : (
         <>
+          <EventShelf title="Eventos de amigos" events={friendsEvents} loading={friendsLoading} />
           <EventShelf title="Em andamento" events={ongoing} loading={loading} />
           <EventShelf title="Em breve" events={upcoming} loading={loading} />
           <EventShelf title="Últimos adicionados" events={latest} loading={loading} />
