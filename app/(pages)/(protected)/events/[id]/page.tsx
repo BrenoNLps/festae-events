@@ -10,6 +10,7 @@ import { useEventRegistration } from "@/app/lib/hooks/useEventRegistration";
 import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
 import { Evento } from "@/app/lib/types";
+import { FriendsAtEvent } from "@/app/components/events/FriendsAtEvent";
 
 function RegistrationAction({
   isOrganizer,
@@ -165,7 +166,12 @@ export default function EventDetail() {
 
       {/* Conteúdo */}
       <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">{event.nome}</h1>
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
+          <h1 className="text-2xl font-bold text-gray-900">{event.nome}</h1>
+          {user && (
+            <FriendsAtEvent userId={user.id} eventoId={event.id} organizerId={event.id_organizador} />
+          )}
+        </div>
 
         {event.descricao && (
           <p className="text-sm text-gray-600 leading-relaxed">{event.descricao}</p>
