@@ -38,3 +38,11 @@ export enum AccountType {
     USUARIO = 'USUARIO',
     EMPRESA = 'EMPRESA'
 }
+
+export interface Message {
+    id: number;
+    conteudo: string;
+    id_remetente: string;
+    id_destinatario: string;
+    data_criacao: string;
+}

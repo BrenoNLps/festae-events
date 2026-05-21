@@ -7,16 +7,8 @@ import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { getFriends } from "@/app/lib/services/database/friendshipService";
 import { getMessagesBetweenUsers, sendMessage, getUnreadSenderIds } from "@/app/lib/services/database/messageService";
 import { Avatar } from "@/app/components/(protected)/Avatar";
-import { Usuario } from "@/app/lib/types";
+import type { Usuario, Message } from "@/app/lib/types";
 import { getSupabaseClient } from "@/app/lib/supabase/singleton";
-
-interface Message {
-  id: number;
-  conteudo: string;
-  id_remetente: string;
-  id_destinatario: string;
-  data_criacao: string;
-}
 
 export default function Chat() {
   const { user } = useCurrentUser();
@@ -83,7 +75,7 @@ export default function Chat() {
 
     setMessages([]);
     getMessagesBetweenUsers(user.id, selected.id).then(({ data }) => {
-      if (data) setMessages(data as Message[]);
+      if (data) setMessages(data);
     });
 
     const channel = supabase

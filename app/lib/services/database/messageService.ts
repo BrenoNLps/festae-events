@@ -1,4 +1,5 @@
 import { getSupabaseClient } from "../../supabase/singleton";
+import { Message } from "../../types";
 
 const supabase = getSupabaseClient();
 
@@ -26,7 +27,7 @@ export async function getUnreadSenderIds(id_destinatario: string, after: string)
 export async function getMessagesBetweenUsers(
   id_remetente: string,
   id_destinatario: string,
-) {
+): Promise<{ data: Message[] | null; error: unknown }> {
   const { data, error } = await supabase
     .from("mensagem")
     .select("*")
@@ -35,7 +36,7 @@ export async function getMessagesBetweenUsers(
     )
     .order("data_criacao", { ascending: true });
 
-  return { data, error };
+  return { data: data as Message[] | null, error };
 }
 
 /* 
