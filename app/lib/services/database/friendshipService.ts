@@ -3,6 +3,18 @@ import { Usuario } from "../../types";
 
 const supabase = getSupabaseClient();
 
+export async function getFriendIds(userId: string): Promise<string[]> {
+  const [sent, received] = await Promise.all([
+    supabase.from("amizade").select("id_amigo").eq("id_usuario", userId).eq("status", "aceito"),
+    supabase.from("amizade").select("id_usuario").eq("id_amigo", userId).eq("status", "aceito"),
+  ]);
+
+  return [
+    ...(sent.data ?? []).map((r: { id_amigo: string }) => r.id_amigo),
+    ...(received.data ?? []).map((r: { id_usuario: string }) => r.id_usuario),
+  ];
+}
+
 export async function sendFriendRequest(values: {
   id_usuario: string;
   id_amigo: string;
@@ -85,15 +97,7 @@ export async function removeFriend(id_usuario: string, id_amigo: string) {
 }
 
 export async function getFriendsAtEvent(userId: string, eventoId: number): Promise<Usuario[]> {
-  const [sent, received] = await Promise.all([
-    supabase.from("amizade").select("id_amigo").eq("id_usuario", userId).eq("status", "aceito"),
-    supabase.from("amizade").select("id_usuario").eq("id_amigo", userId).eq("status", "aceito"),
-  ]);
-
-  const friendIds = [
-    ...(sent.data ?? []).map((r: { id_amigo: string }) => r.id_amigo),
-    ...(received.data ?? []).map((r: { id_usuario: string }) => r.id_usuario),
-  ];
+  const friendIds = await getFriendIds(userId);
 
   if (friendIds.length === 0) return [];
 

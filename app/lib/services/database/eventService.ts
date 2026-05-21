@@ -1,5 +1,6 @@
 import { getSupabaseClient } from "../../supabase/singleton";
 import { Adress, Evento } from "../../types";
+import { getFriendIds } from "./friendshipService";
 
 const supabase = getSupabaseClient();
 
@@ -74,15 +75,7 @@ export async function deleteEvent(id: number) {
 export async function getEventsByFriends(userId: string): Promise<Evento[]> {
     const today = new Date().toISOString().split("T")[0];
 
-    const [sent, received] = await Promise.all([
-        supabase.from("amizade").select("id_amigo").eq("id_usuario", userId).eq("status", "aceito"),
-        supabase.from("amizade").select("id_usuario").eq("id_amigo", userId).eq("status", "aceito"),
-    ]);
-
-    const friendIds = [
-        ...(sent.data ?? []).map((r: { id_amigo: string }) => r.id_amigo),
-        ...(received.data ?? []).map((r: { id_usuario: string }) => r.id_usuario),
-    ];
+    const friendIds = await getFriendIds(userId);
 
     if (friendIds.length === 0) return [];
 
@@ -95,7 +88,7 @@ export async function getEventsByFriends(userId: string): Promise<Evento[]> {
     const events: Evento[] = [];
 
     for (const row of data ?? []) {
-        const e = (row as { evento: Evento }).evento;
+        const e = (row as unknown as { evento: Evento }).evento;
         if (!e || seen.has(e.id) || e.data_fim < today) continue;
         seen.add(e.id);
         events.push(e);
