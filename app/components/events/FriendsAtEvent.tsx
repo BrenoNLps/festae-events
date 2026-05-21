@@ -34,8 +34,6 @@ export function FriendsAtEvent({ userId, eventoId, organizerId }: { userId: stri
 
   useEffect(() => {
     getFriendsAtEvent(userId, eventoId).then((data) => {
-      console.log('[FriendsAtEvent] data:', JSON.stringify(data));
-      console.log('[FriendsAtEvent] organizerId:', organizerId);
       setFriends((data as Usuario[]).filter((f) => f.id !== organizerId));
     });
   }, [userId, eventoId, organizerId]);
