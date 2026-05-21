@@ -1,6 +1,7 @@
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { NextRequest } from 'next/server';
 import { createClient } from '@/app/lib/supabase/server';
+import { getEventById } from '@/app/lib/services/database/eventService';
 
 const mpClient = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN!,
@@ -14,7 +15,12 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
-  const { eventoId, eventoNome, valor } = await req.json();
+  const { eventoId } = await req.json();
+
+  const { data: evento } = await getEventById(Number(eventoId));
+  if (!evento) {
+    return Response.json({ error: 'Evento não encontrado' }, { status: 404 });
+  }
 
   const host = req.headers.get('host')!;
   const protocol = host.startsWith('localhost') ? 'http' : 'https';
@@ -26,14 +32,13 @@ export async function POST(req: NextRequest) {
       body: {
         items: [
           {
-            id: String(eventoId),
-            title: eventoNome,
+            id: String(evento.id),
+            title: evento.nome,
             quantity: 1,
-            unit_price: valor,
+            unit_price: evento.valor,
             currency_id: 'BRL',
           },
         ],
-        payer: { email: user.email! },
         back_urls: {
           success: `${baseUrl}/pagamento/resultado`,
           failure: `${baseUrl}/pagamento/resultado`,
