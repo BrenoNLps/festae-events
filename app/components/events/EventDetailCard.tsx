@@ -1,4 +1,5 @@
 import { Clock, MapPin } from "lucide-react";
+import Link from "next/link";
 import { EventImage } from "./EventImage";
 import { Evento } from "@/app/lib/types";
 import { formatDateRange } from "@/app/lib/utils/date";
@@ -9,7 +10,7 @@ export function EventDetailCard({ event }: { event: Evento }) {
   const price = formatPrice(event.valor);
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+    <Link href={`/events/${event.id}`} className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden block hover:shadow-md transition-shadow">
       <div className="h-28 bg-purple-100">
         <EventImage src={event.imagem_url} alt={event.nome} iconSize="h-8 w-8" />
       </div>
@@ -49,6 +50,6 @@ export function EventDetailCard({ event }: { event: Evento }) {
 
         <p className="text-xs text-gray-400 mt-0.5">{event.vagas} vagas</p>
       </div>
-    </div>
+    </Link>
   );
 }

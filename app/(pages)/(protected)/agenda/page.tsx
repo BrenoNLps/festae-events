@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Clock, MapPin, Ticket, CalendarDays } from "lucide-react";
+import Link from "next/link";
 import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { getEventsByOrganizer } from "@/app/lib/services/database/eventService";
 import { getRegistrationsByUser } from "@/app/lib/services/database/registrationService";
@@ -295,7 +296,7 @@ function AgendaListItem({ event, type }: { event: Evento; type: "created" | "reg
     : "bg-green-100 text-green-400";
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white shadow-sm">
+    <Link href={`/events/${event.id}`} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
       <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${iconStyle}`}>
         <Ticket className="h-4 w-4" />
       </div>
@@ -314,7 +315,7 @@ function AgendaListItem({ event, type }: { event: Evento; type: "created" | "reg
           )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
