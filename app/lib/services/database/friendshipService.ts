@@ -83,13 +83,24 @@ export async function removeFriend(id_usuario: string, id_amigo: string) {
   return { error };
 }
 
-export async function getFriendsAtEvent(id_usuario: string, id_evento: number) {
-  const { data, error } = await supabase
-    .from("amizade")
-    .select("*, usuario!amizade_id_amigo_fkey(*), inscricao!inner(*)")
-    .eq("id_usuario", id_usuario)
-    .eq("status", "aceito")
-    .eq("inscricao.id_evento", id_evento);
+export async function getFriendsAtEvent(userId: string, eventoId: number) {
+  const [sent, received] = await Promise.all([
+    supabase.from("amizade").select("id_amigo").eq("id_usuario", userId).eq("status", "aceito"),
+    supabase.from("amizade").select("id_usuario").eq("id_amigo", userId).eq("status", "aceito"),
+  ]);
 
-  return { data, error };
+  const friendIds = [
+    ...(sent.data ?? []).map((r: { id_amigo: string }) => r.id_amigo),
+    ...(received.data ?? []).map((r: { id_usuario: string }) => r.id_usuario),
+  ];
+
+  if (friendIds.length === 0) return [];
+
+  const { data } = await supabase
+    .from("inscricao")
+    .select("usuario(*)")
+    .eq("id_evento", eventoId)
+    .in("id_usuario", friendIds);
+
+  return (data ?? []).map((r) => (r as { usuario: unknown }).usuario).filter(Boolean);
 }
