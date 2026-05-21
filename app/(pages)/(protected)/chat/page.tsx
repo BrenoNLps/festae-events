@@ -10,10 +10,11 @@ import { Avatar } from "@/app/components/(protected)/Avatar";
 import type { Usuario, Message } from "@/app/lib/types";
 import { getSupabaseClient } from "@/app/lib/supabase/singleton";
 
+const supabase = getSupabaseClient();
+
 export default function Chat() {
   const { user } = useCurrentUser();
   const searchParams = useSearchParams();
-  const supabase = getSupabaseClient();
 
   const [friends, setFriends] = useState<Usuario[]>([]);
   const [selected, setSelected] = useState<Usuario | null>(null);
@@ -73,9 +74,8 @@ export default function Chat() {
   useEffect(() => {
     if (!user?.id || !selected) return;
 
-    setMessages([]);
     getMessagesBetweenUsers(user.id, selected.id).then(({ data }) => {
-      if (data) setMessages(data);
+      setMessages(data ?? []);
     });
 
     const channel = supabase
@@ -123,7 +123,7 @@ export default function Chat() {
 
   return (
     <div className="flex h-[calc(100vh-9rem)] gap-4">
-      <div className="w-72 flex-shrink-0 flex flex-col border border-gray-100 rounded-2xl bg-white shadow-sm overflow-hidden">
+      <div className="w-72 shrink-0 flex flex-col border border-gray-100 rounded-2xl bg-white shadow-sm overflow-hidden">
         <div className="p-4 border-b border-gray-100">
           <h2 className="font-semibold text-gray-900">Mensagens</h2>
         </div>
@@ -150,7 +150,7 @@ export default function Chat() {
                   {f.nome && <p className="text-xs text-gray-900 truncate">{f.nome}</p>}
                 </div>
                 {unreadIds.has(f.id) && (
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" />
                 )}
               </button>
             ))
@@ -185,7 +185,7 @@ export default function Chat() {
                   return (
                     <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                       <div
-                        className={`max-w-xs lg:max-w-md px-3 py-2 rounded-2xl text-sm break-words ${
+                        className={`max-w-xs lg:max-w-md px-3 py-2 rounded-2xl text-sm wrap-break-word ${
                           isMine
                             ? "bg-purple-600 text-white rounded-br-sm"
                             : "bg-gray-100 text-black rounded-bl-sm"
@@ -212,7 +212,7 @@ export default function Chat() {
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || sending}
-                className="flex-shrink-0 w-9 h-9 flex items-center justify-center bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-full transition-colors"
+                className="shrink-0 w-9 h-9 flex items-center justify-center bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-full transition-colors"
               >
                 <Send className="h-4 w-4" />
               </button>
