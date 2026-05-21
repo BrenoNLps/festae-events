@@ -19,6 +19,8 @@ function RegistrationAction({
   registering,
   isPaid,
   purchasing,
+  canCancel,
+  cancelBlockReason,
   onRegister,
   onUnregister,
   onPurchase,
@@ -29,6 +31,8 @@ function RegistrationAction({
   registering: boolean;
   isPaid: boolean;
   purchasing: boolean;
+  canCancel: boolean;
+  cancelBlockReason: string;
   onRegister: () => void;
   onUnregister: () => void;
   onPurchase: () => void;
@@ -40,14 +44,24 @@ function RegistrationAction({
   if (isRegistered)
     return (
       <>
-        <p className="text-center text-sm text-green-600 font-medium">Você está inscrito</p>
-        <button
-          onClick={onUnregister}
-          disabled={registering}
-          className="w-full py-3 rounded-xl text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition disabled:opacity-60"
-        >
-          {registering ? "Cancelando..." : "Cancelar inscrição"}
-        </button>
+        {cancelBlockReason === "Evento já encerrado" ? (
+          <p className="text-center text-sm text-gray-400 py-2">Evento encerrado</p>
+        ) : (
+          <>
+            <p className="text-center text-sm text-green-600 font-medium">Você está inscrito</p>
+            {canCancel ? (
+              <button
+                onClick={onUnregister}
+                disabled={registering}
+                className="w-full py-3 rounded-xl text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition disabled:opacity-60"
+              >
+                {registering ? "Cancelando..." : "Cancelar inscrição"}
+              </button>
+            ) : (
+              <p className="text-center text-sm text-gray-400">{cancelBlockReason}</p>
+            )}
+          </>
+        )}
       </>
     );
   if (isPaid)
@@ -145,6 +159,20 @@ export default function EventDetail() {
   const dateLabel = formatDateRange(event.data_inicio, event.data_fim);
   const isOrganizer = user?.id === event.id_organizador;
 
+  const now = new Date();
+  const startDateTime = new Date(`${event.data_inicio}T${event.hora_inicio}`);
+  const endDateTime = new Date(`${event.data_fim}T${event.hora_fim}`);
+  const hoursUntilStart = (startDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+  const hasEnded = now > endDateTime;
+  const isOngoing = now >= startDateTime && now <= endDateTime;
+  const lessThan24h = hoursUntilStart > 0 && hoursUntilStart < 24;
+  const canCancel = !hasEnded && !isOngoing && !lessThan24h;
+  const cancelBlockReason = hasEnded
+    ? "Evento já encerrado"
+    : isOngoing
+    ? "Evento em andamento"
+    : "Menos de 24h para o início";
+
   return (
     <div className="flex flex-col gap-6">
       <button
@@ -221,6 +249,8 @@ export default function EventDetail() {
             registering={registering}
             isPaid={event.valor > 0}
             purchasing={purchasing}
+            canCancel={canCancel}
+            cancelBlockReason={cancelBlockReason}
             onRegister={register}
             onUnregister={unregister}
             onPurchase={handlePurchase}
