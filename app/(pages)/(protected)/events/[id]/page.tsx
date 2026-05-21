@@ -98,7 +98,8 @@ export default function EventDetail() {
       const { init_point, error } = await res.json();
       if (error || !init_point) throw new Error(error ?? 'Erro ao criar preferência');
       window.location.href = init_point;
-    } catch {
+    } catch (err) {
+      console.error('[Pagamento] Erro:', err);
       setPurchasing(false);
     }
   }
