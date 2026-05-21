@@ -40,12 +40,11 @@ export default function Chat() {
     if (!user?.id) return;
     getFriends(user.id).then(({ data }) => {
       if (!data) return;
-      const users = data as Usuario[];
-      setFriends(users);
+      setFriends(data);
 
       const userId = searchParams.get("userId");
       if (userId) {
-        const friend = users.find((u) => u.id === userId);
+        const friend = data.find((u) => u.id === userId);
         if (friend) setSelected(friend);
       }
     });

@@ -43,9 +43,8 @@ export default function Friends() {
 
     getFriends(user.id).then(({ data }) => {
       if (!data) return;
-      const users = data as Usuario[];
-      setFriends(users);
-      setFriendIds(new Set(users.map((u) => u.id)));
+      setFriends(data);
+      setFriendIds(new Set(data.map((u) => u.id)));
     });
 
     getPendingReceived(user.id).then(({ data }) => {

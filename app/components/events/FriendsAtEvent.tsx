@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Users, X, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { getFriendsAtEvent } from "@/app/lib/services/database/friendshipService";
-import { Usuario } from "@/app/lib/types";
+import type { Usuario } from "@/app/lib/types";
 
 function Avatar({ user }: { user: Usuario }) {
   return (
@@ -34,7 +34,7 @@ export function FriendsAtEvent({ userId, eventoId, organizerId }: { userId: stri
 
   useEffect(() => {
     getFriendsAtEvent(userId, eventoId).then((data) => {
-      setFriends((data as Usuario[]).filter((f) => f.id !== organizerId));
+      setFriends(data.filter((f) => f.id !== organizerId));
     });
   }, [userId, eventoId, organizerId]);
 

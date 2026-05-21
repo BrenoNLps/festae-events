@@ -1,4 +1,5 @@
 import { getSupabaseClient } from "../../supabase/singleton";
+import { Usuario } from "../../types";
 
 const supabase = getSupabaseClient();
 
@@ -10,7 +11,7 @@ export async function sendFriendRequest(values: {
   return { data, error };
 }
 
-export async function getFriends(id_usuario: string) {
+export async function getFriends(id_usuario: string): Promise<{ data: Usuario[]; error: unknown }> {
   const [sent, received] = await Promise.all([
     supabase
       .from("amizade")
@@ -25,9 +26,9 @@ export async function getFriends(id_usuario: string) {
   ]);
 
   const friends = [
-    ...(sent.data ?? []).map((r: { amigo: unknown }) => r.amigo),
-    ...(received.data ?? []).map((r: { remetente: unknown }) => r.remetente),
-  ].filter(Boolean);
+    ...(sent.data ?? []).map((r: { amigo: Usuario }) => r.amigo),
+    ...(received.data ?? []).map((r: { remetente: Usuario }) => r.remetente),
+  ].filter((f): f is Usuario => Boolean(f));
 
   return { data: friends, error: sent.error ?? received.error };
 }
@@ -83,7 +84,7 @@ export async function removeFriend(id_usuario: string, id_amigo: string) {
   return { error };
 }
 
-export async function getFriendsAtEvent(userId: string, eventoId: number) {
+export async function getFriendsAtEvent(userId: string, eventoId: number): Promise<Usuario[]> {
   const [sent, received] = await Promise.all([
     supabase.from("amizade").select("id_amigo").eq("id_usuario", userId).eq("status", "aceito"),
     supabase.from("amizade").select("id_usuario").eq("id_amigo", userId).eq("status", "aceito"),
@@ -102,5 +103,5 @@ export async function getFriendsAtEvent(userId: string, eventoId: number) {
     .eq("id_evento", eventoId)
     .in("id_usuario", friendIds);
 
-  return (data ?? []).map((r) => (r as { usuario: unknown }).usuario).filter(Boolean);
+  return (data ?? []).map((r) => (r as unknown as { usuario: Usuario }).usuario).filter((u): u is Usuario => Boolean(u));
 }
