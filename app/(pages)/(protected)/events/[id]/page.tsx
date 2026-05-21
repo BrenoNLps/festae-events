@@ -144,7 +144,7 @@ export default function EventDetail() {
             <div className="h-4 bg-gray-100 rounded w-full" />
             <div className="h-4 bg-gray-100 rounded w-4/5" />
           </div>
-          <div className="w-64 h-40 bg-gray-100 rounded-2xl flex-shrink-0" />
+          <div className="w-64 h-40 bg-gray-100 rounded-2xl shrink-0" />
         </div>
       </div>
     );
@@ -211,21 +211,21 @@ export default function EventDetail() {
 
         <div className="flex flex-col gap-2 pt-2">
           <span className="flex items-center gap-2 text-sm text-gray-600">
-            <Calendar className="h-4 w-4 text-purple-400 flex-shrink-0" />
+            <Calendar className="h-4 w-4 text-purple-400 shrink-0" />
             {dateLabel}
           </span>
           <span className="flex items-center gap-2 text-sm text-gray-600">
-            <Clock className="h-4 w-4 text-purple-400 flex-shrink-0" />
+            <Clock className="h-4 w-4 text-purple-400 shrink-0" />
             {event.hora_inicio} – {event.hora_fim}
           </span>
           {location && (
             <span className="flex items-center gap-2 text-sm text-gray-600">
-              <MapPin className="h-4 w-4 text-purple-400 flex-shrink-0" />
+              <MapPin className="h-4 w-4 text-purple-400 shrink-0" />
               {location}
             </span>
           )}
           <span className="flex items-center gap-2 text-sm text-gray-600">
-            <Users className="h-4 w-4 text-purple-400 flex-shrink-0" />
+            <Users className="h-4 w-4 text-purple-400 shrink-0" />
             {checking ? (
               <span className="w-24 h-4 bg-gray-100 rounded animate-pulse inline-block" />
             ) : isFull ? (

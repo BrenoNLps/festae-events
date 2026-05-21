@@ -21,7 +21,7 @@ export function EventDetailCard({ event }: { event: Evento }) {
             {event.nome}
           </p>
           <span
-            className={`text-xs font-semibold px-2 py-1 rounded-full flex-shrink-0 ${
+            className={`text-xs font-semibold px-2 py-1 rounded-full shrink-0 ${
               price === "Gratuito"
                 ? "bg-green-100 text-green-700"
                 : "bg-gray-100 text-gray-600"
@@ -37,12 +37,12 @@ export function EventDetailCard({ event }: { event: Evento }) {
 
         <div className="flex flex-col gap-1 mt-1">
           <span className="flex items-center gap-1.5 text-xs text-gray-500">
-            <Clock className="h-3.5 w-3.5 flex-shrink-0" />
+            <Clock className="h-3.5 w-3.5 shrink-0" />
             {formatDateRange(event.data_inicio, event.data_fim)} · {event.hora_inicio} – {event.hora_fim}
           </span>
           {location && (
             <span className="flex items-center gap-1.5 text-xs text-gray-500">
-              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+              <MapPin className="h-3.5 w-3.5 shrink-0" />
               {location}
             </span>
           )}

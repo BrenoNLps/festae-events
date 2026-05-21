@@ -297,7 +297,7 @@ function AgendaListItem({ event, type }: { event: Evento; type: "created" | "reg
 
   return (
     <Link href={`/events/${event.id}`} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
-      <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${iconStyle}`}>
+      <div className={`shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${iconStyle}`}>
         <Ticket className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">
@@ -309,7 +309,7 @@ function AgendaListItem({ event, type }: { event: Evento; type: "created" | "reg
           </span>
           {location && (
             <span className="flex items-center gap-1 text-xs text-gray-500 truncate">
-              <MapPin className="h-3 w-3 flex-shrink-0" />
+              <MapPin className="h-3 w-3 shrink-0" />
               {location}
             </span>
           )}

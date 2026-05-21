@@ -9,7 +9,7 @@ import type { Usuario } from "@/app/lib/types";
 function Avatar({ user }: { user: Usuario }) {
   return (
     <div className="flex items-center gap-3 py-2">
-      <div className="w-10 h-10 rounded-full bg-purple-100 overflow-hidden flex-shrink-0 flex items-center justify-center">
+      <div className="w-10 h-10 rounded-full bg-purple-100 overflow-hidden shrink-0 flex items-center justify-center">
         {user.imagem_url ? (
           <Image src={user.imagem_url} alt={user.nome ?? user.username ?? ""} width={40} height={40} className="object-cover w-full h-full" />
         ) : (
