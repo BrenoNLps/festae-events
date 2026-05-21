@@ -42,7 +42,7 @@ export default function Agenda() {
   return (
     <div className="w-full max-w-2xl mx-auto px-4 py-8">
       <div className="flex border-b border-gray-200 mb-6">
-        {(["agenda", "criados", "inscricoes"] as Tab[]).map((t) => (
+        {(["agenda", "inscricoes", "criados"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -64,8 +64,8 @@ export default function Agenda() {
           loading={loading || registrationsLoading}
         />
       )}
-      {tab === "criados" && <EventListTab events={myEvents} loading={loading} empty="Você ainda não criou nenhum evento." />}
       {tab === "inscricoes" && <EventListTab events={registeredEvents} loading={registrationsLoading} empty="Você ainda não está inscrito em nenhum evento." />}
+      {tab === "criados" && <EventListTab events={myEvents} loading={loading} empty="Você ainda não criou nenhum evento." />}
     </div>
   );
 }
@@ -131,12 +131,13 @@ function AgendaTab({ createdEvents, registeredEvents, loading }: { createdEvents
     const monthStr = `${year}-${month}`;
     return createdEvents
       .filter((e) =>
-        selectedDay
+        e.data_fim >= today &&
+        (selectedDay
           ? e.data_inicio <= selectedDay && e.data_fim >= selectedDay
-          : e.data_inicio.startsWith(monthStr) || e.data_fim.startsWith(monthStr)
+          : e.data_inicio.startsWith(monthStr) || e.data_fim.startsWith(monthStr))
       )
       .sort((a, b) => a.data_inicio.localeCompare(b.data_inicio));
-  }, [createdEvents, currentMonth, selectedDay]);
+  }, [createdEvents, currentMonth, selectedDay, today]);
 
   const visibleRegistered = useMemo(() => {
     const year = currentMonth.getFullYear();
@@ -144,12 +145,13 @@ function AgendaTab({ createdEvents, registeredEvents, loading }: { createdEvents
     const monthStr = `${year}-${month}`;
     return registeredEvents
       .filter((e) =>
-        selectedDay
+        e.data_fim >= today &&
+        (selectedDay
           ? e.data_inicio <= selectedDay && e.data_fim >= selectedDay
-          : e.data_inicio.startsWith(monthStr) || e.data_fim.startsWith(monthStr)
+          : e.data_inicio.startsWith(monthStr) || e.data_fim.startsWith(monthStr))
       )
       .sort((a, b) => a.data_inicio.localeCompare(b.data_inicio));
-  }, [registeredEvents, currentMonth, selectedDay]);
+  }, [registeredEvents, currentMonth, selectedDay, today]);
 
   function prevMonth() {
     setCurrentMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
@@ -248,38 +250,38 @@ function AgendaTab({ createdEvents, registeredEvents, loading }: { createdEvents
             <div key={i} className="h-16 rounded-xl bg-gray-100 animate-pulse" />
           ))}
         </div>
-      ) : visibleCreated.length === 0 && visibleRegistered.length === 0 ? (
-        <p className="text-sm text-gray-400 py-6 text-center">
-          Nenhum evento{selectedDay ? " neste dia" : " neste mês"}.
-        </p>
       ) : (
         <div className="flex flex-col gap-4">
-          {visibleCreated.length > 0 && (
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="w-2 h-2 rounded-full bg-purple-400" />
-                <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Criados</span>
-              </div>
-              <div className="flex flex-col gap-2">
-                {visibleCreated.map((e) => (
-                  <AgendaListItem key={e.id} event={e} type="created" />
-                ))}
-              </div>
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="w-2 h-2 rounded-full bg-green-400" />
+              <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Inscrições</span>
             </div>
-          )}
-          {visibleRegistered.length > 0 && (
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="w-2 h-2 rounded-full bg-green-400" />
-                <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Inscrições</span>
-              </div>
+            {visibleRegistered.length === 0 ? (
+              <p className="text-sm text-gray-400 py-2">Sem inscrições ativas{selectedDay ? " neste dia" : " neste mês"}.</p>
+            ) : (
               <div className="flex flex-col gap-2">
                 {visibleRegistered.map((e) => (
                   <AgendaListItem key={e.id} event={e} type="registered" />
                 ))}
               </div>
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="w-2 h-2 rounded-full bg-purple-400" />
+              <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Criados</span>
             </div>
-          )}
+            {visibleCreated.length === 0 ? (
+              <p className="text-sm text-gray-400 py-2">Sem eventos criados{selectedDay ? " neste dia" : " neste mês"}.</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {visibleCreated.map((e) => (
+                  <AgendaListItem key={e.id} event={e} type="created" />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </>
@@ -331,6 +333,15 @@ function EventListTab({
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="h-20 rounded-xl bg-gray-100 animate-pulse" />
         ))}
+      </div>
+    );
+  }
+
+  if (events.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+        <CalendarDays className="h-10 w-10 text-gray-200" />
+        <p className="text-sm text-gray-400">{empty}</p>
       </div>
     );
   }
