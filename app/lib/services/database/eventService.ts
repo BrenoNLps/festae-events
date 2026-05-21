@@ -44,7 +44,7 @@ export async function searchEvents(
     if (filters?.estado) q = q.eq("endereco->>estado", filters.estado);
     if (filters?.cidade) q = q.eq("endereco->>cidade", filters.cidade);
     const { data } = await q.limit(20);
-    return (data as Evento[]) ?? [];
+    return (data ?? []) as Evento[];
 }
 
 export async function getEventsByOrganizer(id_organizador: string): Promise<{ data: Evento[] | null; error: unknown }> {

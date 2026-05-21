@@ -75,5 +75,5 @@ export async function searchUsers(
       if (diff !== 0) return diff;
       return (a.username?.length ?? 0) - (b.username?.length ?? 0);
     })
-    .slice(0, limit) as Usuario[];
+    .slice(0, limit);
 }
