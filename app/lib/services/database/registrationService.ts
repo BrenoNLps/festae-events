@@ -49,3 +49,8 @@ export async function deleteRegistration(id_usuario: string, id_evento: number) 
 
   return { error };
 }
+
+export async function getRegistrationCount(id_evento: number): Promise<number> {
+  const { data } = await supabase.rpc("get_registration_count", { evento_id: id_evento });
+  return data ?? 0;
+}
