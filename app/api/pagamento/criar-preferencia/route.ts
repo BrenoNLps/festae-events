@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
   }
 
   const host = req.headers.get('host')!;
-  const protocol = host.startsWith('localhost') ? 'http' : 'https';
+  const isLocalhost = host.startsWith('localhost');
+  const protocol = isLocalhost ? 'http' : 'https';
   const baseUrl = `${protocol}://${host}`;
 
   try {
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
           failure: `${baseUrl}/pagamento/resultado`,
           pending: `${baseUrl}/pagamento/resultado`,
         },
-        auto_return: 'approved',
+        ...(!isLocalhost && { auto_return: 'approved' }),
         external_reference: String(eventoId),
       },
     });
