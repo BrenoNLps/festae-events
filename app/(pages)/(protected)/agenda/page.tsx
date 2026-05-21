@@ -346,7 +346,11 @@ function EventListTab({
     );
   }
 
-  if (events.length === 0) {
+  const today = new Date().toISOString().split("T")[0];
+  const active = events.filter((e) => e.data_fim >= today).sort((a, b) => a.data_inicio.localeCompare(b.data_inicio));
+  const ended = events.filter((e) => e.data_fim < today).sort((a, b) => b.data_fim.localeCompare(a.data_fim));
+
+  if (active.length === 0 && ended.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
         <CalendarDays className="h-10 w-10 text-gray-200" />
@@ -357,9 +361,19 @@ function EventListTab({
 
   return (
     <div className="flex flex-col gap-3">
-      {events.map((e) => (
+      {active.map((e) => (
         <EventDetailCard key={e.id} event={e} />
       ))}
+      {ended.length > 0 && (
+        <>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-2">Finalizados</p>
+          {ended.map((e) => (
+            <div key={e.id} className="opacity-50 grayscale">
+              <EventDetailCard event={e} />
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }
