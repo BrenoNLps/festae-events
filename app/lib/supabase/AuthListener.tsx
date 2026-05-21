@@ -41,7 +41,7 @@ export default function AuthListener() {
     });
 
     return () => subscription.unsubscribe();
-  }, [pathname, router, supabase.auth]);
+  }, [pathname, router]);
 
   if (!loading) return null;
 
