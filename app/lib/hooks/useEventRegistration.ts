@@ -3,34 +3,51 @@ import {
   checkRegistration,
   createRegistration,
   deleteRegistration,
+  getRegistrationCount,
 } from "../services/database/registrationService";
 
 export function useEventRegistration(
   userId: string | null,
-  eventId: number | null
+  eventId: number | null,
+  maxVagas?: number
 ) {
   const [isRegistered, setIsRegistered] = useState(false);
   const [checking, setChecking] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [registrationCount, setRegistrationCount] = useState(0);
 
   useEffect(() => {
-    if (!userId || !eventId) return;
+    if (!eventId) return;
     let cancelled = false;
     setChecking(true);
-    checkRegistration(userId, eventId).then(({ data }) => {
-      if (!cancelled) {
-        setIsRegistered(!!data);
-        setChecking(false);
-      }
+    const checks: Promise<void>[] = [
+      getRegistrationCount(eventId).then((count) => {
+        if (!cancelled) setRegistrationCount(count);
+      }),
+    ];
+    if (userId) {
+      checks.push(
+        checkRegistration(userId, eventId).then(({ data }) => {
+          if (!cancelled) setIsRegistered(!!data);
+        })
+      );
+    }
+    Promise.all(checks).then(() => {
+      if (!cancelled) setChecking(false);
     });
     return () => { cancelled = true; };
   }, [userId, eventId]);
+
+  const isFull = maxVagas !== undefined && registrationCount >= maxVagas;
 
   async function register() {
     if (!userId || !eventId) return;
     setLoading(true);
     const { error } = await createRegistration({ id_usuario: userId, id_evento: eventId });
-    if (!error) setIsRegistered(true);
+    if (!error) {
+      setIsRegistered(true);
+      setRegistrationCount((c) => c + 1);
+    }
     setLoading(false);
   }
 
@@ -38,9 +55,12 @@ export function useEventRegistration(
     if (!userId || !eventId) return;
     setLoading(true);
     const { error } = await deleteRegistration(userId, eventId);
-    if (!error) setIsRegistered(false);
+    if (!error) {
+      setIsRegistered(false);
+      setRegistrationCount((c) => Math.max(0, c - 1));
+    }
     setLoading(false);
   }
 
-  return { isRegistered, checking, loading, register, unregister };
+  return { isRegistered, checking, loading, register, unregister, registrationCount, isFull };
 }

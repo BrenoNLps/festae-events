@@ -19,6 +19,7 @@ function RegistrationAction({
   registering,
   isPaid,
   purchasing,
+  isFull,
   canCancel,
   cancelBlockReason,
   onRegister,
@@ -31,6 +32,7 @@ function RegistrationAction({
   registering: boolean;
   isPaid: boolean;
   purchasing: boolean;
+  isFull: boolean;
   canCancel: boolean;
   cancelBlockReason: string;
   onRegister: () => void;
@@ -64,6 +66,8 @@ function RegistrationAction({
         )}
       </>
     );
+  if (isFull)
+    return <p className="text-center text-sm text-gray-400 py-2">Evento lotado</p>;
   if (isPaid)
     return (
       <button
@@ -94,8 +98,8 @@ export default function EventDetail() {
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
 
-  const { isRegistered, checking, loading: registering, register, unregister } =
-    useEventRegistration(user?.id ?? null, event?.id ?? null);
+  const { isRegistered, checking, loading: registering, register, unregister, isFull, registrationCount } =
+    useEventRegistration(user?.id ?? null, event?.id ?? null, event?.vagas ?? undefined);
 
   async function handlePurchase() {
     if (!event) return;
@@ -222,7 +226,16 @@ export default function EventDetail() {
           )}
           <span className="flex items-center gap-2 text-sm text-gray-600">
             <Users className="h-4 w-4 text-purple-400 flex-shrink-0" />
-            {event.vagas} vagas disponíveis
+            {checking ? (
+              <span className="w-24 h-4 bg-gray-100 rounded animate-pulse inline-block" />
+            ) : isFull ? (
+              <span className="text-red-500 font-medium">{event.vagas}/{event.vagas} · Lotado</span>
+            ) : (
+              (() => {
+                const available = event.vagas - registrationCount;
+                return `${registrationCount}/${event.vagas} · ${available} ${available === 1 ? "vaga disponível" : "vagas disponíveis"}`;
+              })()
+            )}
           </span>
         </div>
 
@@ -249,6 +262,7 @@ export default function EventDetail() {
             registering={registering}
             isPaid={event.valor > 0}
             purchasing={purchasing}
+            isFull={isFull}
             canCancel={canCancel}
             cancelBlockReason={cancelBlockReason}
             onRegister={register}
