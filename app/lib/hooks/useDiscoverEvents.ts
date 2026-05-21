@@ -17,10 +17,20 @@ export function useDiscoverEvents() {
 
   const latest = [...events].sort((a, b) => b.id - a.id).slice(0, 10);
 
+  const ongoing = [...events]
+    .filter((e) => e.data_inicio <= today && e.data_fim >= today)
+    .sort((a, b) => a.data_fim.localeCompare(b.data_fim))
+    .slice(0, 10);
+
   const upcoming = [...events]
-    .filter((e) => e.data_inicio >= today)
+    .filter((e) => e.data_inicio > today)
     .sort((a, b) => a.data_inicio.localeCompare(b.data_inicio))
     .slice(0, 10);
 
-  return { latest, upcoming, loading };
+  const finished = [...events]
+    .filter((e) => e.data_fim < today)
+    .sort((a, b) => b.data_fim.localeCompare(a.data_fim))
+    .slice(0, 10);
+
+  return { latest, ongoing, upcoming, finished, loading };
 }
