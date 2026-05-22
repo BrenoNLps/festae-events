@@ -1,11 +1,12 @@
 'use client'
 import { use } from 'react'
+import { FormProvider } from 'react-hook-form'
 import ImageUpload from '@/app/components/(protected)/ImageUpload'
 import AddressField from '@/app/components/(protected)/AddressField'
+import { CategorySelect } from '@/app/components/(protected)/CategorySelect'
 import styles from '@/app/styles/fields.module.css'
 import { useEditEvent } from '@/app/lib/hooks/forms/useEditEvent'
 import { maskCurrency, parseCurrency } from '@/app/lib/validators'
-import { EventCategory, EVENT_CATEGORY_LABELS } from '@/app/lib/types'
 
 export default function EditEvent({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params)
@@ -31,6 +32,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
     return (
         <div className={`${styles.formWrapper} max-w-2xl`}>
             <h1 className="text-3xl font-bold mb-8 text-purple-800">Editar Evento</h1>
+            <FormProvider {...form}>
             <form onSubmit={handleSubmit(onSubmit)} className={`${styles.form} gap-4`}>
                 <ImageUpload onChange={setCoverFile} />
                 <div>
@@ -38,16 +40,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
                     <input {...register('nome')} className={styles.input} placeholder="Nome do evento" />
                     {errors.nome && <span className={styles.error}>{errors.nome.message}</span>}
                 </div>
-                <div>
-                    <label className={styles.label}>Categoria</label>
-                    <select {...register('categoria')} className={styles.input}>
-                        <option value="">Selecione uma categoria</option>
-                        {Object.values(EventCategory).map((cat) => (
-                            <option key={cat} value={cat}>{EVENT_CATEGORY_LABELS[cat]}</option>
-                        ))}
-                    </select>
-                    {errors.categoria && <span className={styles.error}>{errors.categoria.message}</span>}
-                </div>
+                <CategorySelect />
                 <div>
                     <label className={styles.label}>Descrição</label>
                     <textarea {...register('descricao')} className={styles.input} placeholder="Descrição do evento" rows={4} />
@@ -102,6 +95,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
                     {saving ? 'Salvando...' : 'Salvar alterações'}
                 </button>
             </form>
+            </FormProvider>
         </div>
     )
 }
