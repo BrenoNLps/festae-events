@@ -1,109 +1,29 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { Send, MessageCircle, ArrowLeft, Smile } from "lucide-react";
 import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
-import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
-import { getFriends } from "@/app/lib/services/database/friendshipService";
-import { getMessagesBetweenUsers, sendMessage, getUnreadSenderIds } from "@/app/lib/services/database/messageService";
 import { Avatar } from "@/app/components/(protected)/Avatar";
-import type { Usuario, Message } from "@/app/lib/types";
-import { getSupabaseClient } from "@/app/lib/supabase/singleton";
-import { STORAGE_KEYS } from "@/app/lib/storageKeys";
-
-const supabase = getSupabaseClient();
+import { useChat } from "@/app/lib/hooks/useChat";
 
 export default function Chat() {
-  const { user } = useCurrentUser();
-  const searchParams = useSearchParams();
+  const {
+    user,
+    friends,
+    selected,
+    selectFriend,
+    clearSelected,
+    messages,
+    unreadIds,
+    input,
+    setInput,
+    sending,
+    handleSend,
+  } = useChat();
 
-  const [friends, setFriends] = useState<Usuario[]>([]);
-  const [selected, setSelected] = useState<Usuario | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [unreadIds, setUnreadIds] = useState<Set<string>>(new Set());
-  const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
-  const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const emojiRef = useRef<HTMLDivElement>(null);
-  const lastVisitRef = useRef(
-    typeof window !== "undefined"
-      ? (localStorage.getItem(STORAGE_KEYS.lastChatVisit) ?? new Date(0).toISOString())
-      : new Date(0).toISOString()
-  );
-
-  useEffect(() => {
-    if (!user?.id) return;
-    getFriends(user.id).then(({ data }) => {
-      if (!data) return;
-      setFriends(data);
-
-      const userId = searchParams.get("userId");
-      if (userId) {
-        const friend = data.find((u) => u.id === userId);
-        if (friend) setSelected(friend);
-      }
-    });
-
-    getUnreadSenderIds(user.id, lastVisitRef.current).then(({ data }) => {
-      if (data) setUnreadIds(new Set(data));
-    });
-  }, [user?.id, searchParams]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const globalChannel = supabase
-      .channel(`inbox-${user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "mensagem" },
-        (payload) => {
-          const msg = payload.new as Message;
-          if (msg.id_destinatario !== user.id) return;
-          setUnreadIds((prev) => {
-            if (prev.has(msg.id_remetente)) return prev;
-            const next = new Set(prev);
-            next.add(msg.id_remetente);
-            return next;
-          });
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(globalChannel); };
-  }, [user?.id]);
-
-  useEffect(() => {
-    if (!user?.id || !selected) return;
-
-    getMessagesBetweenUsers(user.id, selected.id).then(({ data }) => {
-      setMessages(data ?? []);
-    });
-
-    const channel = supabase
-      .channel(`chat-${[user.id, selected.id].sort().join("-")}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "mensagem" },
-        (payload) => {
-          const msg = payload.new as Message;
-          const isRelevant =
-            (msg.id_remetente === user.id && msg.id_destinatario === selected.id) ||
-            (msg.id_remetente === selected.id && msg.id_destinatario === user.id);
-          if (isRelevant) {
-            setMessages((prev) => [...prev, msg]);
-            if (msg.id_remetente === selected.id) {
-              setUnreadIds((prev) => { const next = new Set(prev); next.delete(selected.id); return next; });
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [user?.id, selected?.id]);
+  const [showEmoji, setShowEmoji] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -119,15 +39,6 @@ export default function Chat() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showEmoji]);
-
-  async function handleSend() {
-    if (!input.trim() || !user?.id || !selected || sending) return;
-    setSending(true);
-    const conteudo = input.trim();
-    setInput("");
-    await sendMessage({ conteudo, id_remetente: user.id, id_destinatario: selected.id });
-    setSending(false);
-  }
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -151,10 +62,7 @@ export default function Chat() {
             friends.map((f) => (
               <button
                 key={f.id}
-                onClick={() => {
-                  setSelected(f);
-                  setUnreadIds((prev) => { const next = new Set(prev); next.delete(f.id); return next; });
-                }}
+                onClick={() => selectFriend(f)}
                 className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-left ${
                   selected?.id === f.id ? "bg-purple-50" : ""
                 }`}
@@ -184,7 +92,7 @@ export default function Chat() {
             <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
               <button
                 className="lg:hidden p-1 -ml-1 text-gray-500 hover:text-gray-800 transition"
-                onClick={() => setSelected(null)}
+                onClick={clearSelected}
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
@@ -226,8 +134,8 @@ export default function Chat() {
                 <div ref={emojiRef} className="absolute bottom-16 left-0 right-0 z-50 md:right-auto md:left-4 md:w-[300px]">
                   <EmojiPicker
                     onEmojiClick={(e: EmojiClickData) => {
-                      setInput((prev) => prev + e.emoji)
-                      setShowEmoji(false)
+                      setInput(input + e.emoji);
+                      setShowEmoji(false);
                     }}
                     height={380}
                     width="100%"
