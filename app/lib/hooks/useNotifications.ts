@@ -9,6 +9,7 @@ import { getRegistrationsByUser } from "../services/database/registrationService
 import { Evento } from "../types";
 import { ROUTES } from "../routes";
 import { getTodayAsString } from "../utils/date";
+import { STORAGE_KEYS } from "../storageKeys";
 
 export function useNotifications() {
   const { user } = useCurrentUser();
@@ -22,13 +23,13 @@ export function useNotifications() {
     const onChat = pathname.startsWith(ROUTES.chat);
     const onAgenda = pathname === ROUTES.agenda;
 
-    if (onFriends) localStorage.setItem("lastFriendsVisit", new Date().toISOString());
-    if (onChat) localStorage.setItem("lastChatVisit", new Date().toISOString());
-    if (onAgenda) localStorage.setItem("lastAgendaVisit", getTodayAsString());
+    if (onFriends) localStorage.setItem(STORAGE_KEYS.lastFriendsVisit, new Date().toISOString());
+    if (onChat) localStorage.setItem(STORAGE_KEYS.lastChatVisit, new Date().toISOString());
+    if (onAgenda) localStorage.setItem(STORAGE_KEYS.lastAgendaVisit, getTodayAsString());
 
-    const lastFriendsVisit = localStorage.getItem("lastFriendsVisit") ?? new Date(0).toISOString();
-    const lastChatVisit = localStorage.getItem("lastChatVisit") ?? new Date(0).toISOString();
-    const lastAgendaVisit = localStorage.getItem("lastAgendaVisit") ?? "";
+    const lastFriendsVisit = localStorage.getItem(STORAGE_KEYS.lastFriendsVisit) ?? new Date(0).toISOString();
+    const lastChatVisit = localStorage.getItem(STORAGE_KEYS.lastChatVisit) ?? new Date(0).toISOString();
+    const lastAgendaVisit = localStorage.getItem(STORAGE_KEYS.lastAgendaVisit) ?? "";
     const today = getTodayAsString();
 
     if (!onFriends) {

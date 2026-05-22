@@ -10,6 +10,7 @@ import { getMessagesBetweenUsers, sendMessage, getUnreadSenderIds } from "@/app/
 import { Avatar } from "@/app/components/(protected)/Avatar";
 import type { Usuario, Message } from "@/app/lib/types";
 import { getSupabaseClient } from "@/app/lib/supabase/singleton";
+import { STORAGE_KEYS } from "@/app/lib/storageKeys";
 
 const supabase = getSupabaseClient();
 
@@ -28,7 +29,7 @@ export default function Chat() {
   const emojiRef = useRef<HTMLDivElement>(null);
   const lastVisitRef = useRef(
     typeof window !== "undefined"
-      ? (localStorage.getItem("lastChatVisit") ?? new Date(0).toISOString())
+      ? (localStorage.getItem(STORAGE_KEYS.lastChatVisit) ?? new Date(0).toISOString())
       : new Date(0).toISOString()
   );
 

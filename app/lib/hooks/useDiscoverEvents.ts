@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getEvents } from "../services/database/eventService";
 import { Evento } from "../types";
 import { getTodayAsString } from "../utils/date";
+import { STORAGE_KEYS } from "../storageKeys";
 
 function readStorage(key: string) {
   try { return localStorage.getItem(key) ?? ""; } catch { return ""; }
@@ -20,9 +21,9 @@ export function useDiscoverEvents() {
   const [categoria, setCategoriaState] = useState("");
 
   useEffect(() => {
-    setEstadoState(readStorage("filtro_estado"));
-    setCidadeState(readStorage("filtro_cidade"));
-    setCategoriaState(readStorage("filtro_categoria"));
+    setEstadoState(readStorage(STORAGE_KEYS.filtroEstado));
+    setCidadeState(readStorage(STORAGE_KEYS.filtroCidade));
+    setCategoriaState(readStorage(STORAGE_KEYS.filtroCategoria));
     setInitialized(true);
   }, []);
 
@@ -42,27 +43,27 @@ export function useDiscoverEvents() {
   function setEstado(value: string) {
     setEstadoState(value);
     setCidadeState("");
-    writeStorage("filtro_estado", value);
-    writeStorage("filtro_cidade", "");
+    writeStorage(STORAGE_KEYS.filtroEstado, value);
+    writeStorage(STORAGE_KEYS.filtroCidade, "");
   }
 
   function setCidade(value: string) {
     setCidadeState(value);
-    writeStorage("filtro_cidade", value);
+    writeStorage(STORAGE_KEYS.filtroCidade, value);
   }
 
   function setCategoria(value: string) {
     setCategoriaState(value);
-    writeStorage("filtro_categoria", value);
+    writeStorage(STORAGE_KEYS.filtroCategoria, value);
   }
 
   function clearFilter() {
     setEstadoState("");
     setCidadeState("");
     setCategoriaState("");
-    writeStorage("filtro_estado", "");
-    writeStorage("filtro_cidade", "");
-    writeStorage("filtro_categoria", "");
+    writeStorage(STORAGE_KEYS.filtroEstado, "");
+    writeStorage(STORAGE_KEYS.filtroCidade, "");
+    writeStorage(STORAGE_KEYS.filtroCategoria, "");
   }
 
   const today = getTodayAsString();
