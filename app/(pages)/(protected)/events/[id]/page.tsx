@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Calendar, Clock, MapPin, Users } from "lucide-react";
 import { EventImage } from "@/app/components/events/EventImage";
-import { getEventById } from "@/app/lib/services/database/eventService";
+import { getEventById, deleteEvent } from "@/app/lib/services/database/eventService";
 import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { useEventRegistration } from "@/app/lib/hooks/useEventRegistration";
 import { formatDateRange } from "@/app/lib/utils/date";
@@ -25,6 +25,9 @@ function RegistrationAction({
   onRegister,
   onUnregister,
   onPurchase,
+  onEdit,
+  onDelete,
+  deleting,
 }: {
   isOrganizer: boolean;
   checking: boolean;
@@ -38,9 +41,47 @@ function RegistrationAction({
   onRegister: () => void;
   onUnregister: () => void;
   onPurchase: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  deleting: boolean;
 }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
   if (isOrganizer)
-    return <p className="text-center text-sm text-gray-400 py-2">Você é o organizador deste evento</p>;
+    return (
+      <div className="flex flex-col gap-2">
+        <button
+          onClick={onEdit}
+          className="w-full py-3 rounded-xl text-sm font-semibold border border-purple-600 text-purple-600 hover:bg-purple-50 transition"
+        >
+          Editar evento
+        </button>
+        {!confirmDelete ? (
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="w-full py-3 rounded-xl text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition"
+          >
+            Excluir evento
+          </button>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              onClick={() => setConfirmDelete(false)}
+              className="flex-1 py-3 rounded-xl text-sm border border-gray-200 text-gray-500 hover:bg-gray-50 transition"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={onDelete}
+              disabled={deleting}
+              className="flex-1 py-3 rounded-xl text-sm font-semibold bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-60"
+            >
+              {deleting ? 'Excluindo...' : 'Confirmar exclusão'}
+            </button>
+          </div>
+        )}
+      </div>
+    );
   if (checking)
     return <div className="h-11 bg-gray-100 rounded-xl animate-pulse" />;
   if (isRegistered)
@@ -97,9 +138,17 @@ export default function EventDetail() {
   const [event, setEvent] = useState<Evento | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const { isRegistered, checking, loading: registering, register, unregister, isFull, registrationCount } =
     useEventRegistration(user?.id ?? null, event?.id ?? null, event?.vagas ?? undefined);
+
+  async function handleDelete() {
+    if (!event) return;
+    setDeleting(true);
+    await deleteEvent(event.id);
+    router.push('/events');
+  }
 
   async function handlePurchase() {
     if (!event) return;
@@ -268,6 +317,9 @@ export default function EventDetail() {
             onRegister={register}
             onUnregister={unregister}
             onPurchase={handlePurchase}
+            onEdit={() => router.push(`/events/${event.id}/edit`)}
+            onDelete={handleDelete}
+            deleting={deleting}
           />
         </div>
       </div>
