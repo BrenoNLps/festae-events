@@ -2,23 +2,15 @@
 import { useState } from "react"
 import styles from '@/app/styles/fields.module.css'
 import { getCepData } from '@/app/lib/services/api/cepService'
-
-interface Endereco {
-    cep: string
-    logradouro: string
-    bairro: string
-    cidade: string
-    estado: string
-    numero: string
-}
+import type { Address } from '@/app/lib/types'
 
 interface AddressFieldProps {
-    onChange: (endereco: Endereco) => void
-    initialValue?: Endereco
+    onChange: (endereco: Address) => void
+    initialValue?: Address
 }
 
 export default function AddressField({ onChange, initialValue }: AddressFieldProps) {
-    const [endereco, setEndereco] = useState<Endereco>(initialValue ?? {
+    const [endereco, setEndereco] = useState<Address>(initialValue ?? {
         cep: '',
         logradouro: '',
         bairro: '',
