@@ -37,7 +37,7 @@ export function useDiscoverEvents() {
     ).then(({ data }) => {
       if (data) setEvents(data);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, [initialized, estado, cidade, categoria]);
 
   function setEstado(value: string) {

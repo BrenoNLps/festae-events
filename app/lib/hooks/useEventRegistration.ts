@@ -32,9 +32,9 @@ export function useEventRegistration(
         })
       );
     }
-    Promise.all(checks).then(() => {
-      if (!cancelled) setChecking(false);
-    });
+    Promise.all(checks)
+      .then(() => { if (!cancelled) setChecking(false); })
+      .catch(() => { if (!cancelled) setChecking(false); });
     return () => { cancelled = true; };
   }, [userId, eventId]);
 

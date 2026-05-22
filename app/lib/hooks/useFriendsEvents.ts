@@ -11,10 +11,9 @@ export function useFriendsEvents(userId: string | null) {
       setLoading(false);
       return;
     }
-    getEventsByFriends(userId).then((data) => {
-      setEvents(data);
-      setLoading(false);
-    });
+    getEventsByFriends(userId)
+      .then((data) => { setEvents(data); setLoading(false); })
+      .catch(() => setLoading(false));
   }, [userId]);
 
   return { events, loading };
