@@ -36,7 +36,7 @@ function ConversaItem({ conv, selected, unreadIds, onClick }: {
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-sm text-gray-900 truncate">{displayName}</p>
         {!isDM && (
-          <p className="text-xs text-gray-400 truncate">{conv.participantes.length + 1} participantes</p>
+          <p className="text-xs text-gray-500 truncate">{conv.participantes.length + 1} participantes</p>
         )}
       </div>
       {unreadIds.has(conv.id) && (
@@ -67,7 +67,7 @@ function CreateGroupModal({ friends, onClose, onCreate }: {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h2 className="font-semibold text-gray-900">Novo grupo</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-600 transition">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -77,7 +77,7 @@ function CreateGroupModal({ friends, onClose, onCreate }: {
             placeholder="Nome do grupo"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
-            className="text-sm border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
+            className="text-sm text-gray-900 border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
           />
           <div className="flex flex-col gap-1 max-h-56 overflow-y-auto">
             {friends.map((f) => (
@@ -89,7 +89,7 @@ function CreateGroupModal({ friends, onClose, onCreate }: {
                 <Avatar nome={f.nome} imagem_url={f.imagem_url} size={32} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">{f.nome ?? `@${f.username}`}</p>
-                  <p className="text-xs text-gray-400 truncate">@{f.username}</p>
+                  <p className="text-xs text-gray-500 truncate">@{f.username}</p>
                 </div>
                 {selected.has(f.id) && <span className="w-2 h-2 rounded-full bg-purple-600 shrink-0" />}
               </button>
@@ -187,7 +187,7 @@ export default function Chat() {
           </div>
           <button
             onClick={() => setShowCreateGroup(true)}
-            className="text-gray-400 hover:text-purple-600 transition"
+            className="text-gray-500 hover:text-purple-600 transition"
             title="Novo grupo"
           >
             <Plus className="h-5 w-5" />
@@ -197,7 +197,7 @@ export default function Chat() {
         <div className="flex-1 overflow-y-auto">
           {tab === 'conversas' ? (
             conversations.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8 px-4">Nenhuma conversa ainda.</p>
+              <p className="text-sm text-gray-500 text-center py-8 px-4">Nenhuma conversa ainda.</p>
             ) : (
               conversations.map((conv) => (
                 <ConversaItem
@@ -211,7 +211,7 @@ export default function Chat() {
             )
           ) : (
             friends.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8 px-4">Adicione amigos para conversar.</p>
+              <p className="text-sm text-gray-500 text-center py-8 px-4">Adicione amigos para conversar.</p>
             ) : (
               friends.map((f) => (
                 <button
@@ -222,7 +222,7 @@ export default function Chat() {
                   <Avatar nome={f.nome} imagem_url={f.imagem_url} size={38} />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-gray-900 truncate">@{f.username}</p>
-                    {f.nome && <p className="text-xs text-gray-400 truncate">{f.nome}</p>}
+                    {f.nome && <p className="text-xs text-gray-500 truncate">{f.nome}</p>}
                   </div>
                 </button>
               ))
@@ -236,7 +236,7 @@ export default function Chat() {
         {!selected ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
             <MessageCircle className="h-10 w-10 text-gray-200" />
-            <p className="text-sm text-gray-400">Selecione uma conversa ou amigo.</p>
+            <p className="text-sm text-gray-500">Selecione uma conversa ou amigo.</p>
           </div>
         ) : (
           <>
@@ -255,13 +255,13 @@ export default function Chat() {
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm text-gray-900">{headerName}</p>
                 {!isDM && (
-                  <p className="text-xs text-gray-400">{(selected.participantes.length + 1)} participantes</p>
+                  <p className="text-xs text-gray-500">{(selected.participantes.length + 1)} participantes</p>
                 )}
               </div>
               {!isDM && (
                 <button
                   onClick={() => setShowLeaveDialog(true)}
-                  className="text-gray-400 hover:text-red-500 transition"
+                  className="text-gray-500 hover:text-red-500 transition"
                   title="Sair do grupo"
                 >
                   <LogOut className="h-4 w-4" />
@@ -271,7 +271,7 @@ export default function Chat() {
 
             <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-2">
               {messages.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center mt-8">Nenhuma mensagem ainda. Diga oi!</p>
+                <p className="text-sm text-gray-500 text-center mt-8">Nenhuma mensagem ainda. Diga oi!</p>
               ) : (
                 messages.map((msg) => {
                   const isMine = msg.id_remetente === user?.id;
@@ -279,7 +279,7 @@ export default function Chat() {
                   return (
                     <div key={msg.id} className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}>
                       {!isMine && !isDM && sender && (
-                        <span className="text-xs text-gray-400 mb-0.5 ml-1">@{sender.username}</span>
+                        <span className="text-xs text-gray-500 mb-0.5 ml-1">@{sender.username}</span>
                       )}
                       <div className={`max-w-xs lg:max-w-md px-3 py-2 rounded-2xl text-sm wrap-break-word ${isMine ? "bg-purple-600 text-white rounded-br-sm" : "bg-gray-100 text-black rounded-bl-sm"}`}>
                         {msg.conteudo}
@@ -301,7 +301,7 @@ export default function Chat() {
                   />
                 </div>
               )}
-              <button onClick={() => setShowEmoji((v) => !v)} className="shrink-0 text-gray-400 hover:text-purple-500 transition">
+              <button onClick={() => setShowEmoji((v) => !v)} className="shrink-0 text-gray-500 hover:text-purple-500 transition">
                 <Smile className="h-5 w-5" />
               </button>
               <div className="flex-1 flex flex-col">
@@ -315,7 +315,7 @@ export default function Chat() {
                   className="text-sm text-black border border-gray-200 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
                 />
                 {input.length > maxMessageLength * 0.8 && (
-                  <span className={`text-xs text-right pr-2 mt-0.5 ${input.length >= maxMessageLength ? 'text-red-500' : 'text-gray-400'}`}>
+                  <span className={`text-xs text-right pr-2 mt-0.5 ${input.length >= maxMessageLength ? 'text-red-500' : 'text-gray-500'}`}>
                     {input.length}/{maxMessageLength}
                   </span>
                 )}
