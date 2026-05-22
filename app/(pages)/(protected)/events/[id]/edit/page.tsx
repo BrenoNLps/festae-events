@@ -7,6 +7,7 @@ import { CategorySelect } from '@/app/components/(protected)/CategorySelect'
 import styles from '@/app/styles/fields.module.css'
 import { useEditEvent } from '@/app/lib/hooks/forms/useEditEvent'
 import { maskCurrency, parseCurrency } from '@/app/lib/validators'
+import { getTodayAsString } from '@/app/lib/utils/date'
 
 export default function EditEvent({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params)
