@@ -8,11 +8,14 @@ import {
   getMessagesByConversation,
   sendMessage,
   getOrCreateDMConversation,
+  getMyConversations,
+  createGroup,
   markConversationAsRead,
-  getUnreadDMPartnerIds,
+  leaveGroup,
+  getUnreadConversationIds,
 } from "../services/database/messageService";
 import { getSupabaseClient } from "../supabase/singleton";
-import type { Usuario, Message } from "../types";
+import type { Usuario, Message, ConversaComInfo, ParticipanteInfo } from "../types";
 
 const supabase = getSupabaseClient();
 
@@ -20,36 +23,51 @@ export function useChat() {
   const { user } = useCurrentUser();
   const searchParams = useSearchParams();
 
+  const [conversations, setConversations] = useState<ConversaComInfo[]>([]);
   const [friends, setFriends] = useState<Usuario[]>([]);
-  const [selected, setSelectedState] = useState<Usuario | null>(null);
-  const [conversaId, setConversaId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<ConversaComInfo | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [unreadIds, setUnreadIds] = useState<Set<string>>(new Set());
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
 
-  const conversaIdRef = useRef<string | null>(null);
-  conversaIdRef.current = conversaId;
+  const selectedRef = useRef<ConversaComInfo | null>(null);
+  selectedRef.current = selected;
+
+  const participantMap = Object.fromEntries(
+    (selected?.participantes ?? []).map((p) => [p.id, p])
+  ) as Record<string, ParticipanteInfo>;
+
+  function refreshConversations() {
+    if (!user?.id) return;
+    getMyConversations().then(({ data }) => setConversations(data));
+  }
 
   useEffect(() => {
     if (!user?.id) return;
-    getFriends(user.id).then(({ data }) => {
-      if (!data) return;
-      setFriends(data);
-      const userId = searchParams.get("userId");
-      if (userId) {
-        const friend = data.find((u) => u.id === userId);
-        if (friend) selectFriend(friend);
-      }
-    });
 
-    getUnreadDMPartnerIds().then(({ data }) => {
+    refreshConversations();
+    getFriends(user.id).then(({ data }) => {
+      if (data) setFriends(data);
+    });
+    getUnreadConversationIds().then(({ data }) => {
       setUnreadIds(new Set(data));
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, searchParams]);
 
-  // Inbox global: detecta novas mensagens de qualquer conversa
+    const userId = searchParams.get("userId");
+    if (userId) {
+      getOrCreateDMConversation(userId).then(({ data: convId }) => {
+        if (!convId) return;
+        getMyConversations().then(({ data }) => {
+          const conv = data.find((c) => c.id === convId);
+          if (conv) selectConversation(conv);
+        });
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  // Inbox global: detecta novas mensagens
   useEffect(() => {
     if (!user?.id) return;
 
@@ -58,11 +76,11 @@ export function useChat() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "mensagem" }, (payload) => {
         const msg = payload.new as Message;
         if (msg.id_remetente === user.id) return;
-        if (msg.id_conversa === conversaIdRef.current) return;
+        if (msg.id_conversa === selectedRef.current?.id) return;
         setUnreadIds((prev) => {
-          if (prev.has(msg.id_remetente)) return prev;
+          if (prev.has(msg.id_conversa)) return prev;
           const next = new Set(prev);
-          next.add(msg.id_remetente);
+          next.add(msg.id_conversa);
           return next;
         });
       })
@@ -71,49 +89,75 @@ export function useChat() {
     return () => { supabase.removeChannel(globalChannel); };
   }, [user?.id]);
 
-  // Carrega mensagens e escuta a conversa selecionada
+  // Carrega mensagens e escuta conversa selecionada
   useEffect(() => {
-    if (!user?.id || !conversaId) return;
+    if (!user?.id || !selected) return;
 
-    getMessagesByConversation(conversaId).then(({ data }) => {
+    getMessagesByConversation(selected.id).then(({ data }) => {
       setMessages(data ?? []);
     });
 
-    markConversationAsRead(conversaId, user.id);
+    markConversationAsRead(selected.id, user.id);
 
     const channel = supabase
-      .channel(`chat-${conversaId}`)
+      .channel(`chat-${selected.id}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "mensagem" }, (payload) => {
         const msg = payload.new as Message;
-        if (msg.id_conversa !== conversaId) return;
+        if (msg.id_conversa !== selected.id) return;
         setMessages((prev) => [...prev, msg]);
         if (msg.id_remetente !== user.id) {
-          markConversationAsRead(conversaId, user.id);
-          setUnreadIds((prev) => { const next = new Set(prev); next.delete(msg.id_remetente); return next; });
+          markConversationAsRead(selected.id, user.id);
+          setUnreadIds((prev) => { const next = new Set(prev); next.delete(selected.id); return next; });
         }
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [user?.id, conversaId]);
+  }, [user?.id, selected?.id]);
 
-  async function selectFriend(friend: Usuario) {
-    setSelectedState(friend);
+  function selectConversation(conv: ConversaComInfo) {
+    setSelected(conv);
     setMessages([]);
-    setUnreadIds((prev) => { const next = new Set(prev); next.delete(friend.id); return next; });
-    const { data: id } = await getOrCreateDMConversation(friend.id);
-    setConversaId(id);
+    setUnreadIds((prev) => { const next = new Set(prev); next.delete(conv.id); return next; });
+  }
+
+  async function startDM(friend: Usuario) {
+    const { data: convId } = await getOrCreateDMConversation(friend.id);
+    if (!convId) return;
+    const existing = conversations.find((c) => c.id === convId);
+    if (existing) { selectConversation(existing); return; }
+    const { data } = await getMyConversations();
+    setConversations(data);
+    const conv = data.find((c) => c.id === convId);
+    if (conv) selectConversation(conv);
+  }
+
+  async function handleCreateGroup(nome: string, participanteIds: string[]) {
+    const { data: convId } = await createGroup(nome, participanteIds);
+    if (!convId) return;
+    const { data } = await getMyConversations();
+    setConversations(data);
+    const conv = data.find((c) => c.id === convId);
+    if (conv) selectConversation(conv);
+  }
+
+  async function handleLeaveGroup() {
+    if (!selected || !user?.id) return;
+    await leaveGroup(selected.id, user.id);
+    setSelected(null);
+    setMessages([]);
+    refreshConversations();
   }
 
   const MAX_MESSAGE_LENGTH = 1000;
 
   async function handleSend() {
     const conteudo = input.trim();
-    if (!conteudo || conteudo.length > MAX_MESSAGE_LENGTH || !user?.id || !conversaId || sending) return;
+    if (!conteudo || conteudo.length > MAX_MESSAGE_LENGTH || !user?.id || !selected || sending) return;
     setSending(true);
     setInput("");
     try {
-      await sendMessage({ conteudo, id_remetente: user.id, id_conversa: conversaId });
+      await sendMessage({ conteudo, id_remetente: user.id, id_conversa: selected.id });
     } finally {
       setSending(false);
     }
@@ -121,11 +165,16 @@ export function useChat() {
 
   return {
     user,
+    conversations,
     friends,
     selected,
-    selectFriend,
-    clearSelected: () => { setSelectedState(null); setConversaId(null); setMessages([]); },
+    selectConversation,
+    startDM,
+    handleCreateGroup,
+    handleLeaveGroup,
+    clearSelected: () => { setSelected(null); setMessages([]); },
     messages,
+    participantMap,
     unreadIds,
     input,
     setInput,
