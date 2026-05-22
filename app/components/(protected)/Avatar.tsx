@@ -10,7 +10,7 @@ export function Avatar({ nome, imagem_url, size = 40, className = '' }: AvatarPr
 
     if (imagem_url) return (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={imagem_url} alt="avatar" style={style} className={`rounded-full object-cover ${className}`}/>
+        <img src={imagem_url} alt={nome ?? 'avatar'} style={style} className={`rounded-full object-cover ${className}`}/>
     )
 
     const initials = (nome ?? 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
