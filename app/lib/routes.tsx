@@ -3,6 +3,7 @@ export const ROUTES = {
     login: '/login',
     events: '/events',
     eventsCreate: '/events/create',
+    eventDetail: (id: number) => `/events/${id}`,
     completeProfile: '/complete-profile',
     friends: '/friends',
     chat: '/chat',

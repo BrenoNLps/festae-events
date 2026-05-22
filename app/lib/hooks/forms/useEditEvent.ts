@@ -8,6 +8,7 @@ import { getRegistrationCount } from "../../services/database/registrationServic
 import { uploadImage } from "../../services/storage/uploadService"
 import { eventSchema, EventFormData } from "../../validation/eventSchema"
 import { Evento } from "../../types"
+import { ROUTES } from "../../routes"
 
 export function useEditEvent(eventId: number) {
     const { user } = useCurrentUser()
@@ -47,6 +48,12 @@ export function useEditEvent(eventId: number) {
         })
     }, [eventId, form])
 
+    useEffect(() => {
+        if (!loadingEvent && event && user && event.id_organizador !== user.id) {
+            router.replace(ROUTES.events)
+        }
+    }, [loadingEvent, event, user, router])
+
     async function onSubmit(data: EventFormData) {
         if (!user || !event) return
         if (data.vagas < minVagas) {
@@ -54,12 +61,16 @@ export function useEditEvent(eventId: number) {
             return
         }
         setSaving(true)
-        let imagem_url: string | undefined
-        if (coverFileRef.current) {
-            imagem_url = await uploadImage('event-covers', user.id, coverFileRef.current) ?? undefined
+        try {
+            let imagem_url: string | undefined
+            if (coverFileRef.current) {
+                imagem_url = await uploadImage('event-covers', user.id, coverFileRef.current) ?? undefined
+            }
+            const { error } = await updateEvent(event.id, { ...data, imagem_url })
+            if (!error) router.push(ROUTES.eventDetail(event.id))
+        } finally {
+            setSaving(false)
         }
-        await updateEvent(event.id, { ...data, imagem_url })
-        router.push(`/events/${event.id}`)
     }
 
     return {
