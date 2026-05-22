@@ -49,6 +49,7 @@ function RegistrationAction({
   registrationCount: number;
 }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const canDelete = registrationCount === 0;
 
   if (isOrganizer)
@@ -89,7 +90,6 @@ function RegistrationAction({
   if (checking)
     return <div className="h-11 bg-gray-100 rounded-xl animate-pulse" />;
   if (isRegistered) {
-    const [showCancelDialog, setShowCancelDialog] = useState(false);
     return (
       <>
         {cancelBlockReason === "Evento já encerrado" ? (
