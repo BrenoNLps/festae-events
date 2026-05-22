@@ -4,22 +4,15 @@ import { FcGoogle } from 'react-icons/fc'
 import { ArrowLeft } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
-import { createClient } from '../../lib/supabase/client'
-
+import { signInWithGoogle } from '../../lib/services/auth/authService'
 
 export default function Login() {
-    const supabase = createClient()
     const searchParams = useSearchParams()
     const router = useRouter()
 
     async function loginWithGoogle() {
         const next = searchParams.get('callbackUrl') ?? '/events'
-        await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: `${window.location.origin}/auth/callback?next=${next}`
-            }
-        })
+        await signInWithGoogle(`${window.location.origin}/auth/callback?next=${next}`)
     }
 
     return (

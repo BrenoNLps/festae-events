@@ -1,11 +1,11 @@
 'use client'
 import { useState } from 'react'
 import { LogOut, Menu, X, ChevronRight } from 'lucide-react'
-import { createClient } from '../../lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ROUTES } from '@/app/lib/routes'
 import { menuItems } from '@/app/lib/nav'
+import { signOut } from '@/app/lib/services/auth/authService'
 import { useNotifications } from '@/app/lib/hooks/useNotifications'
 import { useProfile } from '@/app/lib/hooks/useProfile'
 import { Avatar } from './Avatar'
@@ -21,7 +21,7 @@ export default function Navbar() {
     const displayName = dbUser?.nome || dbUser?.username
 
     async function handleLogout() {
-        await supabase.auth.signOut()
+        await signOut()
         router.push(ROUTES.home)
     }
 
