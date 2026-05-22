@@ -26,6 +26,7 @@ export function useChat() {
   const [conversations, setConversations] = useState<ConversaComInfo[]>([]);
   const [friends, setFriends] = useState<Usuario[]>([]);
   const [selected, setSelected] = useState<ConversaComInfo | null>(null);
+  const [pendingFriend, setPendingFriend] = useState<Usuario | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [unreadIds, setUnreadIds] = useState<Set<string>>(new Set());
   const [input, setInput] = useState("");
@@ -121,15 +122,18 @@ export function useChat() {
     setUnreadIds((prev) => { const next = new Set(prev); next.delete(conv.id); return next; });
   }
 
-  async function startDM(friend: Usuario) {
-    const { data: convId } = await getOrCreateDMConversation(friend.id);
-    if (!convId) return;
-    const existing = conversations.find((c) => c.id === convId);
-    if (existing) { selectConversation(existing); return; }
-    const { data } = await getMyConversations();
-    setConversations(data);
-    const conv = data.find((c) => c.id === convId);
-    if (conv) selectConversation(conv);
+  function startDM(friend: Usuario) {
+    const existing = conversations.find(
+      (c) => c.tipo === 'DM' && c.participantes.some((p) => p.id === friend.id)
+    );
+    if (existing) {
+      selectConversation(existing);
+      setPendingFriend(null);
+    } else {
+      setSelected(null);
+      setPendingFriend(friend);
+      setMessages([]);
+    }
   }
 
   async function handleCreateGroup(nome: string, participanteIds: string[]) {
@@ -153,11 +157,27 @@ export function useChat() {
 
   async function handleSend() {
     const conteudo = input.trim();
-    if (!conteudo || conteudo.length > MAX_MESSAGE_LENGTH || !user?.id || !selected || sending) return;
+    if (!conteudo || conteudo.length > MAX_MESSAGE_LENGTH || !user?.id || sending) return;
+    if (!selected && !pendingFriend) return;
+
+    let convId = selected?.id ?? null;
+
+    if (!convId && pendingFriend) {
+      const { data } = await getOrCreateDMConversation(pendingFriend.id);
+      if (!data) return;
+      convId = data;
+      const { data: convs } = await getMyConversations();
+      setConversations(convs);
+      const conv = convs.find((c) => c.id === convId);
+      if (conv) setSelected(conv);
+      setPendingFriend(null);
+    }
+
+    if (!convId) return;
     setSending(true);
     setInput("");
     try {
-      await sendMessage({ conteudo, id_remetente: user.id, id_conversa: selected.id });
+      await sendMessage({ conteudo, id_remetente: user.id, id_conversa: convId });
     } finally {
       setSending(false);
     }
@@ -168,11 +188,12 @@ export function useChat() {
     conversations,
     friends,
     selected,
+    pendingFriend,
     selectConversation,
     startDM,
     handleCreateGroup,
     handleLeaveGroup,
-    clearSelected: () => { setSelected(null); setMessages([]); },
+    clearSelected: () => { setSelected(null); setPendingFriend(null); setMessages([]); },
     messages,
     participantMap,
     unreadIds,

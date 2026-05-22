@@ -116,6 +116,7 @@ export default function Chat() {
     conversations,
     friends,
     selected,
+    pendingFriend,
     selectConversation,
     startDM,
     handleCreateGroup,
@@ -137,6 +138,7 @@ export default function Chat() {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [tab, setTab] = useState<'conversas' | 'amigos'>('conversas');
+  const [friendSearch, setFriendSearch] = useState('');
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -160,16 +162,19 @@ export default function Chat() {
     }
   }
 
-  const isDM = selected?.tipo === 'DM';
-  const otherParticipant = isDM ? selected?.participantes[0] : null;
-  const headerName = isDM
-    ? (otherParticipant?.nome ?? `@${otherParticipant?.username}`)
-    : (selected?.nome ?? 'Grupo');
+  const isDM = pendingFriend ? true : selected?.tipo === 'DM';
+  const otherParticipant = pendingFriend ?? (isDM ? selected?.participantes[0] : null);
+  const headerName = pendingFriend
+    ? (pendingFriend.nome ?? `@${pendingFriend.username}`)
+    : isDM
+      ? (otherParticipant?.nome ?? `@${otherParticipant?.username}`)
+      : (selected?.nome ?? 'Grupo');
+  const showChat = !!selected || !!pendingFriend;
 
   return (
     <div className="flex h-[calc(100vh-9rem)] gap-4">
       {/* Sidebar */}
-      <div className={`${selected ? 'hidden lg:flex' : 'flex'} w-full lg:w-72 shrink-0 flex-col border border-gray-100 rounded-2xl bg-white shadow-sm overflow-hidden`}>
+      <div className={`${showChat ? 'hidden lg:flex' : 'flex'} w-full lg:w-72 shrink-0 flex-col border border-gray-100 rounded-2xl bg-white shadow-sm overflow-hidden`}>
         <div className="p-4 border-b border-gray-100 flex items-center justify-between">
           <div className="flex gap-2">
             <button
@@ -194,7 +199,7 @@ export default function Chat() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto flex flex-col">
           {tab === 'conversas' ? (
             conversations.length === 0 ? (
               <p className="text-sm text-gray-500 text-center py-8 px-4">Nenhuma conversa ainda.</p>
@@ -210,30 +215,47 @@ export default function Chat() {
               ))
             )
           ) : (
-            friends.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-8 px-4">Adicione amigos para conversar.</p>
-            ) : (
-              friends.map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => { startDM(f); setTab('conversas'); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-left"
-                >
-                  <Avatar nome={f.nome} imagem_url={f.imagem_url} size={38} />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-gray-900 truncate">@{f.username}</p>
-                    {f.nome && <p className="text-xs text-gray-500 truncate">{f.nome}</p>}
-                  </div>
-                </button>
-              ))
-            )
+            <>
+              <div className="px-3 py-2 border-b border-gray-100">
+                <input
+                  type="text"
+                  placeholder="Pesquisar amigo..."
+                  value={friendSearch}
+                  onChange={(e) => setFriendSearch(e.target.value)}
+                  className="w-full text-sm text-gray-900 border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-purple-300"
+                />
+              </div>
+              {friends.filter((f) => {
+                const q = friendSearch.toLowerCase();
+                return !q || f.username.toLowerCase().includes(q) || (f.nome ?? '').toLowerCase().includes(q);
+              }).length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-8 px-4">Nenhum amigo encontrado.</p>
+              ) : (
+                friends.filter((f) => {
+                  const q = friendSearch.toLowerCase();
+                  return !q || f.username.toLowerCase().includes(q) || (f.nome ?? '').toLowerCase().includes(q);
+                }).map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => { startDM(f); setTab('conversas'); setFriendSearch(''); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-left"
+                  >
+                    <Avatar nome={f.nome} imagem_url={f.imagem_url} size={38} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-gray-900 truncate">@{f.username}</p>
+                      {f.nome && <p className="text-xs text-gray-500 truncate">{f.nome}</p>}
+                    </div>
+                  </button>
+                ))
+              )}
+            </>
           )}
         </div>
       </div>
 
       {/* Chat area */}
-      <div className={`${!selected ? 'hidden lg:flex' : 'flex'} flex-1 flex-col border border-gray-100 rounded-2xl bg-white shadow-sm overflow-hidden`}>
-        {!selected ? (
+      <div className={`${!showChat ? 'hidden lg:flex' : 'flex'} flex-1 flex-col border border-gray-100 rounded-2xl bg-white shadow-sm overflow-hidden`}>
+        {!showChat ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
             <MessageCircle className="h-10 w-10 text-gray-200" />
             <p className="text-sm text-gray-500">Selecione uma conversa ou amigo.</p>
