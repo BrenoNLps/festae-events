@@ -71,7 +71,7 @@ function RegistrationAction({
           </button>
           {!canDelete && (
             <p className="text-xs text-center text-gray-400">
-              Não é possível excluir com {registrationCount} {registrationCount === 1 ? 'inscrito' : 'inscritos'}
+              Evento com inscritos não pode ser excluído
             </p>
           )}
         </div>
