@@ -40,7 +40,7 @@ export default function Navbar() {
                     >
                         <Menu className="h-5 w-5 text-purple-600" />
                     </button>
-                    <span className="text-xl font-bold text-purple-600">🌐 Festaê</span>
+                    <span className="text-xl font-bold text-purple-600 absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">🌐 Festaê</span>
                 </div>
                 <button onClick={handleLogout} className="hidden md:flex items-center gap-2 text-sm text-gray-600 hover:text-red-600 bg-gray-200 hover:bg-red-50 px-4 py-2 rounded-full transition">
                     <LogOut className="h-5 w-5" />
