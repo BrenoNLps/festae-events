@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send, MessageCircle, ArrowLeft, Smile, Users, Plus, X, LogOut } from "lucide-react";
+import { Send, MessageCircle, ArrowLeft, Smile, Users, Plus, X, LogOut, UserPlus } from "lucide-react";
 import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
 import { Avatar } from "@/app/components/(protected)/Avatar";
 import { useChat } from "@/app/lib/hooks/useChat";
-import { ConversaComInfo } from "@/app/lib/types";
+import { ConversaComInfo, ParticipanteInfo, Usuario } from "@/app/lib/types";
 import { ConfirmDialog } from "@/app/components/ui/ConfirmDialog";
 
 function ConversaItem({ conv, selected, unreadIds, onClick }: {
@@ -110,6 +110,107 @@ function CreateGroupModal({ friends, onClose, onCreate }: {
   );
 }
 
+function GroupInfoPanel({ selected, currentUserId, friends, onAddToGroup, onLeave, onClose }: {
+  selected: ConversaComInfo;
+  currentUserId: string;
+  friends: Usuario[];
+  onAddToGroup: (id: string) => void;
+  onLeave: () => void;
+  onClose: () => void;
+}) {
+  const memberIds = new Set(selected.participantes.map((p: ParticipanteInfo) => p.id));
+  memberIds.add(currentUserId);
+  const nonMembers = friends.filter((f) => !memberIds.has(f.id));
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col overflow-hidden max-h-[80vh]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
+              <Users className="h-4 w-4 text-purple-600" />
+            </div>
+            <h2 className="font-semibold text-gray-900 truncate">{selected.nome ?? 'Grupo'}</h2>
+          </div>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          <p className="px-5 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+            Participantes ({selected.participantes.length + 1})
+          </p>
+          <div className="flex flex-col">
+            {/* Current user first */}
+            <div className="flex items-center gap-3 px-5 py-2.5">
+              <Avatar nome={undefined} imagem_url={undefined} size={32} />
+              <p className="text-sm text-gray-900 flex-1 truncate">Você</p>
+            </div>
+            {selected.participantes.map((p: ParticipanteInfo) => (
+              <div key={p.id} className="flex items-center gap-3 px-5 py-2.5">
+                <Avatar nome={p.nome} imagem_url={p.imagem_url} size={32} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-900 truncate">{p.nome ?? `@${p.username}`}</p>
+                  <p className="text-xs text-gray-500 truncate">@{p.username}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="px-5 pt-4 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wide border-t border-gray-100 mt-2">
+            Adicionar amigos
+          </p>
+          {nonMembers.length === 0 ? (
+            <p className="px-5 py-3 text-sm text-gray-500">Sem amigos para adicionar.</p>
+          ) : (
+            <div className="flex flex-col">
+              {nonMembers.map((f) => (
+                <div key={f.id} className="flex items-center gap-3 px-5 py-2.5">
+                  <Avatar nome={f.nome} imagem_url={f.imagem_url} size={32} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-900 truncate">{f.nome ?? `@${f.username}`}</p>
+                    <p className="text-xs text-gray-500 truncate">@{f.username}</p>
+                  </div>
+                  <button
+                    onClick={() => onAddToGroup(f.id)}
+                    className="shrink-0 text-purple-600 hover:text-purple-700 transition"
+                    title="Adicionar ao grupo"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="px-5 py-4 border-t border-gray-100">
+          <button
+            onClick={() => setShowLeaveDialog(true)}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition"
+          >
+            <LogOut className="h-4 w-4" />
+            Sair do grupo
+          </button>
+        </div>
+      </div>
+
+      <ConfirmDialog
+        open={showLeaveDialog}
+        title="Sair do grupo?"
+        description="Você não receberá mais mensagens deste grupo."
+        confirmLabel="Sair"
+        cancelLabel="Cancelar"
+        destructive
+        onConfirm={() => { setShowLeaveDialog(false); onLeave(); }}
+        onCancel={() => setShowLeaveDialog(false)}
+      />
+    </div>
+  );
+}
+
 export default function Chat() {
   const {
     user,
@@ -121,6 +222,7 @@ export default function Chat() {
     startDM,
     handleCreateGroup,
     handleLeaveGroup,
+    handleAddToGroup,
     clearSelected,
     messages,
     participantMap,
@@ -136,7 +238,7 @@ export default function Chat() {
   const emojiRef = useRef<HTMLDivElement>(null);
   const [showEmoji, setShowEmoji] = useState(false);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
-  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [showGroupInfo, setShowGroupInfo] = useState(false);
   const [tab, setTab] = useState<'conversas' | 'amigos'>('conversas');
   const [friendSearch, setFriendSearch] = useState('');
 
@@ -269,25 +371,24 @@ export default function Chat() {
               {isDM
                 ? <Avatar nome={otherParticipant?.nome} imagem_url={otherParticipant?.imagem_url} size={36} />
                 : (
-                  <div className="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
-                    <Users className="h-4 w-4 text-purple-600" />
-                  </div>
+                  <button
+                    onClick={() => setShowGroupInfo(true)}
+                    className="flex items-center gap-3 flex-1 min-w-0 text-left hover:opacity-80 transition"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
+                      <Users className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-gray-900">{headerName}</p>
+                      <p className="text-xs text-gray-500">{((selected?.participantes.length ?? 0) + 1)} participantes</p>
+                    </div>
+                  </button>
                 )
               }
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm text-gray-900">{headerName}</p>
-                {!isDM && (
-                  <p className="text-xs text-gray-500">{(selected.participantes.length + 1)} participantes</p>
-                )}
-              </div>
-              {!isDM && (
-                <button
-                  onClick={() => setShowLeaveDialog(true)}
-                  className="text-gray-500 hover:text-red-500 transition"
-                  title="Sair do grupo"
-                >
-                  <LogOut className="h-4 w-4" />
-                </button>
+              {isDM && (
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-gray-900">{headerName}</p>
+                </div>
               )}
             </div>
 
@@ -362,16 +463,16 @@ export default function Chat() {
         />
       )}
 
-      <ConfirmDialog
-        open={showLeaveDialog}
-        title="Sair do grupo?"
-        description="Você não receberá mais mensagens deste grupo."
-        confirmLabel="Sair"
-        cancelLabel="Cancelar"
-        destructive
-        onConfirm={() => { setShowLeaveDialog(false); handleLeaveGroup(); }}
-        onCancel={() => setShowLeaveDialog(false)}
-      />
+      {showGroupInfo && selected && !isDM && user && (
+        <GroupInfoPanel
+          selected={selected}
+          currentUserId={user.id}
+          friends={friends}
+          onAddToGroup={(id) => handleAddToGroup(id)}
+          onLeave={() => { setShowGroupInfo(false); handleLeaveGroup(); }}
+          onClose={() => setShowGroupInfo(false)}
+        />
+      )}
     </div>
   );
 }

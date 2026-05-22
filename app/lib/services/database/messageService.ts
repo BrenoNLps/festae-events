@@ -51,6 +51,10 @@ export async function leaveGroup(id_conversa: string, id_usuario: string) {
     .eq('id_usuario', id_usuario);
 }
 
+export async function addToGroup(id_conversa: string, novo_usuario: string) {
+  return supabase.rpc('adicionar_ao_grupo', { id_conversa_param: id_conversa, novo_usuario });
+}
+
 export async function getUnreadConversationIds(): Promise<{ data: string[]; error: unknown }> {
   const { data, error } = await supabase.rpc('get_unread_conversation_ids');
   return { data: (data as string[] | null) ?? [], error };

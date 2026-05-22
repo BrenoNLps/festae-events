@@ -12,6 +12,7 @@ import {
   createGroup,
   markConversationAsRead,
   leaveGroup,
+  addToGroup,
   getUnreadConversationIds,
 } from "../services/database/messageService";
 import { getSupabaseClient } from "../supabase/singleton";
@@ -153,6 +154,15 @@ export function useChat() {
     refreshConversations();
   }
 
+  async function handleAddToGroup(novo_usuario: string) {
+    if (!selected) return;
+    await addToGroup(selected.id, novo_usuario);
+    const { data } = await getMyConversations();
+    setConversations(data);
+    const updated = data.find((c) => c.id === selected.id);
+    if (updated) setSelected(updated);
+  }
+
   const MAX_MESSAGE_LENGTH = 1000;
 
   async function handleSend() {
@@ -193,6 +203,7 @@ export function useChat() {
     startDM,
     handleCreateGroup,
     handleLeaveGroup,
+    handleAddToGroup,
     clearSelected: () => { setSelected(null); setPendingFriend(null); setMessages([]); },
     messages,
     participantMap,
