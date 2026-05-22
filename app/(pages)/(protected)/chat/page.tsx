@@ -27,11 +27,7 @@ function ConversaItem({ conv, selected, unreadIds, onClick }: {
     >
       {isDM
         ? <Avatar nome={other?.nome} imagem_url={other?.imagem_url} size={38} />
-        : (
-          <div className="w-[38px] h-[38px] rounded-full bg-purple-100 flex items-center justify-center shrink-0">
-            <Users className="h-5 w-5 text-purple-600" />
-          </div>
-        )
+        : <GroupAvatar imagem_url={conv.imagem_url} size={38} />
       }
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-sm text-gray-900 truncate">{displayName}</p>
@@ -110,27 +106,39 @@ function CreateGroupModal({ friends, onClose, onCreate }: {
   );
 }
 
-function GroupInfoPanel({ selected, currentUserId, friends, onAddToGroup, onLeave, onClose }: {
+function GroupAvatar({ imagem_url, size, onClick }: { imagem_url?: string; size: number; onClick?: () => void }) {
+  const cls = `rounded-full bg-purple-100 flex items-center justify-center shrink-0 overflow-hidden`;
+  const style = { width: size, height: size };
+  const inner = imagem_url
+    ? <img src={imagem_url} alt="Grupo" className="w-full h-full object-cover" />
+    : <Users className="text-purple-600" style={{ width: size * 0.45, height: size * 0.45 }} />;
+  if (onClick)
+    return <button onClick={onClick} className={`${cls} relative group`} style={style}>{inner}<span className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition rounded-full flex items-center justify-center"><span className="text-white text-xs font-medium">Alterar</span></span></button>;
+  return <div className={cls} style={style}>{inner}</div>;
+}
+
+function GroupInfoPanel({ selected, currentUserId, friends, onAddToGroup, onLeave, onClose, onUpdateImage }: {
   selected: ConversaComInfo;
   currentUserId: string;
   friends: Usuario[];
   onAddToGroup: (id: string) => void;
   onLeave: () => void;
   onClose: () => void;
+  onUpdateImage: (file: File) => void;
 }) {
   const memberIds = new Set(selected.participantes.map((p: ParticipanteInfo) => p.id));
   memberIds.add(currentUserId);
   const nonMembers = friends.filter((f) => !memberIds.has(f.id));
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col overflow-hidden max-h-[80vh]">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
-              <Users className="h-4 w-4 text-purple-600" />
-            </div>
+          <div className="flex items-center gap-3">
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onUpdateImage(f); }} />
+            <GroupAvatar imagem_url={selected.imagem_url} size={36} onClick={() => fileInputRef.current?.click()} />
             <h2 className="font-semibold text-gray-900 truncate">{selected.nome ?? 'Grupo'}</h2>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition">
@@ -223,6 +231,7 @@ export default function Chat() {
     handleCreateGroup,
     handleLeaveGroup,
     handleAddToGroup,
+    handleUpdateGroupImage,
     clearSelected,
     messages,
     participantMap,
@@ -375,9 +384,7 @@ export default function Chat() {
                     onClick={() => setShowGroupInfo(true)}
                     className="flex items-center gap-3 flex-1 min-w-0 text-left hover:opacity-80 transition"
                   >
-                    <div className="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
-                      <Users className="h-4 w-4 text-purple-600" />
-                    </div>
+                    <GroupAvatar imagem_url={selected?.imagem_url} size={36} />
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm text-gray-900">{headerName}</p>
                       <p className="text-xs text-gray-500">{((selected?.participantes.length ?? 0) + 1)} participantes</p>
@@ -471,6 +478,7 @@ export default function Chat() {
           onAddToGroup={(id) => handleAddToGroup(id)}
           onLeave={() => { setShowGroupInfo(false); handleLeaveGroup(); }}
           onClose={() => setShowGroupInfo(false)}
+          onUpdateImage={(file) => handleUpdateGroupImage(file)}
         />
       )}
     </div>

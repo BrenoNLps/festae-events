@@ -10,6 +10,15 @@ export async function deleteEventImage(userId: string, eventId: number) {
     await supabase.storage.from('event-covers').remove(paths)
 }
 
+export async function uploadGroupImage(id_conversa: string, file: File): Promise<string | null> {
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const path = `groups/${id_conversa}/image.${ext}`
+    const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
+    if (error) return null
+    const { publicUrl } = supabase.storage.from('avatars').getPublicUrl(path).data
+    return `${publicUrl}?t=${Date.now()}`
+}
+
 export async function uploadImage(
     bucket: 'avatars' | 'event-covers',
     userId: string,

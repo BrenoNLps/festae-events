@@ -97,6 +97,7 @@ export interface Conversa {
     nome?: string;
     tipo: 'DM' | 'GRUPO';
     data_criacao: string;
+    imagem_url?: string;
 }
 
 export interface ConversaParticipante {

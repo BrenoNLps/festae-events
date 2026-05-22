@@ -13,8 +13,10 @@ import {
   markConversationAsRead,
   leaveGroup,
   addToGroup,
+  updateGroupImage,
   getUnreadConversationIds,
 } from "../services/database/messageService";
+import { uploadGroupImage } from "../services/storage/uploadService";
 import { getSupabaseClient } from "../supabase/singleton";
 import type { Usuario, Message, ConversaComInfo, ParticipanteInfo } from "../types";
 
@@ -163,6 +165,17 @@ export function useChat() {
     if (updated) setSelected(updated);
   }
 
+  async function handleUpdateGroupImage(file: File) {
+    if (!selected) return;
+    const url = await uploadGroupImage(selected.id, file);
+    if (!url) return;
+    await updateGroupImage(selected.id, url);
+    const { data } = await getMyConversations();
+    setConversations(data);
+    const updated = data.find((c) => c.id === selected.id);
+    if (updated) setSelected(updated);
+  }
+
   const MAX_MESSAGE_LENGTH = 1000;
 
   async function handleSend() {
@@ -204,6 +217,7 @@ export function useChat() {
     handleCreateGroup,
     handleLeaveGroup,
     handleAddToGroup,
+    handleUpdateGroupImage,
     clearSelected: () => { setSelected(null); setPendingFriend(null); setMessages([]); },
     messages,
     participantMap,
