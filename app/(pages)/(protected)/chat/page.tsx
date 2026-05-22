@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Send, MessageCircle, ArrowLeft } from "lucide-react";
+import { Send, MessageCircle, ArrowLeft, Smile } from "lucide-react";
+import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
 import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { getFriends } from "@/app/lib/services/database/friendshipService";
 import { getMessagesBetweenUsers, sendMessage, getUnreadSenderIds } from "@/app/lib/services/database/messageService";
@@ -22,7 +23,9 @@ export default function Chat() {
   const [unreadIds, setUnreadIds] = useState<Set<string>>(new Set());
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const emojiRef = useRef<HTMLDivElement>(null);
   const lastVisitRef = useRef(
     typeof window !== "undefined"
       ? (localStorage.getItem("lastChatVisit") ?? new Date(0).toISOString())
@@ -104,6 +107,17 @@ export default function Chat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (!showEmoji) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
+        setShowEmoji(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showEmoji]);
 
   async function handleSend() {
     if (!input.trim() || !user?.id || !selected || sending) return;
@@ -206,7 +220,25 @@ export default function Chat() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="px-4 py-3 border-t border-gray-100 flex items-center gap-2">
+            <div className="px-4 py-3 border-t border-gray-100 flex items-center gap-2 relative">
+              {showEmoji && (
+                <div ref={emojiRef} className="absolute bottom-16 left-0 right-0 z-50 md:right-auto md:left-4 md:w-[300px]">
+                  <EmojiPicker
+                    onEmojiClick={(e: EmojiClickData) => {
+                      setInput((prev) => prev + e.emoji)
+                      setShowEmoji(false)
+                    }}
+                    height={380}
+                    width="100%"
+                  />
+                </div>
+              )}
+              <button
+                onClick={() => setShowEmoji((v) => !v)}
+                className="shrink-0 text-gray-400 hover:text-purple-500 transition"
+              >
+                <Smile className="h-5 w-5" />
+              </button>
               <input
                 type="text"
                 value={input}
