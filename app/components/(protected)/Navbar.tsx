@@ -1,22 +1,15 @@
 'use client'
 import { useState } from 'react'
-import { LogOut, Menu, X, Ticket, Plus, Users, MessageCircle, Calendar, ChevronRight } from 'lucide-react'
+import { LogOut, Menu, X, ChevronRight } from 'lucide-react'
 import { createClient } from '../../lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ROUTES } from '@/app/lib/routes'
+import { menuItems } from '@/app/lib/nav'
 import { useNotifications } from '@/app/lib/hooks/useNotifications'
 import { useProfile } from '@/app/lib/hooks/useProfile'
 import { Avatar } from './Avatar'
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog'
-
-const menuItems = [
-    { label: 'Eventos', icon: Ticket, href: ROUTES.events },
-    { label: 'Criar Evento', icon: Plus, href: ROUTES.eventsCreate },
-    { label: 'Amigos', icon: Users, href: ROUTES.friends },
-    { label: 'Mensagens', icon: MessageCircle, href: ROUTES.chat },
-    { label: 'Agenda', icon: Calendar, href: ROUTES.agenda },
-]
 
 export default function Navbar() {
     const supabase = createClient()

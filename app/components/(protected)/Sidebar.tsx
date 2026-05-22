@@ -1,19 +1,12 @@
 'use client'
 
-import { Ticket, Plus, Users, MessageCircle, Calendar, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useProfile } from '@/app/lib/hooks/useProfile'
 import { useNotifications } from '@/app/lib/hooks/useNotifications'
 import { Avatar } from './Avatar'
 import { ROUTES } from '@/app/lib/routes'
-
-const menuItems = [
-    { label: 'Eventos', icon: Ticket, href: ROUTES.events },
-    { label: 'Criar Evento', icon: Plus, href: ROUTES.eventsCreate },
-    { label: 'Amigos', icon: Users, href: ROUTES.friends },
-    { label: 'Mensagens', icon: MessageCircle, href: ROUTES.chat },
-    { label: 'Agenda', icon: Calendar, href: ROUTES.agenda },
-]
+import { menuItems } from '@/app/lib/nav'
 
 export default function Sidebar() {
     const { dbUser } = useProfile()
