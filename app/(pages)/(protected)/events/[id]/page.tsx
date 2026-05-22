@@ -29,6 +29,7 @@ function RegistrationAction({
   onEdit,
   onDelete,
   deleting,
+  registrationCount,
 }: {
   isOrganizer: boolean;
   checking: boolean;
@@ -45,8 +46,10 @@ function RegistrationAction({
   onEdit: () => void;
   onDelete: () => void;
   deleting: boolean;
+  registrationCount: number;
 }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const canDelete = registrationCount === 0;
 
   if (isOrganizer)
     return (
@@ -59,11 +62,17 @@ function RegistrationAction({
             Editar evento
           </button>
           <button
-            onClick={() => setShowDeleteDialog(true)}
-            className="w-full py-3 rounded-xl text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition"
+            onClick={() => canDelete && setShowDeleteDialog(true)}
+            disabled={!canDelete}
+            className="w-full py-3 rounded-xl text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Excluir evento
           </button>
+          {!canDelete && (
+            <p className="text-xs text-center text-gray-400">
+              Não é possível excluir com {registrationCount} {registrationCount === 1 ? 'inscrito' : 'inscritos'}
+            </p>
+          )}
         </div>
         <ConfirmDialog
           open={showDeleteDialog}
@@ -327,6 +336,7 @@ export default function EventDetail() {
             onEdit={() => router.push(`/events/${event.id}/edit`)}
             onDelete={handleDelete}
             deleting={deleting}
+            registrationCount={registrationCount}
           />
         </div>
       </div>
