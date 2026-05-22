@@ -107,8 +107,8 @@ export async function getEventsByFriends(userId: string): Promise<Evento[]> {
     const seen = new Set<number>();
     const events: Evento[] = [];
 
-    for (const row of data ?? []) {
-        const e = (row as unknown as { evento: Evento }).evento;
+    for (const row of (data ?? []) as { evento: Evento }[]) {
+        const e = row.evento;
         if (!e || seen.has(e.id) || e.data_fim < today) continue;
         seen.add(e.id);
         events.push(e);

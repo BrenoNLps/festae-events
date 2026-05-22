@@ -107,5 +107,5 @@ export async function getFriendsAtEvent(userId: string, eventoId: number): Promi
     .eq("id_evento", eventoId)
     .in("id_usuario", friendIds);
 
-  return (data ?? []).map((r) => (r as unknown as { usuario: Usuario }).usuario).filter((u): u is Usuario => Boolean(u));
+  return ((data ?? []) as { usuario: Usuario }[]).map((r) => r.usuario).filter((u): u is Usuario => Boolean(u));
 }
