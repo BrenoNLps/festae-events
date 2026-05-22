@@ -66,6 +66,22 @@ export async function getEventById(id: number): Promise<{ data: Evento | null; e
     return { data: data as Evento | null, error };
 }
 
+export async function updateEvent(id: number, values: {
+    nome?: string;
+    descricao?: string;
+    endereco?: Adress;
+    vagas?: number;
+    valor?: number;
+    data_inicio?: string;
+    data_fim?: string;
+    hora_inicio?: string;
+    hora_fim?: string;
+    imagem_url?: string;
+}) {
+    const { data, error } = await supabase.from("evento").update(values).eq("id", id);
+    return { data, error };
+}
+
 export async function deleteEvent(id: number) {
     const { data, error } = await supabase.from("evento").delete().eq("id", id);
 
