@@ -25,11 +25,13 @@ export async function createEvent(values: {
 export async function getEvents(filters?: {
     estado?: string;
     cidade?: string;
+    categoria?: string;
 }): Promise<{ data: Evento[] | null; error: unknown }> {
     let query = supabase.from("evento").select("*");
 
     if (filters?.estado) query = query.eq("endereco->>estado", filters.estado);
     if (filters?.cidade) query = query.eq("endereco->>cidade", filters.cidade);
+    if (filters?.categoria) query = query.eq("categoria", filters.categoria);
 
     const { data, error } = await query;
     return { data: data as Evento[] | null, error };
@@ -38,11 +40,12 @@ export async function getEvents(filters?: {
 
 export async function searchEvents(
     query: string,
-    filters?: { estado?: string; cidade?: string }
+    filters?: { estado?: string; cidade?: string; categoria?: string }
 ): Promise<Evento[]> {
     let q = supabase.from("evento").select("*").ilike("nome", `%${query}%`);
     if (filters?.estado) q = q.eq("endereco->>estado", filters.estado);
     if (filters?.cidade) q = q.eq("endereco->>cidade", filters.cidade);
+    if (filters?.categoria) q = q.eq("categoria", filters.categoria);
     const { data } = await q.limit(20);
     return (data ?? []) as Evento[];
 }

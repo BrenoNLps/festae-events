@@ -3,16 +3,19 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { ESTADOS_BRASIL } from "@/app/lib/utils/brasil";
+import { EventCategory, EVENT_CATEGORY_LABELS } from "@/app/lib/types";
 
 interface CityFilterProps {
   estado: string;
   cidade: string;
+  categoria: string;
   setEstado: (v: string) => void;
   setCidade: (v: string) => void;
+  setCategoria: (v: string) => void;
   clearFilter: () => void;
 }
 
-export function CityFilter({ estado, cidade, setEstado, setCidade, clearFilter }: CityFilterProps) {
+export function CityFilter({ estado, cidade, categoria, setEstado, setCidade, setCategoria, clearFilter }: CityFilterProps) {
   const [cidades, setCidades] = useState<string[]>([]);
 
   useEffect(() => {
@@ -27,10 +30,21 @@ export function CityFilter({ estado, cidade, setEstado, setCidade, clearFilter }
     return () => controller.abort();
   }, [estado]);
 
-  const hasFilter = estado || cidade;
+  const hasFilter = estado || cidade || categoria;
 
   return (
     <div className="flex items-center gap-3 flex-wrap">
+      <select
+        value={categoria}
+        onChange={(e) => setCategoria(e.target.value)}
+        className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+      >
+        <option value="">Categoria</option>
+        {Object.values(EventCategory).map((cat) => (
+          <option key={cat} value={cat}>{EVENT_CATEGORY_LABELS[cat]}</option>
+        ))}
+      </select>
+
       <select
         value={estado}
         onChange={(e) => setEstado(e.target.value)}

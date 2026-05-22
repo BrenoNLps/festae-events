@@ -17,9 +17,10 @@ export default function Events() {
   const {
     latest, ongoing, upcoming, finished, loading,
     estado, cidade, setEstado, setCidade, clearFilter,
+    categoria, setCategoria,
   } = useDiscoverEvents();
 
-  const searchFn = useCallback((q: string) => searchEvents(q, { estado: estado || undefined, cidade: cidade || undefined }), [estado, cidade]);
+  const searchFn = useCallback((q: string) => searchEvents(q, { estado: estado || undefined, cidade: cidade || undefined, categoria: categoria || undefined }), [estado, cidade, categoria]);
   const { query, setQuery, results, loading: searching } = useSearch(searchFn);
   const showSearch = query.trim().length > 0;
 
@@ -37,8 +38,10 @@ export default function Events() {
           <CityFilter
             estado={estado}
             cidade={cidade}
+            categoria={categoria}
             setEstado={setEstado}
             setCidade={setCidade}
+            setCategoria={setCategoria}
             clearFilter={clearFilter}
           />
         )}

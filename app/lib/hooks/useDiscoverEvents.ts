@@ -16,10 +16,12 @@ export function useDiscoverEvents() {
   const [initialized, setInitialized] = useState(false);
   const [estado, setEstadoState] = useState("");
   const [cidade, setCidadeState] = useState("");
+  const [categoria, setCategoriaState] = useState("");
 
   useEffect(() => {
     setEstadoState(readStorage("filtro_estado"));
     setCidadeState(readStorage("filtro_cidade"));
+    setCategoriaState(readStorage("filtro_categoria"));
     setInitialized(true);
   }, []);
 
@@ -27,14 +29,14 @@ export function useDiscoverEvents() {
     if (!initialized) return;
     setLoading(true);
     getEvents(
-      estado || cidade
-        ? { estado: estado || undefined, cidade: cidade || undefined }
+      estado || cidade || categoria
+        ? { estado: estado || undefined, cidade: cidade || undefined, categoria: categoria || undefined }
         : undefined
     ).then(({ data }) => {
       if (data) setEvents(data);
       setLoading(false);
     });
-  }, [initialized, estado, cidade]);
+  }, [initialized, estado, cidade, categoria]);
 
   function setEstado(value: string) {
     setEstadoState(value);
@@ -48,11 +50,18 @@ export function useDiscoverEvents() {
     writeStorage("filtro_cidade", value);
   }
 
+  function setCategoria(value: string) {
+    setCategoriaState(value);
+    writeStorage("filtro_categoria", value);
+  }
+
   function clearFilter() {
     setEstadoState("");
     setCidadeState("");
+    setCategoriaState("");
     writeStorage("filtro_estado", "");
     writeStorage("filtro_cidade", "");
+    writeStorage("filtro_categoria", "");
   }
 
   const today = new Date().toISOString().split("T")[0];
@@ -77,5 +86,6 @@ export function useDiscoverEvents() {
   return {
     latest, ongoing, upcoming, finished, loading,
     estado, cidade, setEstado, setCidade, clearFilter,
+    categoria, setCategoria,
   };
 }
