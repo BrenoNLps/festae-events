@@ -28,7 +28,7 @@ export async function uploadImage(
     const ext = file.name.split('.').pop() ?? 'jpg'
     const path = resourceId
         ? `${userId}/${resourceId}/image.${ext}`
-        : `${userId}/image.${ext}`
+        : `users/${userId}/image.${ext}`
 
     const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
     if (error) return null
