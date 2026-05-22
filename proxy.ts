@@ -36,16 +36,16 @@ export async function proxy(request: NextRequest) {
         }
     )
 
-    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { user } } = await supabase.auth.getUser()
     const { pathname } = request.nextUrl
 
-    if (session && isPublicOnlyRoute(pathname)) {
+    if (user && isPublicOnlyRoute(pathname)) {
         const url = request.nextUrl.clone()
         url.pathname = ROUTES.events
         return NextResponse.redirect(url)
     }
 
-    if (!session && isProtectedRoute(pathname)) {
+    if (!user && isProtectedRoute(pathname)) {
         const url = request.nextUrl.clone()
         url.pathname = ROUTES.login
         return NextResponse.redirect(url)
