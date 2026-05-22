@@ -6,6 +6,7 @@ import { ArrowLeft, Calendar, Clock, MapPin, Users } from "lucide-react";
 import { EventImage } from "@/app/components/events/EventImage";
 import { ConfirmDialog } from "@/app/components/ui/ConfirmDialog";
 import { getEventById, deleteEvent } from "@/app/lib/services/database/eventService";
+import { deleteEventImage } from "@/app/lib/services/storage/uploadService";
 import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { useEventRegistration } from "@/app/lib/hooks/useEventRegistration";
 import { formatDateRange } from "@/app/lib/utils/date";
@@ -163,8 +164,11 @@ export default function EventDetail() {
   async function handleDelete() {
     if (!event) return;
     setDeleting(true);
-    await deleteEvent(event.id);
-    router.push('/events');
+    await Promise.all([
+      deleteEvent(event.id),
+      deleteEventImage(event.id_organizador, event.id),
+    ]);
+    router.push(ROUTES.events);
   }
 
   async function handlePurchase() {

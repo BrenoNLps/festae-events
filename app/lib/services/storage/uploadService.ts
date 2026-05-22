@@ -2,6 +2,14 @@ import { getSupabaseClient } from '../../supabase/singleton'
 
 const supabase = getSupabaseClient()
 
+export async function deleteEventImage(userId: string, eventId: number) {
+    const folder = `${userId}/${eventId}`
+    const { data: files } = await supabase.storage.from('event-covers').list(folder)
+    if (!files?.length) return
+    const paths = files.map((f) => `${folder}/${f.name}`)
+    await supabase.storage.from('event-covers').remove(paths)
+}
+
 export async function uploadImage(
     bucket: 'avatars' | 'event-covers',
     userId: string,
