@@ -1,9 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useProfile } from '@/app/lib/hooks/useProfile'
 import { AccountType } from '@/app/lib/types'
 import { maskCNPJ } from '@/app/lib/validators'
 import { updateProfile } from '@/app/lib/services/database/userService'
+import { uploadImage } from '@/app/lib/services/storage/uploadService'
 import { Avatar } from '@/app/components/(protected)/Avatar'
 import ImageUpload from '@/app/components/(protected)/ImageUpload'
 import styles from '@/app/styles/fields.module.css'
@@ -14,6 +15,7 @@ export default function Profile() {
     const [nome, setNome] = useState('')
     const [username, setUsername] = useState('')
     const [saving, setSaving] = useState(false)
+    const imageFileRef = useRef<File | null>(null)
 
     if (loading) return (
         <div className="flex items-center justify-center h-full">
@@ -32,7 +34,11 @@ export default function Profile() {
     async function save() {
         if (!user) return
         setSaving(true)
-        await updateProfile(user.id, { nome, username })
+        let imagem_url: string | undefined
+        if (imageFileRef.current) {
+            imagem_url = await uploadImage('avatars', user.id, imageFileRef.current) ?? undefined
+        }
+        await updateProfile(user.id, { nome, username, imagem_url })
         await refresh()
         setSaving(false)
         setEditing(false)
@@ -42,7 +48,7 @@ export default function Profile() {
         <div className="max-w-lg mx-auto py-10 flex flex-col gap-6">
             <div className="flex items-center gap-5">
                 {editing ? (
-                    <ImageUpload onChange={() => {}} shape="circle" />
+                    <ImageUpload onChange={(file) => { imageFileRef.current = file }} shape="circle" />
                 ) : (
                     <Avatar nome={dbUser.nome ?? dbUser.username} imagem_url={dbUser.imagem_url} size={80} className="shrink-0" />
                 )}

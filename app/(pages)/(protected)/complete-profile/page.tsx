@@ -6,7 +6,7 @@ import { AccountType } from '@/app/lib/types'
 import { maskCNPJ } from '@/app/lib/validators'
 
 export default function CompleteProfile() {
-    const { form, onSubmit, loading } = useCompleteProfile()
+    const { form, onSubmit, loading, setImageFile } = useCompleteProfile()
     const { register, handleSubmit, formState: { errors }, watch, setValue } = form
     const tipo = watch('tipo_conta')
 
@@ -15,7 +15,7 @@ export default function CompleteProfile() {
             <h1 className="text-3xl font-bold mb-2 text-gray-900">Complete seu perfil</h1>
             <p className="text-gray-500 text-sm mb-8">Essas informações serão visíveis para outros usuários</p>
             <form onSubmit={handleSubmit(onSubmit)} className={`${styles.form} gap-6`}>
-                <ImageUpload onChange={() => {}} shape="circle" />
+                <ImageUpload onChange={setImageFile} shape="circle" />
                 <div>
                     <label className={styles.label}>
                         Username

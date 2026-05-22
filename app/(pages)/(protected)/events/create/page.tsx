@@ -6,7 +6,7 @@ import { useCreateEvent } from '@/app/lib/hooks/forms/useCreateEvent'
 import { maskCurrency, parseCurrency } from '@/app/lib/validators'
 
 export default function Create() {
-    const { form, onSubmit, loading } = useCreateEvent()
+    const { form, onSubmit, loading, setCoverFile } = useCreateEvent()
     const { register, handleSubmit, formState: { errors }, setValue, watch } = form
 
     const hoje = new Date().toISOString().split('T')[0]
@@ -16,7 +16,7 @@ export default function Create() {
         <div className={`${styles.formWrapper} max-w-2xl`}>
             <h1 className="text-3xl font-bold mb-8 text-purple-800">Criar Evento</h1>
             <form onSubmit={handleSubmit(onSubmit)} className={`${styles.form} gap-4`}>
-                <ImageUpload onChange={() => {}} />
+                <ImageUpload onChange={setCoverFile} />
                 <div>
                     <label className={styles.label}>Nome</label>
                     <input {...register('nome')} className={styles.input} placeholder="Nome do evento" />
