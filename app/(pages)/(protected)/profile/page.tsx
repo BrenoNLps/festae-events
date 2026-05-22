@@ -75,7 +75,7 @@ export default function Profile() {
                         <input className={styles.input} value={username} onChange={e => setUsername(e.target.value)} placeholder="@seu_username" />
                     </div>
                     <div className="flex gap-3 justify-end">
-                        <button onClick={() => setEditing(false)} className="text-sm text-gray-500 hover:text-gray-700 transition">
+                        <button onClick={() => setEditing(false)} className="text-sm text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition">
                             Cancelar
                         </button>
                         <button onClick={save} disabled={saving} className={styles.submitButton}>
