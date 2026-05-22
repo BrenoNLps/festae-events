@@ -1,6 +1,6 @@
 'use client'
 
-import { Ticket, Plus, Users, MessageCircle, Calendar } from 'lucide-react'
+import { Ticket, Plus, Users, MessageCircle, Calendar, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useProfile } from '@/app/lib/hooks/useProfile'
 import { useNotifications } from '@/app/lib/hooks/useNotifications'
@@ -44,10 +44,16 @@ export default function Sidebar() {
                     )
                 })}
             </nav>
-            <Link href={ROUTES.profile} className="flex items-center gap-3 px-3 hover:opacity-80 transition">
-                <Avatar nome={displayName} imagem_url={dbUser?.imagem_url} size={32} />
-                <span className="text-sm text-gray-300 truncate">{displayName}</span>
-            </Link>
+            <div className="border-t border-gray-700 pt-4">
+                <Link href={ROUTES.profile} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-800 rounded-lg transition">
+                    <Avatar nome={displayName} imagem_url={dbUser?.imagem_url} size={32} />
+                    <div className="flex flex-col flex-1 min-w-0">
+                        <span className="text-xs text-gray-500">Meu perfil</span>
+                        <span className="text-sm text-gray-300 truncate">{displayName}</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-500 shrink-0" />
+                </Link>
+            </div>
         </aside>
     )
 }
