@@ -1,11 +1,21 @@
 import { getSupabaseClient } from "../../supabase/singleton";
-import { Message } from "../../types";
+import { ConversaComInfo, Message } from "../../types";
 
 const supabase = getSupabaseClient();
 
 export async function getOrCreateDMConversation(outroUsuarioId: string): Promise<{ data: string | null; error: unknown }> {
   const { data, error } = await supabase.rpc('criar_conversa_dm', { outro_usuario: outroUsuarioId });
   return { data: data as string | null, error };
+}
+
+export async function createGroup(nome: string, participantes: string[]): Promise<{ data: string | null; error: unknown }> {
+  const { data, error } = await supabase.rpc('criar_grupo', { nome_grupo: nome, participantes });
+  return { data: data as string | null, error };
+}
+
+export async function getMyConversations(): Promise<{ data: ConversaComInfo[]; error: unknown }> {
+  const { data, error } = await supabase.rpc('get_my_conversations');
+  return { data: (data as ConversaComInfo[] | null) ?? [], error };
 }
 
 export async function getMessagesByConversation(id_conversa: string): Promise<{ data: Message[] | null; error: unknown }> {
@@ -33,7 +43,15 @@ export async function markConversationAsRead(id_conversa: string, id_usuario: st
     .eq('id_usuario', id_usuario);
 }
 
-export async function getUnreadDMPartnerIds(): Promise<{ data: string[]; error: unknown }> {
-  const { data, error } = await supabase.rpc('get_unread_dm_partner_ids');
+export async function leaveGroup(id_conversa: string, id_usuario: string) {
+  return supabase
+    .from('conversa_participante')
+    .delete()
+    .eq('id_conversa', id_conversa)
+    .eq('id_usuario', id_usuario);
+}
+
+export async function getUnreadConversationIds(): Promise<{ data: string[]; error: unknown }> {
+  const { data, error } = await supabase.rpc('get_unread_conversation_ids');
   return { data: (data as string[] | null) ?? [], error };
 }
