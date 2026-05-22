@@ -2,22 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Users, X, ChevronRight } from "lucide-react";
-import Image from "next/image";
 import { getFriendsAtEvent } from "@/app/lib/services/database/friendshipService";
+import { Avatar } from "@/app/components/(protected)/Avatar";
 import type { Usuario } from "@/app/lib/types";
 
-function Avatar({ user }: { user: Usuario }) {
+function FriendRow({ user }: { user: Usuario }) {
   return (
     <div className="flex items-center gap-3 py-2">
-      <div className="w-10 h-10 rounded-full bg-purple-100 overflow-hidden shrink-0 flex items-center justify-center">
-        {user.imagem_url ? (
-          <Image src={user.imagem_url} alt={user.nome ?? user.username ?? ""} width={40} height={40} className="object-cover w-full h-full" />
-        ) : (
-          <span className="text-purple-600 font-semibold text-sm">
-            {(user.nome ?? user.username ?? "?")[0].toUpperCase()}
-          </span>
-        )}
-      </div>
+      <Avatar nome={user.nome ?? user.username} imagem_url={user.imagem_url} size={40} />
       <div className="flex flex-col">
         <span className="text-sm font-medium text-gray-800">{user.nome ?? user.username}</span>
         {user.username && user.nome && (
@@ -68,7 +60,7 @@ export function FriendsAtEvent({ userId, eventoId, organizerId }: { userId: stri
             </div>
             <div className="flex flex-col divide-y divide-gray-100">
               {friends.map((f) => (
-                <Avatar key={f.id} user={f} />
+                <FriendRow key={f.id} user={f} />
               ))}
             </div>
           </div>
