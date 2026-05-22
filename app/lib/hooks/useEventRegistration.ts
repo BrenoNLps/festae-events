@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   checkRegistration,
   createRegistration,
@@ -15,6 +15,7 @@ export function useEventRegistration(
   const [checking, setChecking] = useState(false);
   const [loading, setLoading] = useState(false);
   const [registrationCount, setRegistrationCount] = useState(0);
+  const inFlight = useRef(false);
 
   useEffect(() => {
     if (!eventId) return;
@@ -41,25 +42,35 @@ export function useEventRegistration(
   const isFull = maxVagas !== undefined && registrationCount >= maxVagas;
 
   async function register() {
-    if (!userId || !eventId) return;
+    if (!userId || !eventId || inFlight.current) return;
+    inFlight.current = true;
     setLoading(true);
-    const { error } = await createRegistration({ id_usuario: userId, id_evento: eventId });
-    if (!error) {
-      setIsRegistered(true);
-      setRegistrationCount((c) => c + 1);
+    try {
+      const { error } = await createRegistration({ id_usuario: userId, id_evento: eventId });
+      if (!error) {
+        setIsRegistered(true);
+        setRegistrationCount((c) => c + 1);
+      }
+    } finally {
+      inFlight.current = false;
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function unregister() {
-    if (!userId || !eventId) return;
+    if (!userId || !eventId || inFlight.current) return;
+    inFlight.current = true;
     setLoading(true);
-    const { error } = await deleteRegistration(userId, eventId);
-    if (!error) {
-      setIsRegistered(false);
-      setRegistrationCount((c) => Math.max(0, c - 1));
+    try {
+      const { error } = await deleteRegistration(userId, eventId);
+      if (!error) {
+        setIsRegistered(false);
+        setRegistrationCount((c) => Math.max(0, c - 1));
+      }
+    } finally {
+      inFlight.current = false;
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return { isRegistered, checking, loading, register, unregister, registrationCount, isFull };
