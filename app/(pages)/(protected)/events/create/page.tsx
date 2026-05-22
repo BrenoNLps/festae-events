@@ -6,6 +6,7 @@ import { CategorySelect } from '@/app/components/(protected)/CategorySelect'
 import styles from '@/app/styles/fields.module.css'
 import { useCreateEvent } from '@/app/lib/hooks/forms/useCreateEvent'
 import { maskCurrency, parseCurrency } from '@/app/lib/validators'
+import { getTodayAsString } from '@/app/lib/utils/date'
 
 export default function Create() {
     const { form, onSubmit, loading, setCoverFile } = useCreateEvent()
