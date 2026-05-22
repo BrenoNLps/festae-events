@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Calendar, Clock, MapPin, Users } from "lucide-react";
 import { EventImage } from "@/app/components/events/EventImage";
+import { ConfirmDialog } from "@/app/components/ui/ConfirmDialog";
 import { getEventById, deleteEvent } from "@/app/lib/services/database/eventService";
 import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { useEventRegistration } from "@/app/lib/hooks/useEventRegistration";
@@ -45,46 +46,41 @@ function RegistrationAction({
   onDelete: () => void;
   deleting: boolean;
 }) {
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   if (isOrganizer)
     return (
-      <div className="flex flex-col gap-2">
-        <button
-          onClick={onEdit}
-          className="w-full py-3 rounded-xl text-sm font-semibold border border-purple-600 text-purple-600 hover:bg-purple-50 transition"
-        >
-          Editar evento
-        </button>
-        {!confirmDelete ? (
+      <>
+        <div className="flex flex-col gap-2">
           <button
-            onClick={() => setConfirmDelete(true)}
+            onClick={onEdit}
+            className="w-full py-3 rounded-xl text-sm font-semibold border border-purple-600 text-purple-600 hover:bg-purple-50 transition"
+          >
+            Editar evento
+          </button>
+          <button
+            onClick={() => setShowDeleteDialog(true)}
             className="w-full py-3 rounded-xl text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition"
           >
             Excluir evento
           </button>
-        ) : (
-          <div className="flex gap-2">
-            <button
-              onClick={() => setConfirmDelete(false)}
-              className="flex-1 py-3 rounded-xl text-sm border border-gray-200 text-gray-500 hover:bg-gray-50 transition"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={onDelete}
-              disabled={deleting}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-60"
-            >
-              {deleting ? 'Excluindo...' : 'Confirmar exclusão'}
-            </button>
-          </div>
-        )}
-      </div>
+        </div>
+        <ConfirmDialog
+          open={showDeleteDialog}
+          title="Excluir evento?"
+          description="Essa ação não pode ser desfeita."
+          confirmLabel="Excluir"
+          destructive
+          loading={deleting}
+          onConfirm={onDelete}
+          onCancel={() => setShowDeleteDialog(false)}
+        />
+      </>
     );
   if (checking)
     return <div className="h-11 bg-gray-100 rounded-xl animate-pulse" />;
-  if (isRegistered)
+  if (isRegistered) {
+    const [showCancelDialog, setShowCancelDialog] = useState(false);
     return (
       <>
         {cancelBlockReason === "Evento já encerrado" ? (
@@ -94,19 +90,30 @@ function RegistrationAction({
             <p className="text-center text-sm text-green-600 font-medium">Você está inscrito</p>
             {canCancel ? (
               <button
-                onClick={onUnregister}
+                onClick={() => setShowCancelDialog(true)}
                 disabled={registering}
                 className="w-full py-3 rounded-xl text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition disabled:opacity-60"
               >
-                {registering ? "Cancelando..." : "Cancelar inscrição"}
+                Cancelar inscrição
               </button>
             ) : (
               <p className="text-center text-sm text-gray-400">{cancelBlockReason}</p>
             )}
           </>
         )}
+        <ConfirmDialog
+          open={showCancelDialog}
+          title="Cancelar inscrição?"
+          description="Você perderá sua vaga neste evento."
+          confirmLabel="Cancelar inscrição"
+          destructive
+          loading={registering}
+          onConfirm={onUnregister}
+          onCancel={() => setShowCancelDialog(false)}
+        />
       </>
     );
+  }
   if (isFull)
     return <p className="text-center text-sm text-gray-400 py-2">Evento lotado</p>;
   if (isPaid)
