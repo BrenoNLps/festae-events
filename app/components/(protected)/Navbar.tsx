@@ -12,7 +12,6 @@ import { Avatar } from './Avatar'
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog'
 
 export default function Navbar() {
-    const supabase = createClient()
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
