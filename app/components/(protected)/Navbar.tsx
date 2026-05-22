@@ -8,6 +8,7 @@ import { ROUTES } from '@/app/lib/routes'
 import { useNotifications } from '@/app/lib/hooks/useNotifications'
 import { useProfile } from '@/app/lib/hooks/useProfile'
 import { Avatar } from './Avatar'
+import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog'
 
 const menuItems = [
     { label: 'Eventos', icon: Ticket, href: ROUTES.events },
@@ -21,6 +22,7 @@ export default function Navbar() {
     const supabase = createClient()
     const router = useRouter()
     const [open, setOpen] = useState(false)
+    const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const badges = useNotifications()
     const { dbUser } = useProfile()
     const displayName = dbUser?.nome || dbUser?.username
@@ -42,7 +44,7 @@ export default function Navbar() {
                     </button>
                     <span className="text-xl font-bold text-purple-600 absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">🌐 Festaê</span>
                 </div>
-                <button onClick={handleLogout} className="hidden md:flex items-center gap-2 text-sm text-gray-600 hover:text-red-600 bg-gray-200 hover:bg-red-50 px-4 py-2 rounded-full transition">
+                <button onClick={() => setShowLogoutDialog(true)} className="hidden md:flex items-center gap-2 text-sm text-gray-600 hover:text-red-600 bg-gray-300 hover:bg-red-50 px-4 py-2 rounded-full transition">
                     <LogOut className="h-5 w-5" />
                     <span>Sair</span>
                 </button>
@@ -92,7 +94,7 @@ export default function Navbar() {
                                 <ChevronRight className="h-4 w-4 text-gray-500 shrink-0" />
                             </Link>
                             <button
-                                onClick={handleLogout}
+                                onClick={() => { setOpen(false); setShowLogoutDialog(true) }}
                                 className="flex items-center gap-3 text-gray-300 hover:text-red-400 hover:bg-gray-800 rounded-lg px-3 py-2 transition"
                             >
                                 <LogOut className="h-5 w-5" />
@@ -102,6 +104,16 @@ export default function Navbar() {
                     </div>
                 </div>
             )}
+            <ConfirmDialog
+                open={showLogoutDialog}
+                title="Sair da conta?"
+                description="Você será desconectado."
+                confirmLabel="Sair"
+                cancelLabel="Cancelar"
+                destructive
+                onConfirm={handleLogout}
+                onCancel={() => setShowLogoutDialog(false)}
+            />
         </>
     )
 }
