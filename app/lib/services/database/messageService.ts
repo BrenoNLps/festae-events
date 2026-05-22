@@ -38,14 +38,3 @@ export async function getMessagesBetweenUsers(
 
   return { data: data as Message[] | null, error };
 }
-
-/* 
-export async function deleteMessage(id: number) {
-    const { data, error } = await supabase
-        .from('mensagem')
-        .delete()
-        .eq('id', id)
-
-    return { data, error }
-}
-*/
