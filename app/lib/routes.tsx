@@ -4,6 +4,7 @@ export const ROUTES = {
     events: '/events',
     eventsCreate: '/events/create',
     eventDetail: (id: number) => `/events/${id}`,
+    eventEdit: (id: number) => `/events/${id}/edit`,
     completeProfile: '/complete-profile',
     friends: '/friends',
     chat: '/chat',

@@ -10,6 +10,7 @@ import { Evento } from "@/app/lib/types";
 import { EventDetailCard } from "@/app/components/events/EventDetailCard";
 import { formatDateRange, formatDay } from "@/app/lib/utils/date";
 import { formatLocation } from "@/app/lib/utils/event";
+import { ROUTES } from "@/app/lib/routes";
 
 const MONTHS_PT = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -296,7 +297,7 @@ function AgendaListItem({ event, type }: { event: Evento; type: "created" | "reg
     : "bg-green-100 text-green-400";
 
   return (
-    <Link href={`/events/${event.id}`} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+    <Link href={ROUTES.eventDetail(event.id)} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
       <div className={`shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${iconStyle}`}>
         <Ticket className="h-4 w-4" />
       </div>

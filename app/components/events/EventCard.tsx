@@ -7,6 +7,7 @@ import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
 import { EventImage } from "./EventImage";
 import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
+import { ROUTES } from "@/app/lib/routes";
 
 export function EventCard({ event }: { event: Evento }) {
   const { user, loading } = useCurrentUser();
@@ -15,8 +16,8 @@ export function EventCard({ event }: { event: Evento }) {
   const price = formatPrice(event.valor);
   const href =
     !loading && !user
-      ? `/login?callbackUrl=/events/${event.id}`
-      : `/events/${event.id}`;
+      ? `${ROUTES.login}?callbackUrl=${ROUTES.eventDetail(event.id)}`
+      : ROUTES.eventDetail(event.id);
 
   return (
     <Link href={href} className="shrink-0 w-64 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer block">

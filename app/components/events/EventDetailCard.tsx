@@ -4,13 +4,14 @@ import { EventImage } from "./EventImage";
 import { Evento } from "@/app/lib/types";
 import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
+import { ROUTES } from "@/app/lib/routes";
 
 export function EventDetailCard({ event }: { event: Evento }) {
   const location = formatLocation(event.endereco);
   const price = formatPrice(event.valor);
 
   return (
-    <Link href={`/events/${event.id}`} className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden block hover:shadow-md transition-shadow">
+    <Link href={ROUTES.eventDetail(event.id)} className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden block hover:shadow-md transition-shadow">
       <div className="h-28 bg-purple-100">
         <EventImage src={event.imagem_url} alt={event.nome} iconSize="h-8 w-8" />
       </div>

@@ -12,6 +12,7 @@ import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
 import { Evento, EVENT_CATEGORY_LABELS } from "@/app/lib/types";
 import { FriendsAtEvent } from "@/app/components/events/FriendsAtEvent";
+import { ROUTES } from "@/app/lib/routes";
 
 function RegistrationAction({
   isOrganizer,
@@ -340,7 +341,7 @@ export default function EventDetail() {
             onRegister={register}
             onUnregister={unregister}
             onPurchase={handlePurchase}
-            onEdit={() => router.push(`/events/${event.id}/edit`)}
+            onEdit={() => router.push(ROUTES.eventEdit(event.id))}
             onDelete={handleDelete}
             deleting={deleting}
             registrationCount={registrationCount}
