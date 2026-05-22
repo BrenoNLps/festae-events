@@ -24,7 +24,7 @@ export async function completeProfile(
 ) {
   const { data, error } = await supabase
     .from("usuario")
-    .update({ ...values, perfil_completo: true })
+    .update(values)
     .eq("id", id);
 
   return { data, error };
@@ -53,7 +53,7 @@ export async function searchUsers(
 ): Promise<Usuario[]> {
   let q = supabase
     .from("usuario")
-    .select("id, username, nome, imagem_url, tipo_conta, perfil_completo")
+    .select("id, username, nome, imagem_url, tipo_conta")
     .ilike("username", `%${query}%`)
     .limit(limit * 3);
 

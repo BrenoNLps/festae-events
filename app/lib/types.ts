@@ -74,7 +74,6 @@ export interface Usuario {
     tipo_conta: AccountType
     cnpj?: string
     imagem_url?: string
-    perfil_completo: boolean
     nome?: string
 }
 
