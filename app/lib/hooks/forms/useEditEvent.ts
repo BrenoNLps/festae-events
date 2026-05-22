@@ -38,6 +38,7 @@ export function useEditEvent(eventId: number) {
                     hora_inicio: data.hora_inicio,
                     hora_fim: data.hora_fim,
                     endereco: data.endereco,
+                    categoria: data.categoria,
                 })
             }
             setEvent(data)

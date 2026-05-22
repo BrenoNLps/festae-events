@@ -24,6 +24,7 @@ export function useCreateEvent() {
             hora_fim: '',
             valor: 0,
             endereco: { cep: '', logradouro: '', numero: '', bairro: '', cidade: '', estado: '' },
+            categoria: undefined,
         }
     })
 

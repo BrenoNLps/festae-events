@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { EventCategory } from '../types'
 
 const enderecoSchema = z.object({
     cep: z.string().length(8, 'CEP inválido'),
@@ -19,6 +20,7 @@ export const eventSchema = z.object({
     hora_inicio: z.string().min(1, 'Hora de início obrigatória'),
     hora_fim: z.string().min(1, 'Hora de fim obrigatória'),
     endereco: enderecoSchema,
+    categoria: z.nativeEnum(EventCategory, { error: 'Selecione uma categoria' }),
 }).refine(
     (data) => !data.data_inicio || !data.data_fim || data.data_fim >= data.data_inicio,
     { message: 'Data de fim deve ser após a data de início', path: ['data_fim'] }

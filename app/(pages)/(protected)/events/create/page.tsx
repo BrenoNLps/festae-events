@@ -4,6 +4,7 @@ import AddressField from '@/app/components/(protected)/AddressField'
 import styles from '@/app/styles/fields.module.css'
 import { useCreateEvent } from '@/app/lib/hooks/forms/useCreateEvent'
 import { maskCurrency, parseCurrency } from '@/app/lib/validators'
+import { EventCategory, EVENT_CATEGORY_LABELS } from '@/app/lib/types'
 
 export default function Create() {
     const { form, onSubmit, loading, setCoverFile } = useCreateEvent()
@@ -21,6 +22,16 @@ export default function Create() {
                     <label className={styles.label}>Nome</label>
                     <input {...register('nome')} className={styles.input} placeholder="Nome do evento" />
                     {errors.nome && <span className={styles.error}>{errors.nome.message}</span>}
+                </div>
+                <div>
+                    <label className={styles.label}>Categoria</label>
+                    <select {...register('categoria')} className={styles.input}>
+                        <option value="">Selecione uma categoria</option>
+                        {Object.values(EventCategory).map((cat) => (
+                            <option key={cat} value={cat}>{EVENT_CATEGORY_LABELS[cat]}</option>
+                        ))}
+                    </select>
+                    {errors.categoria && <span className={styles.error}>{errors.categoria.message}</span>}
                 </div>
                 <div>
                     <label className={styles.label}>Descrição</label>

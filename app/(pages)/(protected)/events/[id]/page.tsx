@@ -10,7 +10,7 @@ import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { useEventRegistration } from "@/app/lib/hooks/useEventRegistration";
 import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
-import { Evento } from "@/app/lib/types";
+import { Evento, EVENT_CATEGORY_LABELS } from "@/app/lib/types";
 import { FriendsAtEvent } from "@/app/components/events/FriendsAtEvent";
 
 function RegistrationAction({
@@ -264,7 +264,14 @@ export default function EventDetail() {
       {/* Conteúdo */}
       <div className="flex flex-col gap-4">
         <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
-          <h1 className="text-2xl font-bold text-gray-900">{event.nome}</h1>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold text-gray-900">{event.nome}</h1>
+            {event.categoria && (
+              <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full w-fit">
+                {EVENT_CATEGORY_LABELS[event.categoria]}
+              </span>
+            )}
+          </div>
           {user && (
             <FriendsAtEvent userId={user.id} eventoId={event.id} organizerId={event.id_organizador} />
           )}
