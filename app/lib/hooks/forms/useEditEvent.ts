@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useCurrentUser } from "../useCurrentUser"
 import { getEventById, updateEvent } from "../../services/database/eventService"
+import { getRegistrationCount } from "../../services/database/registrationService"
 import { uploadImage } from "../../services/storage/uploadService"
 import { eventSchema, EventFormData } from "../../validation/eventSchema"
 import { Evento } from "../../types"
@@ -14,6 +15,7 @@ export function useEditEvent(eventId: number) {
     const [event, setEvent] = useState<Evento | null>(null)
     const [loadingEvent, setLoadingEvent] = useState(true)
     const [saving, setSaving] = useState(false)
+    const [minVagas, setMinVagas] = useState(1)
     const coverFileRef = useRef<File | null>(null)
 
     const form = useForm<EventFormData>({
@@ -21,7 +23,10 @@ export function useEditEvent(eventId: number) {
     })
 
     useEffect(() => {
-        getEventById(eventId).then(({ data }) => {
+        Promise.all([
+            getEventById(eventId),
+            getRegistrationCount(eventId),
+        ]).then(([{ data }, count]) => {
             if (data) {
                 form.reset({
                     nome: data.nome,
@@ -36,12 +41,17 @@ export function useEditEvent(eventId: number) {
                 })
             }
             setEvent(data)
+            setMinVagas(Math.max(1, count))
             setLoadingEvent(false)
         })
     }, [eventId, form])
 
     async function onSubmit(data: EventFormData) {
         if (!user || !event) return
+        if (data.vagas < minVagas) {
+            form.setError('vagas', { message: `Mínimo ${minVagas} vaga${minVagas > 1 ? 's' : ''} (${minVagas} inscritos)` })
+            return
+        }
         setSaving(true)
         let imagem_url: string | undefined
         if (coverFileRef.current) {
@@ -57,6 +67,7 @@ export function useEditEvent(eventId: number) {
         saving,
         loadingEvent,
         event,
+        minVagas,
         setCoverFile: (file: File) => { coverFileRef.current = file },
     }
 }

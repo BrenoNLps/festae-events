@@ -8,7 +8,7 @@ import { maskCurrency, parseCurrency } from '@/app/lib/validators'
 
 export default function EditEvent({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params)
-    const { form, onSubmit, saving, loadingEvent, event, setCoverFile } = useEditEvent(Number(id))
+    const { form, onSubmit, saving, loadingEvent, event, minVagas, setCoverFile } = useEditEvent(Number(id))
     const { register, handleSubmit, formState: { errors }, setValue, watch } = form
 
     const hoje = new Date().toISOString().split('T')[0]
@@ -75,7 +75,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
                 <div className="flex gap-4">
                     <div className="flex-1">
                         <label className={styles.label}>Vagas</label>
-                        <input {...register('vagas', { valueAsNumber: true })} type="number" className={styles.input} placeholder="0" min={1} />
+                        <input {...register('vagas', { valueAsNumber: true })} type="number" className={styles.input} placeholder="0" min={minVagas} />
                         {errors.vagas && <span className={styles.error}>{errors.vagas.message}</span>}
                     </div>
                     <div className="flex-1">
