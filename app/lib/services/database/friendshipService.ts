@@ -1,5 +1,6 @@
 import { getSupabaseClient } from "../../supabase/singleton";
 import { Usuario } from "../../types";
+import { insertNotification } from "./notificationService";
 
 const supabase = getSupabaseClient();
 
@@ -20,6 +21,7 @@ export async function sendFriendRequest(values: {
   id_amigo: string;
 }) {
   const { data, error } = await supabase.from("amizade").insert(values);
+  if (!error) await insertNotification(values.id_amigo, 'amizade');
   return { data, error };
 }
 
