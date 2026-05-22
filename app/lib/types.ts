@@ -92,10 +92,23 @@ export enum AccountType {
     EMPRESA = 'EMPRESA'
 }
 
+export interface Conversa {
+    id: string;
+    nome?: string;
+    tipo: 'DM' | 'GRUPO';
+    data_criacao: string;
+}
+
+export interface ConversaParticipante {
+    id_conversa: string;
+    id_usuario: string;
+    ultima_leitura: string;
+}
+
 export interface Message {
-    id: number;
+    id: string;
     conteudo: string;
     id_remetente: string;
-    id_destinatario: string;
+    id_conversa: string;
     data_criacao: string;
 }
