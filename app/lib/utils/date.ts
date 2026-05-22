@@ -1,3 +1,7 @@
+export function getTodayAsString(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
 export function formatDateRange(inicio: string, fim: string): string {
   const fmt = (d: string) => {
     const [, month, day] = d.split("-");

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getEvents } from "../services/database/eventService";
 import { Evento } from "../types";
+import { getTodayAsString } from "../utils/date";
 
 function readStorage(key: string) {
   try { return localStorage.getItem(key) ?? ""; } catch { return ""; }
@@ -64,7 +65,7 @@ export function useDiscoverEvents() {
     writeStorage("filtro_categoria", "");
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTodayAsString();
 
   const latest = [...events].sort((a, b) => b.id - a.id).slice(0, 10);
 

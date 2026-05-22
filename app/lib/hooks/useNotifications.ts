@@ -8,6 +8,7 @@ import { getEventsByOrganizer } from "../services/database/eventService";
 import { getRegistrationsByUser } from "../services/database/registrationService";
 import { Evento } from "../types";
 import { ROUTES } from "../routes";
+import { getTodayAsString } from "../utils/date";
 
 export function useNotifications() {
   const { user } = useCurrentUser();
@@ -23,12 +24,12 @@ export function useNotifications() {
 
     if (onFriends) localStorage.setItem("lastFriendsVisit", new Date().toISOString());
     if (onChat) localStorage.setItem("lastChatVisit", new Date().toISOString());
-    if (onAgenda) localStorage.setItem("lastAgendaVisit", new Date().toISOString().split("T")[0]);
+    if (onAgenda) localStorage.setItem("lastAgendaVisit", getTodayAsString());
 
     const lastFriendsVisit = localStorage.getItem("lastFriendsVisit") ?? new Date(0).toISOString();
     const lastChatVisit = localStorage.getItem("lastChatVisit") ?? new Date(0).toISOString();
     const lastAgendaVisit = localStorage.getItem("lastAgendaVisit") ?? "";
-    const today = new Date().toISOString().split("T")[0];
+    const today = getTodayAsString();
 
     if (!onFriends) {
       getPendingReceived(user.id).then(({ data }) => {

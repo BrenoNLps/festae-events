@@ -13,7 +13,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
     const { form, onSubmit, saving, loadingEvent, event, minVagas, setCoverFile } = useEditEvent(Number(id))
     const { register, handleSubmit, formState: { errors }, setValue, watch } = form
 
-    const hoje = new Date().toISOString().split('T')[0]
+    const hoje = getTodayAsString()
     const dataInicio = watch('data_inicio')
 
     if (loadingEvent) {

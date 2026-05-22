@@ -11,7 +11,7 @@ export default function Create() {
     const { form, onSubmit, loading, setCoverFile } = useCreateEvent()
     const { register, handleSubmit, formState: { errors }, setValue, watch } = form
 
-    const hoje = new Date().toISOString().split('T')[0]
+    const hoje = getTodayAsString()
     const dataInicio = watch('data_inicio')
 
     return (
