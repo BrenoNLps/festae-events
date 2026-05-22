@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { ESTADOS_BRASIL } from "@/app/lib/utils/brasil";
 import { EventCategory, EVENT_CATEGORY_LABELS } from "@/app/lib/types";
+import { getCidadesByEstado } from "@/app/lib/services/api/ibgeService";
 
 interface CityFilterProps {
   estado: string;
@@ -20,14 +21,7 @@ export function CityFilter({ estado, cidade, categoria, setEstado, setCidade, se
 
   useEffect(() => {
     if (!estado) { setCidades([]); return; }
-    const controller = new AbortController();
-    fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado}/municipios`, {
-      signal: controller.signal,
-    })
-      .then((r) => r.json())
-      .then((data) => setCidades(data.map((m: { nome: string }) => m.nome).sort()))
-      .catch(() => setCidades([]));
-    return () => controller.abort();
+    getCidadesByEstado(estado).then(setCidades);
   }, [estado]);
 
   const hasFilter = estado || cidade || categoria;
