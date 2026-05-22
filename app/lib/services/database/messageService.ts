@@ -3,38 +3,37 @@ import { Message } from "../../types";
 
 const supabase = getSupabaseClient();
 
+export async function getOrCreateDMConversation(outroUsuarioId: string): Promise<{ data: string | null; error: unknown }> {
+  const { data, error } = await supabase.rpc('criar_conversa_dm', { outro_usuario: outroUsuarioId });
+  return { data: data as string | null, error };
+}
+
+export async function getMessagesByConversation(id_conversa: string): Promise<{ data: Message[] | null; error: unknown }> {
+  const { data, error } = await supabase
+    .from('mensagem')
+    .select('*')
+    .eq('id_conversa', id_conversa)
+    .order('data_criacao', { ascending: true });
+  return { data: data as Message[] | null, error };
+}
+
 export async function sendMessage(values: {
   conteudo: string;
   id_remetente: string;
-  id_destinatario: string;
+  id_conversa: string;
 }) {
-  const { data, error } = await supabase.from("mensagem").insert(values);
-
-  return { data, error };
+  return supabase.from('mensagem').insert(values);
 }
 
-export async function getUnreadSenderIds(id_destinatario: string, after: string) {
-  const { data, error } = await supabase
-    .from("mensagem")
-    .select("id_remetente")
-    .eq("id_destinatario", id_destinatario)
-    .gt("data_criacao", after);
-
-  const ids = [...new Set((data ?? []).map((m: { id_remetente: string }) => m.id_remetente))];
-  return { data: ids, error };
+export async function markConversationAsRead(id_conversa: string, id_usuario: string) {
+  return supabase
+    .from('conversa_participante')
+    .update({ ultima_leitura: new Date().toISOString() })
+    .eq('id_conversa', id_conversa)
+    .eq('id_usuario', id_usuario);
 }
 
-export async function getMessagesBetweenUsers(
-  id_remetente: string,
-  id_destinatario: string,
-): Promise<{ data: Message[] | null; error: unknown }> {
-  const { data, error } = await supabase
-    .from("mensagem")
-    .select("*")
-    .or(
-      `and(id_remetente.eq.${id_remetente},id_destinatario.eq.${id_destinatario}),and(id_remetente.eq.${id_destinatario},id_destinatario.eq.${id_remetente})`,
-    )
-    .order("data_criacao", { ascending: true });
-
-  return { data: data as Message[] | null, error };
+export async function getUnreadDMPartnerIds(): Promise<{ data: string[]; error: unknown }> {
+  const { data, error } = await supabase.rpc('get_unread_dm_partner_ids');
+  return { data: (data as string[] | null) ?? [], error };
 }
