@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useCurrentUser } from "./useCurrentUser";
 import { getPendingReceived } from "../services/database/friendshipService";
-import { getUnreadDMPartnerIds } from "../services/database/messageService";
+import { getUnreadConversationIds } from "../services/database/messageService";
 import { getEventsByOrganizer } from "../services/database/eventService";
 import { getRegistrationsByUser } from "../services/database/registrationService";
 import { Evento } from "../types";
@@ -43,7 +43,7 @@ export function useNotifications() {
     }
 
     if (!onChat) {
-      getUnreadDMPartnerIds().then(({ data }) => {
+      getUnreadConversationIds().then(({ data }) => {
         setBadges((prev) => ({ ...prev, [ROUTES.chat]: data.length }));
       });
     } else {
