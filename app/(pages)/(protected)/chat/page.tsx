@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Send, MessageCircle } from "lucide-react";
+import { Send, MessageCircle, ArrowLeft } from "lucide-react";
 import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { getFriends } from "@/app/lib/services/database/friendshipService";
 import { getMessagesBetweenUsers, sendMessage, getUnreadSenderIds } from "@/app/lib/services/database/messageService";
@@ -123,7 +123,7 @@ export default function Chat() {
 
   return (
     <div className="flex h-[calc(100vh-9rem)] gap-4">
-      <div className="w-72 shrink-0 flex flex-col border border-gray-100 rounded-2xl bg-white shadow-sm overflow-hidden">
+      <div className={`${selected ? 'hidden lg:flex' : 'flex'} w-full lg:w-72 shrink-0 flex-col border border-gray-100 rounded-2xl bg-white shadow-sm overflow-hidden`}>
         <div className="p-4 border-b border-gray-100">
           <h2 className="font-semibold text-gray-900">Mensagens</h2>
         </div>
@@ -158,7 +158,7 @@ export default function Chat() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col border border-gray-100 rounded-2xl bg-white shadow-sm overflow-hidden">
+      <div className={`${!selected ? 'hidden lg:flex' : 'flex'} flex-1 flex-col border border-gray-100 rounded-2xl bg-white shadow-sm overflow-hidden`}>
         {!selected ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
             <MessageCircle className="h-10 w-10 text-gray-200" />
@@ -167,6 +167,12 @@ export default function Chat() {
         ) : (
           <>
             <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+              <button
+                className="lg:hidden p-1 -ml-1 text-gray-500 hover:text-gray-800 transition"
+                onClick={() => setSelected(null)}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
               <Avatar nome={selected.nome} imagem_url={selected.imagem_url} size={36} />
               <div>
                 <p className="font-semibold text-sm text-gray-900">@{selected.username}</p>
