@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useCurrentUser } from "../useCurrentUser"
 import { ROUTES } from "../../routes"
-import { createEvent } from "../../services/database/eventService"
+import { createEvent, updateEvent } from "../../services/database/eventService"
 import { uploadImage } from "../../services/storage/uploadService"
 import { eventSchema, EventFormData } from "../../validation/eventSchema"
 
@@ -30,12 +30,13 @@ export function useCreateEvent() {
 
     async function onSubmit(data: EventFormData) {
         if (!user) return
-        let imagem_url: string | undefined
+        const { data: created, error } = await createEvent({ ...data, id_organizador: user.id })
+        if (error || !created) return
         if (coverFileRef.current) {
-            imagem_url = await uploadImage('event-covers', user.id, coverFileRef.current) ?? undefined
+            const imagem_url = await uploadImage('event-covers', user.id, coverFileRef.current, created.id) ?? undefined
+            if (imagem_url) await updateEvent(created.id, { imagem_url })
         }
-        const { error } = await createEvent({ ...data, id_organizador: user.id, imagem_url })
-        if (!error) router.push(ROUTES.events)
+        router.push(ROUTES.events)
     }
 
     return { form, onSubmit, loading, setCoverFile: (file: File) => { coverFileRef.current = file } }

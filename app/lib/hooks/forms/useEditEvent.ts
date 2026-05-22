@@ -64,7 +64,7 @@ export function useEditEvent(eventId: number) {
         try {
             let imagem_url: string | undefined
             if (coverFileRef.current) {
-                imagem_url = await uploadImage('event-covers', user.id, coverFileRef.current) ?? undefined
+                imagem_url = await uploadImage('event-covers', user.id, coverFileRef.current, event.id) ?? undefined
             }
             const { error } = await updateEvent(event.id, { ...data, imagem_url })
             if (!error) router.push(ROUTES.eventDetail(event.id))

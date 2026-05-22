@@ -18,7 +18,7 @@ export async function createEvent(values: {
     imagem_url?: string;
     id_organizador: string;
 }) {
-    const { data, error } = await supabase.from("evento").insert(values);
+    const { data, error } = await supabase.from("evento").insert(values).select('id').single();
 
     return { data, error };
 }
