@@ -1,13 +1,14 @@
 import { getSupabaseClient } from "../../supabase/singleton";
-import { Adress, Evento } from "../../types";
+import { Address, Evento } from "../../types";
 import { getFriendIds } from "./friendshipService";
+import { getTodayAsString } from "../../utils/date";
 
 const supabase = getSupabaseClient();
 
 export async function createEvent(values: {
     nome: string;
     descricao?: string;
-    endereco: Adress;
+    endereco: Address;
     vagas: number;
     valor: number;
     data_inicio: string;
@@ -72,7 +73,7 @@ export async function getEventById(id: number): Promise<{ data: Evento | null; e
 export async function updateEvent(id: number, values: {
     nome?: string;
     descricao?: string;
-    endereco?: Adress;
+    endereco?: Address;
     vagas?: number;
     valor?: number;
     data_inicio?: string;
@@ -92,7 +93,7 @@ export async function deleteEvent(id: number) {
 }
 
 export async function getEventsByFriends(userId: string): Promise<Evento[]> {
-    const today = new Date().toISOString().split("T")[0];
+    const today = getTodayAsString();
 
     const friendIds = await getFriendIds(userId);
 

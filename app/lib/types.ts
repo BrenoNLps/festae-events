@@ -55,7 +55,7 @@ export interface Evento {
     id: number;
     nome: string;
     descricao?: string;
-    endereco: Adress;
+    endereco: Address;
     vagas: number;
     valor: number;
     data_inicio: string;
@@ -78,7 +78,7 @@ export interface Usuario {
     nome?: string
 }
 
-export interface Adress {
+export interface Address {
     cep: string;
     logradouro: string;
     numero: string;
