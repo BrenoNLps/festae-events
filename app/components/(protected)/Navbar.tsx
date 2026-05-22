@@ -35,10 +35,10 @@ export default function Navbar() {
             <nav className="h-16 w-full border-b border-gray-300 flex items-center justify-between px-8">
                 <div className="flex items-center gap-3">
                     <button
-                        className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
+                        className="md:hidden p-2 rounded-lg hover:bg-purple-50 transition"
                         onClick={() => setOpen(true)}
                     >
-                        <Menu className="h-5 w-5" />
+                        <Menu className="h-5 w-5 text-purple-600" />
                     </button>
                     <span className="text-xl font-bold text-purple-600">🌐 Festaê</span>
                 </div>

@@ -26,7 +26,7 @@ export default function Login() {
             </div>
 
             <div className="w-2/3 h-screen flex flex-col items-center justify-center">
-                <h1 className="text-4xl font-bold">Bem vindo ao Festaê</h1>
+                <h1 className="text-4xl font-bold text-gray-900">Bem vindo ao Festaê</h1>
                 <p className="text-purple-800 text-sm">Entre com sua conta Google para continuar</p>
                 <button className="flex items-center gap-3 border border-gray-300 rounded-full px-6 py-3 hover:bg-gray-50 transition" onClick={loginWithGoogle}>
                     <FcGoogle className="h-5 w-5" />
