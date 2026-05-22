@@ -105,6 +105,13 @@ export interface ConversaParticipante {
     ultima_leitura: string;
 }
 
+export type ParticipanteInfo = Pick<Usuario, 'id' | 'username' | 'nome' | 'imagem_url'>
+
+export interface ConversaComInfo extends Conversa {
+    ultima_leitura: string;
+    participantes: ParticipanteInfo[];
+}
+
 export interface Message {
     id: string;
     conteudo: string;
