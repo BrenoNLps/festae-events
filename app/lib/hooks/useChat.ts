@@ -96,13 +96,18 @@ export function useChat() {
     setUnreadIds((prev) => { const next = new Set(prev); next.delete(friend.id); return next; });
   }
 
+  const MAX_MESSAGE_LENGTH = 1000;
+
   async function handleSend() {
-    if (!input.trim() || !user?.id || !selected || sending) return;
-    setSending(true);
     const conteudo = input.trim();
+    if (!conteudo || conteudo.length > MAX_MESSAGE_LENGTH || !user?.id || !selected || sending) return;
+    setSending(true);
     setInput("");
-    await sendMessage({ conteudo, id_remetente: user.id, id_destinatario: selected.id });
-    setSending(false);
+    try {
+      await sendMessage({ conteudo, id_remetente: user.id, id_destinatario: selected.id });
+    } finally {
+      setSending(false);
+    }
   }
 
   return {
@@ -117,5 +122,6 @@ export function useChat() {
     setInput,
     sending,
     handleSend,
+    maxMessageLength: MAX_MESSAGE_LENGTH,
   };
 }

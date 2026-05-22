@@ -19,6 +19,7 @@ export default function Chat() {
     setInput,
     sending,
     handleSend,
+    maxMessageLength,
   } = useChat();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -148,17 +149,25 @@ export default function Chat() {
               >
                 <Smile className="h-5 w-5" />
               </button>
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Digite uma mensagem..."
-                className="flex-1 text-sm text-black border border-gray-200 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
-              />
+              <div className="flex-1 flex flex-col">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Digite uma mensagem..."
+                  maxLength={maxMessageLength}
+                  className="text-sm text-black border border-gray-200 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
+                />
+                {input.length > maxMessageLength * 0.8 && (
+                  <span className={`text-xs text-right pr-2 mt-0.5 ${input.length >= maxMessageLength ? 'text-red-500' : 'text-gray-400'}`}>
+                    {input.length}/{maxMessageLength}
+                  </span>
+                )}
+              </div>
               <button
                 onClick={handleSend}
-                disabled={!input.trim() || sending}
+                disabled={!input.trim() || input.length > maxMessageLength || sending}
                 className="shrink-0 w-9 h-9 flex items-center justify-center bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-full transition-colors"
               >
                 <Send className="h-4 w-4" />
