@@ -39,7 +39,7 @@ export function FriendsAtEvent({ userId, eventoId, organizerId }: { userId: stri
         className="flex items-center gap-2 text-sm text-purple-700 font-medium border border-purple-200 bg-purple-50 hover:bg-purple-100 transition rounded-full px-4 py-2 w-full sm:w-fit"
       >
         <Users className="h-4 w-4" />
-        {friends.length === 1 ? "1 amigo vai" : `${friends.length} amigos vão`}
+        {friends.length === 1 ? "1 amigo irá" : `${friends.length} amigos irão`}
         <ChevronRight className="h-4 w-4 opacity-60" />
       </button>
 
@@ -53,7 +53,7 @@ export function FriendsAtEvent({ userId, eventoId, organizerId }: { userId: stri
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-gray-800">Amigos que vão</h3>
+              <h3 className="text-base font-semibold text-gray-800">Amigos que irão</h3>
               <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600 transition">
                 <X className="h-5 w-5" />
               </button>
