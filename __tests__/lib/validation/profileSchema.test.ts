@@ -76,13 +76,17 @@ describe('profileSchema', () => {
         }
     })
 
-    // Edge case: username acima do limite de 30 caracteres deve ser rejeitado
-    it('rejeita username com mais de 30 caracteres', () => {
+    // Edge case: username acima do limite de 30 caracteres deve ser rejeitado com mensagem correta
+    it('rejeita username com mais de 30 caracteres com mensagem correta', () => {
         const result = profileSchema.safeParse({
             username: 'a'.repeat(31),
             tipo_conta: AccountType.USUARIO,
         })
         expect(result.success).toBe(false)
+        if (!result.success) {
+            const issue = result.error.issues.find(i => i.path[0] === 'username')
+            expect(issue?.message).toBe('Máximo 30 caracteres')
+        }
     })
 
     // Edge case: username com caracteres especiais não permitidos deve ser rejeitado
