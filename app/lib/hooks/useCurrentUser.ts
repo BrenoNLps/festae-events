@@ -12,7 +12,7 @@ export function useCurrentUser() {
             setLoading(false)
         })
 
-        const { data: { subscription } } = onAuthStateChange((_, session) => {
+        const { data: { subscription } } = onAuthStateChange(async (_, session) => {
             setUser(session?.user ?? null)
         })
         return () => subscription.unsubscribe()
