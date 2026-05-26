@@ -13,6 +13,7 @@ export default function Eventos() {
   const {
     latest, ongoing, upcoming, finished, loading,
     estado, cidade, setEstado, setCidade, clearFilter,
+    categoria, setCategoria,
   } = useDiscoverEvents();
 
   const searchFn = useCallback((q: string) => searchEvents(q, { estado: estado || undefined, cidade: cidade || undefined }), [estado, cidade]);
@@ -38,8 +39,10 @@ export default function Eventos() {
           <CityFilter
             estado={estado}
             cidade={cidade}
+            categoria={categoria}
             setEstado={setEstado}
             setCidade={setCidade}
+            setCategoria={setCategoria}
             clearFilter={clearFilter}
           />
         )}
