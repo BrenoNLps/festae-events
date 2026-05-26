@@ -1,7 +1,7 @@
 import { formatPrice, formatLocation } from '@/app/lib/utils/event'
-import { Adress } from '@/app/lib/types'
+import { Address } from '@/app/lib/types'
 
-const endereco = (overrides?: Partial<Adress>): Adress => ({
+const endereco = (overrides?: Partial<Address>): Address => ({
     cep: '01310100',
     logradouro: 'Av. Paulista',
     numero: '1000',
