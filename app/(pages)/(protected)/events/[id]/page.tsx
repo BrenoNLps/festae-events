@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Calendar, Clock, MapPin, Users } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Users, Share2 } from "lucide-react";
 import { EventImage } from "@/app/components/events/EventImage";
 import { ConfirmDialog } from "@/app/components/ui/ConfirmDialog";
 import { getEventById, deleteEvent } from "@/app/lib/services/database/eventService";
@@ -13,6 +13,7 @@ import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
 import { Evento, EVENT_CATEGORY_LABELS } from "@/app/lib/types";
 import { FriendsAtEvent } from "@/app/components/events/FriendsAtEvent";
+import { ShareEventModal } from "@/app/components/events/ShareEventModal";
 import { ROUTES } from "@/app/lib/routes";
 
 function RegistrationAction({
@@ -157,6 +158,7 @@ export default function EventDetail() {
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   const { isRegistered, checking, loading: registering, register, unregister, isFull, registrationCount } =
     useEventRegistration(user?.id ?? null, event?.id ?? null, event?.vagas ?? undefined);
@@ -249,17 +251,26 @@ export default function EventDetail() {
 
   return (
     <div className="flex flex-col gap-6">
-      <button
-        onClick={() => {
-          const ref = document.referrer;
-          const isInternal = ref && new URL(ref).origin === window.location.origin && !ref.includes('/login');
-          isInternal ? router.back() : router.push('/events');
-        }}
-        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition w-fit"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Voltar
-      </button>
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => {
+            const ref = document.referrer;
+            const isInternal = ref && new URL(ref).origin === window.location.origin && !ref.includes('/login');
+            isInternal ? router.back() : router.push('/events');
+          }}
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar
+        </button>
+        <button
+          onClick={() => setShowShare(true)}
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-purple-600 transition"
+        >
+          <Share2 className="h-4 w-4" />
+          Enviar
+        </button>
+      </div>
 
       {/* Hero */}
       <div className="relative w-full h-72 rounded-2xl bg-purple-100 overflow-hidden">
@@ -352,6 +363,10 @@ export default function EventDetail() {
           />
         </div>
       </div>
+
+      {showShare && (
+        <ShareEventModal evento={event} onClose={() => setShowShare(false)} />
+      )}
     </div>
   );
 }
