@@ -7,6 +7,15 @@ const mpClient = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN!,
 });
 
+function parseEventoId(value: unknown): number | null {
+  if (typeof value !== 'number') return null;
+  if (!Number.isInteger(value)) return null;
+  if (!Number.isFinite(value)) return null;
+  if (value <= 0) return null;
+  if (value > Number.MAX_SAFE_INTEGER) return null;
+  return value;
+}
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -15,14 +24,28 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
-  const { eventoId } = await req.json();
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return Response.json({ error: 'Body inválido' }, { status: 400 });
+  }
 
-  const { data: evento } = await getEventById(Number(eventoId));
+  const eventoId = parseEventoId((body as any)?.eventoId);
+  if (!eventoId) {
+    return Response.json({ error: 'eventoId inválido' }, { status: 400 });
+  }
+
+  const { data: evento } = await getEventById(eventoId);
   if (!evento) {
     return Response.json({ error: 'Evento não encontrado' }, { status: 404 });
   }
 
-  const host = req.headers.get('host')!;
+  const host = req.headers.get('host');
+  if (!host) {
+    return Response.json({ error: 'Header host ausente' }, { status: 400 });
+  }
+
   const isLocalhost = host.startsWith('localhost');
   const protocol = isLocalhost ? 'http' : 'https';
   const baseUrl = `${protocol}://${host}`;
