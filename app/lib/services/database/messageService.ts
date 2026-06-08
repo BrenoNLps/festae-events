@@ -27,11 +27,17 @@ export async function getMessagesByConversation(id_conversa: string): Promise<{ 
   return { data: data as Message[] | null, error };
 }
 
+const HTML_PATTERN = /<[^>]+>/i
+const MAX_MESSAGE_LENGTH = 5_000
+
 export async function sendMessage(values: {
   conteudo: string;
   id_remetente: string;
   id_conversa: string;
 }) {
+  if (values.conteudo.includes('\x00')) throw new Error('Input inválido')
+  if (values.conteudo.length > MAX_MESSAGE_LENGTH) throw new Error('Mensagem muito longa')
+  if (HTML_PATTERN.test(values.conteudo)) throw new Error('Conteúdo HTML não permitido')
   return supabase.from('mensagem').insert(values);
 }
 
