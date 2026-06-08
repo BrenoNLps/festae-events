@@ -5,6 +5,13 @@ import { getTodayAsString } from "../../utils/date";
 
 const supabase = getSupabaseClient();
 
+const HTML_PATTERN = /<[^>]+>/i
+
+function assertNoHtml(value: string, field: string) {
+    if (value.includes('\x00')) throw new Error(`${field}: input inválido`)
+    if (HTML_PATTERN.test(value)) throw new Error(`${field}: conteúdo HTML não permitido`)
+}
+
 export async function createEvent(values: {
     nome: string;
     descricao?: string;
@@ -18,6 +25,9 @@ export async function createEvent(values: {
     imagem_url?: string;
     id_organizador: string;
 }) {
+    assertNoHtml(values.nome, 'nome')
+    if (values.descricao) assertNoHtml(values.descricao, 'descricao')
+
     const { data, error } = await supabase.from("evento").insert(values).select('id').single();
 
     return { data, error };
@@ -39,11 +49,17 @@ export async function getEvents(filters?: {
 }
 
 
+function escapeLike(value: string): string {
+    if (value.includes('\x00')) throw new Error('Input inválido')
+    if (value.length > 200) throw new Error('Input muito longo')
+    return value.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
+}
+
 export async function searchEvents(
     query: string,
     filters?: { estado?: string; cidade?: string; categoria?: string }
 ): Promise<Evento[]> {
-    let q = supabase.from("evento").select("*").ilike("nome", `%${query}%`);
+    let q = supabase.from("evento").select("*").ilike("nome", `%${escapeLike(query)}%`);
     if (filters?.estado) q = q.eq("endereco->>estado", filters.estado);
     if (filters?.cidade) q = q.eq("endereco->>cidade", filters.cidade);
     if (filters?.categoria) q = q.eq("categoria", filters.categoria);
