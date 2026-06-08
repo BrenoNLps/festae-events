@@ -111,116 +111,81 @@ describe('autenticação', () => {
 })
 
 // ─── Validação de eventoId ────────────────────────────────────────────────────
+// Comportamento esperado: eventoId inválido deve retornar 400.
+// Esses testes FALHAM enquanto a rota não tiver validação.
 
-describe('validação de eventoId — inputs inválidos', () => {
+describe('validação de eventoId — inputs inválidos devem retornar 400', () => {
     beforeEach(() => mockAutenticado())
 
-    // eventoId ausente → Number(undefined) = NaN → getEventById(NaN)
-    it('eventoId ausente: passa NaN para getEventById (ausência de validação)', async () => {
-        mockGetEventById.mockResolvedValue({ data: null })
-
+    it('eventoId ausente deve retornar 400', async () => {
         const res = await POST(makeRequest({}))
-
-        expect(mockGetEventById).toHaveBeenCalledWith(NaN)
-        expect(res.status).toBe(404)
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 
-    // eventoId null → Number(null) = 0 → busca evento com id 0
-    it('eventoId null: converte para 0 e busca evento com id 0 (ausência de validação)', async () => {
-        mockGetEventById.mockResolvedValue({ data: null })
-
+    it('eventoId null deve retornar 400', async () => {
         const res = await POST(makeRequest({ eventoId: null }))
-
-        expect(mockGetEventById).toHaveBeenCalledWith(0)
-        expect(res.status).toBe(404)
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 
-    // eventoId negativo → aceito sem rejeição
-    it('eventoId negativo: é passado para o banco sem rejeição (ausência de validação)', async () => {
-        mockGetEventById.mockResolvedValue({ data: null })
-
+    it('eventoId negativo deve retornar 400', async () => {
         const res = await POST(makeRequest({ eventoId: -99 }))
-
-        expect(mockGetEventById).toHaveBeenCalledWith(-99)
-        expect(res.status).toBe(404)
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 
-    // eventoId zero → aceito sem rejeição
-    it('eventoId zero: é passado para o banco sem rejeição (ausência de validação)', async () => {
-        mockGetEventById.mockResolvedValue({ data: null })
-
+    it('eventoId zero deve retornar 400', async () => {
         const res = await POST(makeRequest({ eventoId: 0 }))
-
-        expect(mockGetEventById).toHaveBeenCalledWith(0)
-        expect(res.status).toBe(404)
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 
-    // eventoId float → não é truncado para inteiro
-    it('eventoId float 1.9: não é truncado para inteiro antes de buscar', async () => {
-        mockGetEventById.mockResolvedValue({ data: null })
-
-        await POST(makeRequest({ eventoId: 1.9 }))
-
-        expect(mockGetEventById).toHaveBeenCalledWith(1.9)
+    it('eventoId float deve retornar 400', async () => {
+        const res = await POST(makeRequest({ eventoId: 1.9 }))
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 
-    // eventoId como objeto → Number({}) = NaN
-    it('eventoId como objeto: converte para NaN sem lançar erro', async () => {
-        mockGetEventById.mockResolvedValue({ data: null })
-
+    it('eventoId como objeto deve retornar 400', async () => {
         const res = await POST(makeRequest({ eventoId: {} }))
-
-        expect(mockGetEventById).toHaveBeenCalledWith(NaN)
-        expect(res.status).toBe(404)
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 
-    // eventoId como array → Number([5]) = 5 (JS converte silenciosamente)
-    it('eventoId como array [5]: JavaScript converte para 5 silenciosamente (ausência de validação)', async () => {
-        mockGetEventById.mockResolvedValue({ data: { ...eventoValido(), id: 5 } })
-
+    it('eventoId como array deve retornar 400', async () => {
         const res = await POST(makeRequest({ eventoId: [5] }))
-
-        expect(mockGetEventById).toHaveBeenCalledWith(5)
-        expect(res.status).toBe(200)
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 
-    // número muito grande
-    it('eventoId muito grande (MAX_SAFE_INTEGER+1): é passado sem rejeição', async () => {
-        mockGetEventById.mockResolvedValue({ data: null })
-
+    it('eventoId maior que MAX_SAFE_INTEGER deve retornar 400', async () => {
         const res = await POST(makeRequest({ eventoId: Number.MAX_SAFE_INTEGER + 1 }))
-
-        expect(mockGetEventById).toHaveBeenCalled()
-        expect(res.status).toBe(404)
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 })
 
 // ─── Injeção via eventoId ─────────────────────────────────────────────────────
+// Comportamento esperado: qualquer input não-numérico deve retornar 400.
+// Esses testes FALHAM enquanto a rota não tiver validação.
 
-describe('tentativas de injeção via eventoId', () => {
+describe('tentativas de injeção via eventoId — devem retornar 400', () => {
     beforeEach(() => mockAutenticado())
 
-    // SQL injection via string → Number() converte para NaN, não chega como string ao banco
-    it('SQL injection "1; DROP TABLE evento": Number() vira NaN (não chega ao banco como string)', async () => {
-        mockGetEventById.mockResolvedValue({ data: null })
-
-        await POST(makeRequest({ eventoId: '1; DROP TABLE evento' }))
-
-        expect(mockGetEventById).toHaveBeenCalledWith(NaN)
+    it('SQL injection "1; DROP TABLE evento" deve retornar 400', async () => {
+        const res = await POST(makeRequest({ eventoId: '1; DROP TABLE evento' }))
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 
-    // String numérica → aceita sem validar o tipo
-    it('string numérica "1": é convertida e aceita sem validar o tipo do campo', async () => {
-        mockGetEventById.mockResolvedValue({ data: eventoValido() })
-
+    it('string numérica "1" deve retornar 400 (tipo errado)', async () => {
         const res = await POST(makeRequest({ eventoId: '1' }))
-
-        expect(mockGetEventById).toHaveBeenCalledWith(1)
-        expect(res.status).toBe(200)
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 
-    // Prototype pollution — JSON.parse em engines modernas não contamina Object.prototype
-    it('prototype pollution: JSON.parse não contamina Object.prototype em V8', async () => {
+    it('prototype pollution: não contamina Object.prototype', async () => {
         mockGetEventById.mockResolvedValue({ data: null })
 
         const req = {
@@ -235,43 +200,35 @@ describe('tentativas de injeção via eventoId', () => {
         expect((Object.prototype as any).admin).toBeUndefined()
     })
 
-    // XSS via script tag → Number() descarta
-    it('XSS via script tag: Number() descarta a string maliciosa', async () => {
-        mockGetEventById.mockResolvedValue({ data: null })
-
-        await POST(makeRequest({ eventoId: '<script>alert(1)</script>' }))
-
-        expect(mockGetEventById).toHaveBeenCalledWith(NaN)
+    it('XSS via script tag deve retornar 400', async () => {
+        const res = await POST(makeRequest({ eventoId: '<script>alert(1)</script>' }))
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 
-    // String com espaços → Number("  1  ") = 1 — aceita sem validar tipo
-    it('string "  1  " com espaços: Number() aceita e converte para 1 sem validar tipo', async () => {
-        mockGetEventById.mockResolvedValue({ data: eventoValido() })
-
+    it('string com espaços "  1  " deve retornar 400 (tipo errado)', async () => {
         const res = await POST(makeRequest({ eventoId: '  1  ' }))
-
-        expect(mockGetEventById).toHaveBeenCalledWith(1)
-        expect(res.status).toBe(200)
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 
-    // Infinity → aceito sem rejeição
-    it('eventoId Infinity: é passado para o banco sem rejeição (ausência de validação)', async () => {
-        mockGetEventById.mockResolvedValue({ data: null })
-
-        await POST(makeRequest({ eventoId: Infinity }))
-
-        expect(mockGetEventById).toHaveBeenCalledWith(Infinity)
+    it('eventoId Infinity deve retornar 400', async () => {
+        const res = await POST(makeRequest({ eventoId: Infinity }))
+        expect(res.status).toBe(400)
+        expect(mockGetEventById).not.toHaveBeenCalled()
     })
 })
 
 // ─── Body malformado ──────────────────────────────────────────────────────────
-// req.json() é chamado FORA do try-catch da rota → erro propaga, não retorna 500
+// Comportamento esperado: retornar 400, não explodir com erro não tratado.
+// Esse teste FALHA enquanto req.json() estiver fora do try-catch.
 
-describe('body malformado ou ausente', () => {
+describe('body malformado', () => {
     beforeEach(() => mockAutenticado())
 
-    it('JSON inválido: a exceção de req.json() não é capturada pela rota (bug: deveria retornar 400)', async () => {
-        await expect(POST(makeBrokenRequest())).rejects.toThrow(SyntaxError)
+    it('JSON inválido deve retornar 400, não lançar exceção não tratada', async () => {
+        const res = await POST(makeBrokenRequest())
+        expect(res.status).toBe(400)
     })
 })
 
@@ -301,14 +258,16 @@ describe('manipulação do header host', () => {
         expect(callArg.auto_return).toBe('approved')
     })
 
-    // host null → host.startsWith() lança TypeError FORA do try-catch → propaga (bug)
-    it('header host ausente: TypeError não é capturado pela rota (bug: deveria retornar 400)', async () => {
+    // Comportamento esperado: retornar 400/500 graciosamente, não explodir.
+    // Esse teste FALHA enquanto host.startsWith() estiver fora do try-catch.
+    it('header host ausente deve retornar erro gracioso, não TypeError não tratado', async () => {
         const req = {
             json: jest.fn().mockResolvedValue({ eventoId: 1 }),
             headers: { get: (_key: string) => null },
         } as any
 
-        await expect(POST(req)).rejects.toThrow(TypeError)
+        const res = await POST(req)
+        expect([400, 500]).toContain(res.status)
     })
 })
 
