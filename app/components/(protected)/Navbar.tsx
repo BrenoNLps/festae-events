@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import { LogOut, Menu, X, ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -34,7 +35,10 @@ export default function Navbar() {
                     >
                         <Menu className="h-5 w-5 text-purple-600" />
                     </button>
-                    <span className="text-xl font-bold text-purple-600 absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">🌐 Festaê</span>
+                    <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">
+                        <Image src="/images/logo.png" alt="Festaê" width={40} height={40} />
+                        <span className="text-xl font-bold text-purple-600">Festaê</span>
+                    </div>
                 </div>
                 <button onClick={() => setShowLogoutDialog(true)} className="hidden md:flex items-center gap-2 text-sm text-gray-600 hover:text-red-600 bg-gray-300 hover:bg-red-50 px-4 py-2 rounded-full transition">
                     <LogOut className="h-5 w-5" />
