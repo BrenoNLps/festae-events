@@ -60,11 +60,21 @@ export default function Events() {
         </div>
       ) : (
         <>
-          <EventShelf title="Eventos de amigos" events={friendsEvents} loading={friendsLoading} />
-          <EventShelf title="Em andamento" events={ongoing} loading={loading} />
-          <EventShelf title="Em breve" events={upcoming} loading={loading} />
-          <EventShelf title="Últimos adicionados" events={latest} loading={loading} />
-          <EventShelf title="Finalizados" events={finished} loading={loading} />
+          {[
+            { title: "Eventos de amigos", events: friendsEvents, loading: friendsLoading },
+            { title: "Em andamento",      events: ongoing,       loading },
+            { title: "Em breve",          events: upcoming,      loading },
+            { title: "Últimos adicionados", events: latest,      loading },
+            { title: "Finalizados",       events: finished,      loading },
+          ]
+            .sort((a, b) => {
+              const aVazio = !a.loading && a.events.length === 0;
+              const bVazio = !b.loading && b.events.length === 0;
+              return Number(aVazio) - Number(bVazio);
+            })
+            .map((shelf) => (
+              <EventShelf key={shelf.title} title={shelf.title} events={shelf.events} loading={shelf.loading} />
+            ))}
         </>
       )}
     </div>
