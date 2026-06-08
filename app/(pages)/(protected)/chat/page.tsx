@@ -1,12 +1,35 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send, MessageCircle, ArrowLeft, Smile, Users, Plus, X, LogOut, UserPlus } from "lucide-react";
+import { Send, MessageCircle, ArrowLeft, Smile, Users, Plus, X, LogOut, UserPlus, Calendar } from "lucide-react";
+import Link from "next/link";
 import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
 import { Avatar } from "@/app/components/(protected)/Avatar";
 import { useChat } from "@/app/lib/hooks/useChat";
 import { ConversaComInfo, ParticipanteInfo, Usuario } from "@/app/lib/types";
 import { ConfirmDialog } from "@/app/components/ui/ConfirmDialog";
+import { formatDateRange } from "@/app/lib/utils/date";
+import { formatPrice } from "@/app/lib/utils/event";
+
+interface EventShareData {
+  __type: "event_share";
+  id: number;
+  nome: string;
+  data_inicio: string;
+  data_fim: string;
+  hora_inicio: string;
+  hora_fim: string;
+  valor: number;
+  imagem_url?: string | null;
+}
+
+function parseEventShare(conteudo: string): EventShareData | null {
+  try {
+    const data = JSON.parse(conteudo);
+    if (data?.__type === "event_share") return data as EventShareData;
+  } catch {}
+  return null;
+}
 
 function ConversaItem({ conv, selected, unreadIds, onClick }: {
   conv: ConversaComInfo;
@@ -406,14 +429,42 @@ export default function Chat() {
                 messages.map((msg) => {
                   const isMine = msg.id_remetente === user?.id;
                   const sender = !isMine ? participantMap[msg.id_remetente] : null;
+                  const eventShare = parseEventShare(msg.conteudo);
                   return (
                     <div key={msg.id} className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}>
                       {!isMine && !isDM && sender && (
                         <span className="text-xs text-gray-500 mb-0.5 ml-1">@{sender.username}</span>
                       )}
-                      <div className={`max-w-xs lg:max-w-md px-3 py-2 rounded-2xl text-sm wrap-break-word ${isMine ? "bg-purple-600 text-white rounded-br-sm" : "bg-gray-100 text-black rounded-bl-sm"}`}>
-                        {msg.conteudo}
-                      </div>
+                      {eventShare ? (
+                        <Link
+                          href={`/events/${eventShare.id}`}
+                          className={`max-w-[220px] rounded-xl overflow-hidden border transition-shadow hover:shadow-md ${isMine ? "border-purple-200" : "border-gray-200"}`}
+                        >
+                          {eventShare.imagem_url ? (
+                            <div className="h-24 bg-purple-50 overflow-hidden">
+                              <img src={eventShare.imagem_url} alt={eventShare.nome} className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className="h-24 bg-purple-100 flex items-center justify-center">
+                              <Calendar className="h-6 w-6 text-purple-400" />
+                            </div>
+                          )}
+                          <div className={`p-2.5 flex flex-col gap-1 ${isMine ? "bg-purple-50" : "bg-white"}`}>
+                            <p className="text-xs font-semibold text-gray-900 leading-tight line-clamp-2">{eventShare.nome}</p>
+                            <p className="text-xs text-gray-500">{formatDateRange(eventShare.data_inicio, eventShare.data_fim)}</p>
+                            <div className="flex items-center justify-between mt-0.5">
+                              <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${eventShare.valor === 0 ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+                                {formatPrice(eventShare.valor)}
+                              </span>
+                              <span className="text-xs text-white font-bold bg-gray-900 px-2 py-0.5 rounded-full">Ver evento</span>
+                            </div>
+                          </div>
+                        </Link>
+                      ) : (
+                        <div className={`max-w-xs lg:max-w-md px-3 py-2 rounded-2xl text-sm wrap-break-word ${isMine ? "bg-purple-600 text-white rounded-br-sm" : "bg-gray-100 text-black rounded-bl-sm"}`}>
+                          {msg.conteudo}
+                        </div>
+                      )}
                     </div>
                   );
                 })
