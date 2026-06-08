@@ -115,6 +115,7 @@ describe('searchUsers', () => {
         const result = await searchUsers('joao')
 
         expect(mockQuery.ilike).toHaveBeenCalledWith('username', '%joao%')
+        expect(mockQuery.limit).toHaveBeenCalledWith(15) // limit padrão 5 * 3
         expect(result).toHaveLength(1)
     })
 

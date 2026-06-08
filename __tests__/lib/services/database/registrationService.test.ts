@@ -98,6 +98,7 @@ describe('checkRegistration', () => {
         expect(mockQuery.select).toHaveBeenCalledWith('id')
         expect(mockQuery.eq).toHaveBeenCalledWith('id_usuario', 'user-1')
         expect(mockQuery.eq).toHaveBeenCalledWith('id_evento', 42)
+        expect(mockQuery.maybeSingle).toHaveBeenCalled()
         expect(result.data).toEqual({ id: 1 })
     })
 

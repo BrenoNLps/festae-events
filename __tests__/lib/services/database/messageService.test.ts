@@ -7,6 +7,8 @@ import {
     markConversationAsRead,
     leaveGroup,
     getUnreadConversationIds,
+    addToGroup,
+    updateGroupImage,
 } from '@/app/lib/services/database/messageService'
 
 jest.mock('@/app/lib/supabase/singleton', () => {
@@ -174,6 +176,56 @@ describe('leaveGroup', () => {
         expect(mockQuery.delete).toHaveBeenCalled()
         expect(mockQuery.eq).toHaveBeenCalledWith('id_conversa', 'conv-1')
         expect(mockQuery.eq).toHaveBeenCalledWith('id_usuario', 'user-1')
+    })
+})
+
+describe('addToGroup', () => {
+    // Happy path: chama RPC adicionar_ao_grupo com os parâmetros corretos
+    it('chama RPC adicionar_ao_grupo com id da conversa e novo usuário', async () => {
+        mockRpc.mockResolvedValueOnce({ data: null, error: null })
+
+        await addToGroup('conv-1', 'user-2')
+
+        expect(mockRpc).toHaveBeenCalledWith('adicionar_ao_grupo', {
+            id_conversa_param: 'conv-1',
+            novo_usuario: 'user-2',
+        })
+    })
+
+    // Edge case: RPC falha → repassa o erro
+    it('retorna erro quando o RPC falha', async () => {
+        const mockError = new Error('RPC error')
+        mockRpc.mockResolvedValueOnce({ data: null, error: mockError })
+
+        const result = await addToGroup('conv-1', 'user-2')
+
+        expect((result as any).error).toBe(mockError)
+    })
+})
+
+describe('updateGroupImage', () => {
+    // Happy path: atualiza imagem do grupo com URL válida
+    it('chama RPC atualizar_imagem_grupo com url da imagem', async () => {
+        mockRpc.mockResolvedValueOnce({ data: null, error: null })
+
+        await updateGroupImage('conv-1', 'https://example.com/image.png')
+
+        expect(mockRpc).toHaveBeenCalledWith('atualizar_imagem_grupo', {
+            id_conversa_param: 'conv-1',
+            nova_imagem: 'https://example.com/image.png',
+        })
+    })
+
+    // Edge case: remove imagem passando null
+    it('chama RPC com null para remover a imagem do grupo', async () => {
+        mockRpc.mockResolvedValueOnce({ data: null, error: null })
+
+        await updateGroupImage('conv-1', null)
+
+        expect(mockRpc).toHaveBeenCalledWith('atualizar_imagem_grupo', {
+            id_conversa_param: 'conv-1',
+            nova_imagem: null,
+        })
     })
 })
 

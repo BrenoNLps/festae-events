@@ -201,15 +201,26 @@ describe('declineFriend', () => {
 })
 
 describe('removeFriend', () => {
-    // Happy path: remove amizade em ambas as direções via OR
-    it('remove amizade usando OR para ambas as direções', async () => {
+    // Happy path: remove amizade em ambas as direções via OR com sintaxe exata do Supabase
+    it('remove amizade usando OR para ambas as direções com filtro correto', async () => {
         mockResolves({ data: null, error: null })
 
         await removeFriend('user-1', 'user-2')
 
         expect(mockQuery.delete).toHaveBeenCalled()
         expect(mockQuery.or).toHaveBeenCalledWith(
-            expect.stringContaining('user-1') && expect.stringContaining('user-2')
+            'and(id_usuario.eq.user-1,id_amigo.eq.user-2),and(id_usuario.eq.user-2,id_amigo.eq.user-1)'
+        )
+    })
+
+    // Edge case: sentido inverso também é removido (user-2 iniciou, user-1 é amigo)
+    it('remove corretamente quando a amizade foi iniciada pelo outro usuário', async () => {
+        mockResolves({ data: null, error: null })
+
+        await removeFriend('user-2', 'user-1')
+
+        expect(mockQuery.or).toHaveBeenCalledWith(
+            'and(id_usuario.eq.user-2,id_amigo.eq.user-1),and(id_usuario.eq.user-1,id_amigo.eq.user-2)'
         )
     })
 })

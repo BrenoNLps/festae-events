@@ -78,6 +78,8 @@ describe('createEvent', () => {
 
         expect(mockFrom).toHaveBeenCalledWith('evento')
         expect(mockQuery.insert).toHaveBeenCalledWith(input)
+        expect(mockQuery.select).toHaveBeenCalledWith('id')
+        expect(mockQuery.single).toHaveBeenCalled()
         expect(result.data).toEqual({ id: 42 })
         expect(result.error).toBeNull()
     })
