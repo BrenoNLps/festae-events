@@ -27,8 +27,20 @@ export async function GET(request: Request) {
         },
       }
     )
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      const userId = data.session?.user.id
+      if (userId) {
+        const { data: usuario } = await supabase
+          .from('usuario')
+          .select('username')
+          .eq('id', userId)
+          .single()
+
+        if (!usuario?.username) {
+          return NextResponse.redirect(new URL('/complete-profile', requestUrl.origin))
+        }
+      }
       return NextResponse.redirect(new URL(next, requestUrl.origin))
     }
   }
