@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useCurrentUser } from "./useCurrentUser";
 import { getFriends } from "../services/database/friendshipService";
-import { getEventById } from "../services/database/eventService";
 import {
   getMessagesByConversation,
   sendMessage,
@@ -19,8 +18,7 @@ import {
 } from "../services/database/messageService";
 import { uploadGroupImage } from "../services/storage/uploadService";
 import { getSupabaseClient } from "../supabase/singleton";
-import { buildEventSharePayload } from "../../components/events/ShareEventModal";
-import type { Usuario, Message, ConversaComInfo, ParticipanteInfo, Evento } from "../types";
+import type { Usuario, Message, ConversaComInfo, ParticipanteInfo } from "../types";
 
 const supabase = getSupabaseClient();
 
@@ -34,7 +32,6 @@ export function useChat() {
   const [pendingFriend, setPendingFriend] = useState<Usuario | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [unreadIds, setUnreadIds] = useState<Set<string>>(new Set());
-  const [pendingEventShare, setPendingEventShare] = useState<Evento | null>(null);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -54,18 +51,15 @@ export function useChat() {
     if (!user?.id) return;
 
     const userId = searchParams.get("userId");
-    const eventoId = searchParams.get("eventoId");
 
     Promise.all([
       getMyConversations(),
       getFriends(user.id),
       getUnreadConversationIds(),
-      eventoId ? getEventById(Number(eventoId)) : Promise.resolve({ data: null, error: null }),
-    ]).then(([{ data: convs }, { data: friendList }, { data: unread }, { data: evento }]) => {
+    ]).then(([{ data: convs }, { data: friendList }, { data: unread }]) => {
       setConversations(convs);
       if (friendList) setFriends(friendList);
       setUnreadIds(new Set(unread));
-      if (evento) setPendingEventShare(evento);
 
       if (userId) {
         const existingConv = convs.find(
@@ -210,12 +204,7 @@ export function useChat() {
     if (!convId) return;
     setSending(true);
     setInput("");
-    const eventToShare = pendingEventShare;
-    setPendingEventShare(null);
     try {
-      if (eventToShare) {
-        await sendMessage({ conteudo: buildEventSharePayload(eventToShare), id_remetente: user.id, id_conversa: convId });
-      }
       await sendMessage({ conteudo, id_remetente: user.id, id_conversa: convId });
     } finally {
       setSending(false);
@@ -228,8 +217,6 @@ export function useChat() {
     friends,
     selected,
     pendingFriend,
-    pendingEventShare,
-    clearPendingEventShare: () => setPendingEventShare(null),
     selectConversation,
     startDM,
     handleCreateGroup,

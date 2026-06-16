@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Users, X, ChevronRight, MessageCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { getFriendsAtEvent } from "@/app/lib/services/database/friendshipService";
 import { Avatar } from "@/app/components/(protected)/Avatar";
+import { ShareEventModal } from "@/app/components/events/ShareEventModal";
 import type { Usuario, Evento } from "@/app/lib/types";
-import { ROUTES } from "@/app/lib/routes";
 
-function FriendRow({ user, eventoId, onMessage }: { user: Usuario; eventoId: number; onMessage: (user: Usuario) => void }) {
+function FriendRow({ user, onMessage }: { user: Usuario; onMessage: (user: Usuario) => void }) {
   return (
     <div className="flex items-center gap-3 py-2">
       <Avatar nome={user.nome ?? user.username} imagem_url={user.imagem_url} size={40} />
@@ -30,20 +30,19 @@ function FriendRow({ user, eventoId, onMessage }: { user: Usuario; eventoId: num
 }
 
 export function FriendsAtEvent({ userId, evento, organizerId }: { userId: string; evento: Evento; organizerId: string }) {
-  const eventoId = evento.id;
   const [friends, setFriends] = useState<Usuario[]>([]);
   const [open, setOpen] = useState(false);
-  const router = useRouter();
+  const [showShare, setShowShare] = useState(false);
 
   useEffect(() => {
-    getFriendsAtEvent(userId, eventoId).then((data) => {
+    getFriendsAtEvent(userId, evento.id).then((data) => {
       setFriends(data.filter((f) => f.id !== organizerId));
     });
-  }, [userId, eventoId, organizerId]);
+  }, [userId, evento.id, organizerId]);
 
-  function handleMessage(friend: Usuario) {
+  function handleMessage() {
     setOpen(false);
-    router.push(`${ROUTES.chat}?userId=${friend.id}&eventoId=${eventoId}`);
+    setShowShare(true);
   }
 
   if (friends.length === 0) return null;
@@ -59,7 +58,7 @@ export function FriendsAtEvent({ userId, evento, organizerId }: { userId: string
         <ChevronRight className="h-4 w-4 opacity-60" />
       </button>
 
-      {open && (
+      {open && createPortal(
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
           onClick={() => setOpen(false)}
@@ -76,11 +75,16 @@ export function FriendsAtEvent({ userId, evento, organizerId }: { userId: string
             </div>
             <div className="flex flex-col divide-y divide-gray-100">
               {friends.map((f) => (
-                <FriendRow key={f.id} user={f} eventoId={eventoId} onMessage={handleMessage} />
+                <FriendRow key={f.id} user={f} onMessage={handleMessage} />
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
+      )}
+
+      {showShare && (
+        <ShareEventModal evento={evento} onClose={() => setShowShare(false)} />
       )}
     </>
   );

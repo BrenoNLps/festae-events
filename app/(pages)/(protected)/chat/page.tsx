@@ -249,8 +249,6 @@ export default function Chat() {
     friends,
     selected,
     pendingFriend,
-    pendingEventShare,
-    clearPendingEventShare,
     selectConversation,
     startDM,
     handleCreateGroup,
@@ -475,20 +473,6 @@ export default function Chat() {
             </div>
 
             <div className="border-t border-gray-100">
-              {pendingEventShare && (
-                <div className="px-4 pt-3 pb-1">
-                  <div className="flex items-center gap-2 bg-purple-50 border border-purple-100 rounded-xl px-3 py-2">
-                    <Calendar className="h-4 w-4 text-purple-500 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-purple-800 truncate">{pendingEventShare.nome}</p>
-                      <p className="text-xs text-purple-500">Evento será enviado com sua mensagem</p>
-                    </div>
-                    <button onClick={clearPendingEventShare} className="shrink-0 text-purple-400 hover:text-purple-600 transition">
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              )}
             <div className="px-4 py-3 flex items-center gap-2 relative">
               {showEmoji && (
                 <div ref={emojiRef} className="absolute bottom-16 left-0 right-0 z-50 md:right-auto md:left-4 md:w-[300px]">
