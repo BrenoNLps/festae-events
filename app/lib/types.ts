@@ -109,6 +109,7 @@ export type ParticipanteInfo = Pick<Usuario, 'id' | 'username' | 'nome' | 'image
 
 export interface ConversaComInfo extends Conversa {
     ultima_leitura: string;
+    ultima_mensagem_at?: string;
     participantes: ParticipanteInfo[];
 }
 

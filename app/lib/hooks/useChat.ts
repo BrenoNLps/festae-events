@@ -85,6 +85,13 @@ export function useChat() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "mensagem" }, (payload) => {
         const msg = payload.new as Message;
         if (msg.id_remetente === user.id) return;
+        setConversations((prev) => {
+          const idx = prev.findIndex((c) => c.id === msg.id_conversa);
+          if (idx <= 0) return prev;
+          const updated = [...prev];
+          const [conv] = updated.splice(idx, 1);
+          return [conv, ...updated];
+        });
         if (msg.id_conversa === selectedRef.current?.id) return;
         setUnreadIds((prev) => {
           if (prev.has(msg.id_conversa)) return prev;
@@ -206,6 +213,13 @@ export function useChat() {
     setInput("");
     try {
       await sendMessage({ conteudo, id_remetente: user.id, id_conversa: convId });
+      setConversations((prev) => {
+        const idx = prev.findIndex((c) => c.id === convId);
+        if (idx <= 0) return prev;
+        const updated = [...prev];
+        const [conv] = updated.splice(idx, 1);
+        return [conv, ...updated];
+      });
     } finally {
       setSending(false);
     }
