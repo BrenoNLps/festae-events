@@ -265,34 +265,32 @@ function UserCard({ user, isFriend, isPendingSent, isPendingReceived, onAdd, onR
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {isFriend ? (
-            <>
+            <div className="relative" ref={menuRef}>
               <button
-                onClick={onMessage}
-                className="flex items-center gap-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded-full transition-colors"
+                onClick={() => setMenuOpen((o) => !o)}
+                className="flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-full transition-colors"
               >
-                <MessageCircle className="h-4 w-4" />
-                Mensagem
+                <MoreVertical className="h-4 w-4" />
               </button>
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setMenuOpen((o) => !o)}
-                  className="flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-full transition-colors"
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </button>
-                {menuOpen && (
-                  <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 min-w-max">
-                    <button
-                      onClick={() => { setMenuOpen(false); setConfirmRemove(true); }}
-                      className="flex items-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                    >
-                      <UserMinus className="h-4 w-4" />
-                      Remover amigo
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
+              {menuOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 min-w-max">
+                  <button
+                    onClick={() => { onMessage?.(); setMenuOpen(false); }}
+                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-t-xl transition-colors"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    Enviar mensagem
+                  </button>
+                  <button
+                    onClick={() => { setMenuOpen(false); setConfirmRemove(true); }}
+                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-b-xl transition-colors"
+                  >
+                    <UserMinus className="h-4 w-4" />
+                    Remover amigo
+                  </button>
+                </div>
+              )}
+            </div>
           ) : isPendingReceived ? (
             <>
               <button
