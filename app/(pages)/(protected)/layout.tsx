@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createClient } from '@/app/lib/supabase/server'
 import { ROUTES } from '@/app/lib/routes'
 import Navbar from "@/app/components/(protected)/Navbar"
@@ -10,6 +11,19 @@ export default async function ProtectedLayout({ children }: { children: React.Re
 
     if (!user) {
         redirect(ROUTES.login)
+    }
+
+    const pathname = (await headers()).get('x-pathname') ?? ''
+    if (pathname !== ROUTES.completeProfile) {
+        const { data: usuario } = await supabase
+            .from('usuario')
+            .select('username')
+            .eq('id', user!.id)
+            .single()
+
+        if (!usuario?.username) {
+            redirect(ROUTES.completeProfile)
+        }
     }
 
     return (
