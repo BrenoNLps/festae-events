@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Send, Check, Users } from "lucide-react";
 import { Evento, ConversaComInfo, Usuario } from "@/app/lib/types";
 import {
@@ -38,6 +39,7 @@ export function ShareEventModal({ evento, onClose }: Props) {
   const [conversations, setConversations] = useState<ConversaComInfo[]>([]);
   const [friends, setFriends] = useState<Usuario[]>([]);
   const [search, setSearch] = useState("");
+  const [message, setMessage] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [sentIds, setSentIds] = useState<Set<string>>(new Set());
 
@@ -76,11 +78,10 @@ export function ShareEventModal({ evento, onClose }: Props) {
   async function sendToConv(convId: string) {
     if (!user?.id || loadingId) return;
     setLoadingId(convId);
-    await sendMessage({
-      conteudo: buildEventSharePayload(evento),
-      id_remetente: user.id,
-      id_conversa: convId,
-    });
+    await sendMessage({ conteudo: buildEventSharePayload(evento), id_remetente: user.id, id_conversa: convId });
+    if (message.trim()) {
+      await sendMessage({ conteudo: message.trim(), id_remetente: user.id, id_conversa: convId });
+    }
     setLoadingId(null);
     setSentIds((prev) => new Set(prev).add(convId));
   }
@@ -90,11 +91,10 @@ export function ShareEventModal({ evento, onClose }: Props) {
     setLoadingId(friend.id);
     const { data: convId } = await getOrCreateDMConversation(friend.id);
     if (convId) {
-      await sendMessage({
-        conteudo: buildEventSharePayload(evento),
-        id_remetente: user.id,
-        id_conversa: convId,
-      });
+      await sendMessage({ conteudo: buildEventSharePayload(evento), id_remetente: user.id, id_conversa: convId });
+      if (message.trim()) {
+        await sendMessage({ conteudo: message.trim(), id_remetente: user.id, id_conversa: convId });
+      }
       setSentIds((prev) => new Set(prev).add(friend.id));
     }
     setLoadingId(null);
@@ -102,7 +102,7 @@ export function ShareEventModal({ evento, onClose }: Props) {
 
   const isEmpty = filteredConvs.length === 0 && filteredFriends.length === 0;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
       onClick={onClose}
@@ -125,6 +125,17 @@ export function ShareEventModal({ evento, onClose }: Props) {
           <p className="text-xs text-purple-700 font-medium truncate">
             {evento.nome}
           </p>
+        </div>
+
+        <div className="px-4 py-2.5 border-b border-gray-100">
+          <input
+            type="text"
+            placeholder="Adicionar mensagem (opcional)..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            maxLength={500}
+            className="w-full text-sm text-gray-900 border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-purple-300"
+          />
         </div>
 
         <div className="px-4 py-2 border-b border-gray-100">
@@ -232,6 +243,7 @@ export function ShareEventModal({ evento, onClose }: Props) {
           })}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

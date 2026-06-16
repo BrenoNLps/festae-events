@@ -57,10 +57,11 @@ export async function searchUsers(
   excludeId?: string,
   limit = 5,
 ): Promise<Usuario[]> {
+  const escaped = escapeLike(query);
   let q = supabase
     .from("usuario")
     .select("id, username, nome, imagem_url, tipo_conta")
-    .ilike("username", `%${escapeLike(query)}%`)
+    .or(`username.ilike.%${escaped}%,nome.ilike.%${escaped}%`)
     .limit(limit * 3);
 
   if (excludeId) q = q.neq("id", excludeId);
@@ -73,8 +74,9 @@ export async function searchUsers(
     .sort((a, b) => {
       const score = (u: typeof a) => {
         const un = u.username?.toLowerCase() ?? "";
-        if (un === lower) return 0;
-        if (un.startsWith(lower)) return 1;
+        const nm = u.nome?.toLowerCase() ?? "";
+        if (un === lower || nm === lower) return 0;
+        if (un.startsWith(lower) || nm.startsWith(lower)) return 1;
         return 2;
       };
       const diff = score(a) - score(b);

@@ -71,7 +71,7 @@ export function EventCard({ event }: { event: Evento }) {
           <button
             onClick={() => setShowShare(true)}
             title="Enviar para amigo"
-            className="absolute top-2 left-2 w-7 h-7 flex items-center justify-center rounded-full bg-white/80 text-gray-500 hover:text-purple-600 hover:bg-white transition opacity-0 group-hover:opacity-100 focus:opacity-100"
+            className="absolute top-2 left-2 w-7 h-7 flex items-center justify-center rounded-full bg-white/80 text-gray-500 hover:text-purple-600 hover:bg-white transition opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
           >
             <Share2 className="h-3.5 w-3.5" />
           </button>
