@@ -16,6 +16,7 @@ import { Avatar } from "@/app/components/(protected)/Avatar";
 interface Props {
   evento: Evento;
   onClose: () => void;
+  initialFriend?: Usuario;
 }
 
 export function buildEventSharePayload(evento: Evento): string {
@@ -40,14 +41,16 @@ function ShareRow({
   subtitle,
   isSent,
   onSend,
+  defaultExpanded,
 }: {
   avatar: React.ReactNode;
   name: string;
   subtitle?: string;
   isSent: boolean;
   onSend: (message: string) => Promise<void>;
+  defaultExpanded?: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(defaultExpanded ?? false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -100,7 +103,7 @@ function ShareRow({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Mensagem (opcional)..."
+            placeholder="Mensagem..."
             maxLength={500}
             className="flex-1 text-sm text-gray-900 border border-gray-200 rounded-full px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-purple-300"
           />
@@ -120,7 +123,7 @@ function ShareRow({
   );
 }
 
-export function ShareEventModal({ evento, onClose }: Props) {
+export function ShareEventModal({ evento, onClose, initialFriend }: Props) {
   const { user } = useCurrentUser();
   const [conversations, setConversations] = useState<ConversaComInfo[]>([]);
   const [friends, setFriends] = useState<Usuario[]>([]);
@@ -224,6 +227,7 @@ export function ShareEventModal({ evento, onClose }: Props) {
             const other = isDM ? conv.participantes[0] : null;
             const name = isDM ? (other?.nome ?? `@${other?.username}`) : (conv.nome ?? "Grupo");
             const subtitle = !isDM ? `${conv.participantes.length + 1} participantes` : undefined;
+            const isInitial = isDM && initialFriend && other?.id === initialFriend.id;
 
             return (
               <ShareRow
@@ -241,6 +245,7 @@ export function ShareEventModal({ evento, onClose }: Props) {
                 subtitle={subtitle}
                 isSent={sentIds.has(conv.id)}
                 onSend={(msg) => sendToConv(conv.id, msg)}
+                defaultExpanded={!!isInitial}
               />
             );
           })}
@@ -253,6 +258,7 @@ export function ShareEventModal({ evento, onClose }: Props) {
               subtitle={`@${f.username}`}
               isSent={sentIds.has(f.id)}
               onSend={(msg) => sendToFriend(f, msg)}
+              defaultExpanded={initialFriend?.id === f.id}
             />
           ))}
         </div>

@@ -32,7 +32,7 @@ function FriendRow({ user, onMessage }: { user: Usuario; onMessage: (user: Usuar
 export function FriendsAtEvent({ userId, evento, organizerId }: { userId: string; evento: Evento; organizerId: string }) {
   const [friends, setFriends] = useState<Usuario[]>([]);
   const [open, setOpen] = useState(false);
-  const [showShare, setShowShare] = useState(false);
+  const [shareTarget, setShareTarget] = useState<Usuario | null>(null);
 
   useEffect(() => {
     getFriendsAtEvent(userId, evento.id).then((data) => {
@@ -40,9 +40,9 @@ export function FriendsAtEvent({ userId, evento, organizerId }: { userId: string
     });
   }, [userId, evento.id, organizerId]);
 
-  function handleMessage() {
+  function handleMessage(friend: Usuario) {
     setOpen(false);
-    setShowShare(true);
+    setShareTarget(friend);
   }
 
   if (friends.length === 0) return null;
@@ -75,7 +75,7 @@ export function FriendsAtEvent({ userId, evento, organizerId }: { userId: string
             </div>
             <div className="flex flex-col divide-y divide-gray-100">
               {friends.map((f) => (
-                <FriendRow key={f.id} user={f} onMessage={handleMessage} />
+                <FriendRow key={f.id} user={f} onMessage={() => handleMessage(f)} />
               ))}
             </div>
           </div>
@@ -83,8 +83,8 @@ export function FriendsAtEvent({ userId, evento, organizerId }: { userId: string
         document.body
       )}
 
-      {showShare && (
-        <ShareEventModal evento={evento} onClose={() => setShowShare(false)} />
+      {shareTarget && (
+        <ShareEventModal evento={evento} initialFriend={shareTarget} onClose={() => setShareTarget(null)} />
       )}
     </>
   );
