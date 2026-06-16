@@ -1,34 +1,50 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Users, X, ChevronRight } from "lucide-react";
+import { Users, X, ChevronRight, MessageCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { getFriendsAtEvent } from "@/app/lib/services/database/friendshipService";
 import { Avatar } from "@/app/components/(protected)/Avatar";
-import type { Usuario } from "@/app/lib/types";
+import type { Usuario, Evento } from "@/app/lib/types";
+import { ROUTES } from "@/app/lib/routes";
 
-function FriendRow({ user }: { user: Usuario }) {
+function FriendRow({ user, eventoId, onMessage }: { user: Usuario; eventoId: number; onMessage: (user: Usuario) => void }) {
   return (
     <div className="flex items-center gap-3 py-2">
       <Avatar nome={user.nome ?? user.username} imagem_url={user.imagem_url} size={40} />
-      <div className="flex flex-col">
-        <span className="text-sm font-medium text-gray-800">{user.nome ?? user.username}</span>
+      <div className="flex flex-col flex-1 min-w-0">
+        <span className="text-sm font-medium text-gray-800 truncate">{user.nome ?? user.username}</span>
         {user.username && user.nome && (
           <span className="text-xs text-gray-400">@{user.username}</span>
         )}
       </div>
+      <button
+        onClick={() => onMessage(user)}
+        className="shrink-0 flex items-center gap-1.5 text-xs font-semibold text-purple-600 hover:text-purple-700 border border-purple-200 hover:border-purple-300 hover:bg-purple-50 px-3 py-1.5 rounded-full transition-colors"
+      >
+        <MessageCircle className="h-3.5 w-3.5" />
+        Mensagem
+      </button>
     </div>
   );
 }
 
-export function FriendsAtEvent({ userId, eventoId, organizerId }: { userId: string; eventoId: number; organizerId: string }) {
+export function FriendsAtEvent({ userId, evento, organizerId }: { userId: string; evento: Evento; organizerId: string }) {
+  const eventoId = evento.id;
   const [friends, setFriends] = useState<Usuario[]>([]);
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     getFriendsAtEvent(userId, eventoId).then((data) => {
       setFriends(data.filter((f) => f.id !== organizerId));
     });
   }, [userId, eventoId, organizerId]);
+
+  function handleMessage(friend: Usuario) {
+    setOpen(false);
+    router.push(`${ROUTES.chat}?userId=${friend.id}&eventoId=${eventoId}`);
+  }
 
   if (friends.length === 0) return null;
 
@@ -60,7 +76,7 @@ export function FriendsAtEvent({ userId, eventoId, organizerId }: { userId: stri
             </div>
             <div className="flex flex-col divide-y divide-gray-100">
               {friends.map((f) => (
-                <FriendRow key={f.id} user={f} />
+                <FriendRow key={f.id} user={f} eventoId={eventoId} onMessage={handleMessage} />
               ))}
             </div>
           </div>

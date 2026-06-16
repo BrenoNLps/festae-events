@@ -51,8 +51,8 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(url)
     }
 
-    //Impede que o bfcache forneça informações de autenticação desatualizadas ao navegar (de trás/para frente).
     supabaseResponse.headers.set('Cache-Control', 'no-store')
+    supabaseResponse.headers.set('x-pathname', pathname)
 
     return supabaseResponse
 }

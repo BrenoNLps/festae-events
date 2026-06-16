@@ -289,7 +289,7 @@ export default function EventDetail() {
             )}
           </div>
           {user && (
-            <FriendsAtEvent userId={user.id} eventoId={event.id} organizerId={event.id_organizador} />
+            <FriendsAtEvent userId={user.id} evento={event} organizerId={event.id_organizador} />
           )}
         </div>
 

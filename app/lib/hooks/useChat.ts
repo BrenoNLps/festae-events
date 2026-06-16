@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useCurrentUser } from "./useCurrentUser";
 import { getFriends } from "../services/database/friendshipService";
+import { getEventById } from "../services/database/eventService";
 import {
   getMessagesByConversation,
   sendMessage,
@@ -18,7 +19,8 @@ import {
 } from "../services/database/messageService";
 import { uploadGroupImage } from "../services/storage/uploadService";
 import { getSupabaseClient } from "../supabase/singleton";
-import type { Usuario, Message, ConversaComInfo, ParticipanteInfo } from "../types";
+import { buildEventSharePayload } from "../../components/events/ShareEventModal";
+import type { Usuario, Message, ConversaComInfo, ParticipanteInfo, Evento } from "../types";
 
 const supabase = getSupabaseClient();
 
@@ -32,6 +34,7 @@ export function useChat() {
   const [pendingFriend, setPendingFriend] = useState<Usuario | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [unreadIds, setUnreadIds] = useState<Set<string>>(new Set());
+  const [pendingEventShare, setPendingEventShare] = useState<Evento | null>(null);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -50,24 +53,32 @@ export function useChat() {
   useEffect(() => {
     if (!user?.id) return;
 
-    refreshConversations();
-    getFriends(user.id).then(({ data }) => {
-      if (data) setFriends(data);
-    });
-    getUnreadConversationIds().then(({ data }) => {
-      setUnreadIds(new Set(data));
-    });
-
     const userId = searchParams.get("userId");
-    if (userId) {
-      getOrCreateDMConversation(userId).then(({ data: convId }) => {
-        if (!convId) return;
-        getMyConversations().then(({ data }) => {
-          const conv = data.find((c) => c.id === convId);
-          if (conv) selectConversation(conv);
-        });
-      });
-    }
+    const eventoId = searchParams.get("eventoId");
+
+    Promise.all([
+      getMyConversations(),
+      getFriends(user.id),
+      getUnreadConversationIds(),
+      eventoId ? getEventById(Number(eventoId)) : Promise.resolve({ data: null, error: null }),
+    ]).then(([{ data: convs }, { data: friendList }, { data: unread }, { data: evento }]) => {
+      setConversations(convs);
+      if (friendList) setFriends(friendList);
+      setUnreadIds(new Set(unread));
+      if (evento) setPendingEventShare(evento);
+
+      if (userId) {
+        const existingConv = convs.find(
+          (c) => c.tipo === 'DM' && c.participantes.some((p) => p.id === userId)
+        );
+        if (existingConv) {
+          selectConversation(existingConv);
+        } else {
+          const friend = friendList?.find((f) => f.id === userId);
+          if (friend) setPendingFriend(friend);
+        }
+      }
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
@@ -199,7 +210,12 @@ export function useChat() {
     if (!convId) return;
     setSending(true);
     setInput("");
+    const eventToShare = pendingEventShare;
+    setPendingEventShare(null);
     try {
+      if (eventToShare) {
+        await sendMessage({ conteudo: buildEventSharePayload(eventToShare), id_remetente: user.id, id_conversa: convId });
+      }
       await sendMessage({ conteudo, id_remetente: user.id, id_conversa: convId });
     } finally {
       setSending(false);
@@ -212,6 +228,8 @@ export function useChat() {
     friends,
     selected,
     pendingFriend,
+    pendingEventShare,
+    clearPendingEventShare: () => setPendingEventShare(null),
     selectConversation,
     startDM,
     handleCreateGroup,
