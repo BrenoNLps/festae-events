@@ -52,7 +52,6 @@ export async function proxy(request: NextRequest) {
     }
 
     supabaseResponse.headers.set('Cache-Control', 'no-store')
-    supabaseResponse.headers.set('x-pathname', pathname)
 
     return supabaseResponse
 }
