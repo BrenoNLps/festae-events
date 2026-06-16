@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserPlus, UserCheck, Users, MessageCircle, UserMinus, Clock, Check, X } from "lucide-react";
+import { UserPlus, UserCheck, Users, MessageCircle, UserMinus, Clock, Check, X, MoreVertical } from "lucide-react";
 
 import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { useSearch } from "@/app/lib/hooks/useSearch";
@@ -17,6 +17,7 @@ import {
   declineFriend,
 } from "@/app/lib/services/database/friendshipService";
 import { SearchInput } from "@/app/components/(protected)/SearchInput";
+import { ConfirmDialog } from "@/app/components/ui/ConfirmDialog";
 import { Avatar } from "@/app/components/(protected)/Avatar";
 import { Usuario } from "@/app/lib/types";
 import { ROUTES } from "@/app/lib/routes";
@@ -230,68 +231,106 @@ interface UserCardProps {
 }
 
 function UserCard({ user, isFriend, isPendingSent, isPendingReceived, onAdd, onRemove, onAccept, onDecline, onCancel, onMessage }: UserCardProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
+
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white shadow-sm">
-      <Avatar nome={user.nome} imagem_url={user.imagem_url} size={44} />
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm text-gray-900 truncate">@{user.username}</p>
-        {user.nome && <p className="text-xs text-gray-500 truncate">{user.nome}</p>}
-      </div>
-      <div className="flex items-center gap-2">
-        {isFriend ? (
-          <>
+    <>
+      <ConfirmDialog
+        open={confirmRemove}
+        title="Remover amigo"
+        description={`Tem certeza que deseja remover @${user.username} da sua lista de amigos?`}
+        confirmLabel="Remover"
+        destructive
+        onConfirm={() => { onRemove?.(); setConfirmRemove(false); }}
+        onCancel={() => setConfirmRemove(false)}
+      />
+      <div className="relative flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white shadow-sm">
+        <Avatar nome={user.nome} imagem_url={user.imagem_url} size={44} />
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm text-gray-900 truncate">@{user.username}</p>
+          {user.nome && <p className="text-xs text-gray-500 truncate">{user.nome}</p>}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {isFriend ? (
+            <>
+              <button
+                onClick={onMessage}
+                className="flex items-center gap-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded-full transition-colors"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Mensagem
+              </button>
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setMenuOpen((o) => !o)}
+                  className="flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-full transition-colors"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 min-w-max">
+                    <button
+                      onClick={() => { setMenuOpen(false); setConfirmRemove(true); }}
+                      className="flex items-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                    >
+                      <UserMinus className="h-4 w-4" />
+                      Remover amigo
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : isPendingReceived ? (
+            <>
+              <button
+                onClick={onAccept}
+                className="flex items-center gap-1.5 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded-full transition-colors"
+              >
+                <Check className="h-4 w-4" />
+                Aceitar
+              </button>
+              <button
+                onClick={onDecline}
+                className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-red-600 border border-gray-200 hover:border-red-300 px-3 py-2 rounded-full transition-colors"
+              >
+                <X className="h-4 w-4" />
+                Recusar
+              </button>
+            </>
+          ) : isPendingSent ? (
             <button
-              onClick={onMessage}
-              className="flex items-center gap-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded-full transition-colors"
-            >
-              <MessageCircle className="h-4 w-4" />
-              Mensagem
-            </button>
-            <button
-              onClick={onRemove}
-              className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-red-600 border border-gray-200 hover:border-red-300 px-3 py-2 rounded-full transition-colors"
-            >
-              <UserMinus className="h-4 w-4" />
-              Remover
-            </button>
-          </>
-        ) : isPendingReceived ? (
-          <>
-            <button
-              onClick={onAccept}
-              className="flex items-center gap-1.5 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded-full transition-colors"
-            >
-              <Check className="h-4 w-4" />
-              Aceitar
-            </button>
-            <button
-              onClick={onDecline}
-              className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-red-600 border border-gray-200 hover:border-red-300 px-3 py-2 rounded-full transition-colors"
+              onClick={onCancel}
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-red-600 border border-gray-200 hover:border-red-300 px-3 py-2 rounded-full transition-colors"
             >
               <X className="h-4 w-4" />
-              Recusar
+              Cancelar
             </button>
-          </>
-        ) : isPendingSent ? (
-          <button
-            onClick={onCancel}
-            className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-red-600 border border-gray-200 hover:border-red-300 px-3 py-2 rounded-full transition-colors"
-          >
-            <X className="h-4 w-4" />
-            Cancelar
-          </button>
-        ) : (
-          onAdd && (
-            <button
-              onClick={onAdd}
-              className="flex items-center gap-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded-full transition-colors"
-            >
-              <UserPlus className="h-4 w-4" />
-              Adicionar
-            </button>
-          )
-        )}
+          ) : (
+            onAdd && (
+              <button
+                onClick={onAdd}
+                className="flex items-center gap-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded-full transition-colors"
+              >
+                <UserPlus className="h-4 w-4" />
+                Adicionar
+              </button>
+            )
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
