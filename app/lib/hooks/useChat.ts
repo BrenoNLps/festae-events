@@ -42,11 +42,6 @@ export function useChat() {
     (selected?.participantes ?? []).map((p) => [p.id, p])
   ) as Record<string, ParticipanteInfo>;
 
-  function refreshConversations() {
-    if (!user?.id) return;
-    getMyConversations().then(({ data }) => setConversations(data));
-  }
-
   useEffect(() => {
     if (!user?.id) return;
 
@@ -165,7 +160,7 @@ export function useChat() {
     await leaveGroup(selected.id, user.id);
     setSelected(null);
     setMessages([]);
-    refreshConversations();
+    getMyConversations().then(({ data }) => setConversations(data));
   }
 
   async function handleAddToGroup(novo_usuario: string) {
