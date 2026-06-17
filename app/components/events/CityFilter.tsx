@@ -29,17 +29,6 @@ export function CityFilter({ estado, cidade, categoria, setEstado, setCidade, se
   return (
     <div className="flex items-center gap-3 flex-wrap">
       <select
-        value={categoria}
-        onChange={(e) => setCategoria(e.target.value)}
-        className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-      >
-        <option value="">Categoria</option>
-        {Object.values(EventCategory).map((cat) => (
-          <option key={cat} value={cat}>{EVENT_CATEGORY_LABELS[cat]}</option>
-        ))}
-      </select>
-
-      <select
         value={estado}
         onChange={(e) => setEstado(e.target.value)}
         className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
@@ -59,6 +48,17 @@ export function CityFilter({ estado, cidade, categoria, setEstado, setCidade, se
         <option value="">Cidade</option>
         {cidades.map((c) => (
           <option key={c} value={c}>{c}</option>
+        ))}
+      </select>
+
+      <select
+        value={categoria}
+        onChange={(e) => setCategoria(e.target.value)}
+        className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+      >
+        <option value="">Categoria</option>
+        {Object.values(EventCategory).map((cat) => (
+          <option key={cat} value={cat}>{EVENT_CATEGORY_LABELS[cat]}</option>
         ))}
       </select>
 
