@@ -27,15 +27,23 @@ export function EventShareButton({ evento, className, label }: Props) {
       if (buttonRef.current?.contains(target) || menuRef.current?.contains(target)) return;
       setMenuOpen(false);
     }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    function handleScroll() { setMenuOpen(false); }
+      document.addEventListener("mousedown", handleClick);
+      window.addEventListener("scroll", handleScroll, true);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
   }, [menuOpen]);
 
   function handleToggle(e: React.MouseEvent) {
     e.preventDefault();
     if (!menuOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      setMenuPos({ top: rect.bottom + 8, left: rect.left });
+      const menuWidth = 192;
+      const centered = rect.left + rect.width / 2 - menuWidth / 2;
+      const left = Math.max(8, Math.min(centered, window.innerWidth - menuWidth - 8));
+      setMenuPos({ top: rect.bottom + 8, left });
     }
     setMenuOpen((v) => !v);
   }
