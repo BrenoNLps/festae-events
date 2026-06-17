@@ -54,7 +54,9 @@ export function EventCard({ event }: { event: Evento }) {
           )}
 
           <div className="flex items-center justify-between mt-0.5">
-            <span className="text-xs text-gray-400">{event.vagas} vagas</span>
+            <span className="text-xs text-gray-400">
+                {event.inscritos !== undefined ? `${event.inscritos}/${event.vagas} vagas` : `${event.vagas} vagas`}
+              </span>
             {event.categoria && (
               <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
                 {EVENT_CATEGORY_LABELS[event.categoria]}

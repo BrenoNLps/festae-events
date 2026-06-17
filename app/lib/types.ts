@@ -66,6 +66,7 @@ export interface Evento {
     id_organizador: string;
     created_at?: string;
     categoria?: EventCategory;
+    inscritos?: number;
 }
 
 export interface Usuario {
