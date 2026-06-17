@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Share2, Link2, MessageCircle } from "lucide-react";
 import { Evento } from "@/app/lib/types";
 import { ShareEventModal } from "./ShareEventModal";
@@ -15,18 +16,29 @@ export function EventShareButton({ evento, className, label }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!menuOpen) return;
     function handleClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
+      const target = e.target as Node;
+      if (buttonRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setMenuOpen(false);
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
+
+  function handleToggle(e: React.MouseEvent) {
+    e.preventDefault();
+    if (!menuOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom + 8, left: rect.left });
+    }
+    setMenuOpen((v) => !v);
+  }
 
   async function handleCopyLink() {
     setMenuOpen(false);
@@ -42,34 +54,40 @@ export function EventShareButton({ evento, className, label }: Props) {
 
   return (
     <>
-      <div ref={menuRef} className="relative">
+      <div>
         <button
-          onClick={(e) => { e.preventDefault(); setMenuOpen((v) => !v); }}
+          ref={buttonRef}
+          onClick={handleToggle}
           className={className}
         >
           <Share2 className="h-4 w-4" />
           {label && <span>{copied ? "Link copiado!" : label}</span>}
         </button>
-
-        {menuOpen && (
-          <div className="absolute top-full mt-2 right-0 z-20 bg-white rounded-xl shadow-lg border border-gray-100 py-1 w-48">
-            <button
-              onClick={handleCopyLink}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition text-left"
-            >
-              <Link2 className="h-4 w-4 text-gray-400 shrink-0" />
-              Compartilhar link
-            </button>
-            <button
-              onClick={() => { setMenuOpen(false); setShowShare(true); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition text-left"
-            >
-              <MessageCircle className="h-4 w-4 text-gray-400 shrink-0" />
-              Enviar para amigo
-            </button>
-          </div>
-        )}
       </div>
+
+      {menuOpen && createPortal(
+        <div
+          ref={menuRef}
+          className="fixed z-50 bg-white rounded-xl shadow-lg border border-gray-100 py-1 w-48"
+          style={{ top: menuPos.top, left: menuPos.left }}
+        >
+          <button
+            onClick={handleCopyLink}
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition text-left"
+          >
+            <Link2 className="h-4 w-4 text-gray-400 shrink-0" />
+            Compartilhar link
+          </button>
+          <button
+            onClick={() => { setMenuOpen(false); setShowShare(true); }}
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition text-left"
+          >
+            <MessageCircle className="h-4 w-4 text-gray-400 shrink-0" />
+            Enviar para amigo
+          </button>
+        </div>,
+        document.body
+      )}
 
       {showShare && (
         <ShareEventModal evento={evento} onClose={() => setShowShare(false)} />
