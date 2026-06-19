@@ -110,7 +110,7 @@ export default function Friends() {
       <SearchInput
         value={query}
         onChange={setQuery}
-        placeholder="Buscar por username..."
+        placeholder="Buscar por apelido..."
         loading={loading}
         className="mb-6"
       />

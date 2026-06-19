@@ -70,8 +70,8 @@ export default function Profile() {
                         <input className={styles.input} value={nome} onChange={e => setNome(e.target.value)} placeholder="Seu nome" />
                     </div>
                     <div>
-                        <label className={styles.label}>Username</label>
-                        <input className={styles.input} value={username} onChange={e => setUsername(e.target.value)} placeholder="@seu_username" />
+                        <label className={styles.label}>Apelido</label>
+                        <input className={styles.input} value={username} onChange={e => setUsername(e.target.value)} placeholder="@seu_apelido" />
                     </div>
                     <div className="flex gap-3 justify-end">
                         <button onClick={() => setEditing(false)} className="text-sm font-bold text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition">

@@ -18,9 +18,9 @@ export default function CompleteProfile() {
                 <ImageUpload onChange={setImageFile} shape="circle" />
                 <div>
                     <label className={styles.label}>
-                        Username
+                        Apelido
                     </label>
-                    <input {...register('username')} className={styles.input} placeholder="@seu_username" />
+                    <input {...register('username')} className={styles.input} placeholder="@seu_apelido" />
                     {errors.username && <span className={styles.error}>{errors.username.message}</span>}
                 </div>
                 <div>
