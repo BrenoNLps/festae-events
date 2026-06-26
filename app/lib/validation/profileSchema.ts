@@ -15,6 +15,6 @@ export const profileSchema = z.object({
         return validatorCNPJ(data.cnpj ?? '')
     }
     return true
-}, { message: 'CNPJ inválido (deve ter 14 dígitos)', path: ['cnpj'] })
+}, { message: 'CNPJ inválido', path: ['cnpj'] })
 
 export type ProfileFormData = z.infer<typeof profileSchema>
