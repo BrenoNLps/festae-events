@@ -46,7 +46,7 @@ export function UserProfileSheet({ user, open, onClose }: UserProfileSheetProps)
                         <div className="flex items-center gap-1.5">
                             <span className="text-base font-bold text-gray-900">{displayName}</span>
                             {isEmpresa && (
-                                <BadgeCheck className="h-5 w-5 text-purple-500 shrink-0" title="Empresa verificada" />
+                                <BadgeCheck className="h-5 w-5 text-purple-500 shrink-0" aria-label="Empresa verificada" />
                             )}
                         </div>
                         <span className="text-sm text-gray-400">@{user.username}</span>
