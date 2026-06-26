@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Calendar, Clock, MapPin, Users } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Calendar, Clock, MapPin, User, Users } from "lucide-react";
 import { EventImage } from "@/app/components/events/EventImage";
 import { ConfirmDialog } from "@/app/components/ui/ConfirmDialog";
 import { getEventById, deleteEvent } from "@/app/lib/services/database/eventService";
@@ -11,9 +11,10 @@ import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { useEventRegistration } from "@/app/lib/hooks/useEventRegistration";
 import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
-import { Evento, EVENT_CATEGORY_LABELS } from "@/app/lib/types";
+import { AccountType, Evento, EVENT_CATEGORY_LABELS } from "@/app/lib/types";
 import { FriendsAtEvent } from "@/app/components/events/FriendsAtEvent";
 import { EventShareButton } from "@/app/components/events/EventShareButton";
+import { UserProfileSheet } from "@/app/components/ui/UserProfileSheet";
 import { ROUTES } from "@/app/lib/routes";
 
 function RegistrationAction({
@@ -158,6 +159,7 @@ export default function EventDetail() {
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showOrganizer, setShowOrganizer] = useState(false);
 
   const { isRegistered, checking, loading: registering, register, unregister, isFull, registrationCount } =
     useEventRegistration(user?.id ?? null, event?.id ?? null, event?.vagas ?? undefined);
@@ -309,6 +311,20 @@ export default function EventDetail() {
               {location}
             </span>
           )}
+          {event.organizador && (
+            <span className="flex items-center gap-2 text-sm text-gray-600">
+              <User className="h-4 w-4 text-purple-400 shrink-0" />
+              <button
+                onClick={() => setShowOrganizer(true)}
+                className="flex items-center gap-1 hover:text-purple-600 transition"
+              >
+                Organizador: {event.organizador.nome || event.organizador.username}
+                {event.organizador.tipo_conta === AccountType.EMPRESA && (
+                  <BadgeCheck className="h-4 w-4 text-purple-500 shrink-0" />
+                )}
+              </button>
+            </span>
+          )}
           <span className="flex items-center gap-2 text-sm text-gray-600">
             <Users className="h-4 w-4 text-purple-400 shrink-0" />
             {checking ? (
@@ -361,6 +377,11 @@ export default function EventDetail() {
         </div>
       </div>
 
+      <UserProfileSheet
+        user={event.organizador ?? null}
+        open={showOrganizer}
+        onClose={() => setShowOrganizer(false)}
+      />
     </div>
   );
 }
