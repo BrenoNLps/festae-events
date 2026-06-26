@@ -1,5 +1,5 @@
 import { getSupabaseClient } from "../../supabase/singleton";
-import { AccountType, Address, Evento } from "../../types";
+import { AccountType, Address, Evento, Usuario } from "../../types";
 import { getFriendIds } from "./friendshipService";
 import { getTodayAsString } from "../../utils/date";
 
@@ -92,11 +92,13 @@ export async function getEventsByOrganizer(id_organizador: string): Promise<{ da
 export async function getEventById(id: number): Promise<{ data: Evento | null; error: unknown }> {
     const { data, error } = await supabase
         .from("evento")
-        .select("*")
+        .select("*, usuario!id_organizador(id, username, nome, imagem_url, tipo_conta, cnpj)")
         .eq("id", id)
         .single();
 
-    return { data: data as Evento | null, error };
+    if (!data) return { data: null, error };
+    const { usuario, ...evento } = data as typeof data & { usuario: Usuario | null };
+    return { data: { ...evento, organizador: usuario ?? undefined } as Evento, error };
 }
 
 export async function updateEvent(id: number, values: {
