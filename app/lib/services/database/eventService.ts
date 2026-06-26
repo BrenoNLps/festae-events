@@ -1,5 +1,5 @@
 import { getSupabaseClient } from "../../supabase/singleton";
-import { Address, Evento } from "../../types";
+import { AccountType, Address, Evento } from "../../types";
 import { getFriendIds } from "./friendshipService";
 import { getTodayAsString } from "../../utils/date";
 
@@ -12,10 +12,17 @@ function assertNoHtml(value: string, field: string) {
     if (HTML_PATTERN.test(value)) throw new Error(`${field}: conteúdo HTML não permitido`)
 }
 
-type EventoRaw = Evento & { inscricao: { count: number }[] };
+type EventoRaw = Omit<Evento, 'organizador_tipo_conta'> & {
+    inscricao: { count: number }[];
+    usuario?: { tipo_conta: AccountType } | null;
+};
 
 function mapInscritos(data: EventoRaw[]): Evento[] {
-    return data.map(({ inscricao, ...e }) => ({ ...e, inscritos: inscricao?.[0]?.count ?? 0 }));
+    return data.map(({ inscricao, usuario, ...e }) => ({
+        ...e,
+        inscritos: inscricao?.[0]?.count ?? 0,
+        organizador_tipo_conta: usuario?.tipo_conta,
+    }));
 }
 
 export async function createEvent(values: {
@@ -44,7 +51,7 @@ export async function getEvents(filters?: {
     cidade?: string;
     categoria?: string;
 }): Promise<{ data: Evento[] | null; error: unknown }> {
-    let query = supabase.from("evento").select("*, inscricao(count)");
+    let query = supabase.from("evento").select("*, inscricao(count), usuario!id_organizador(tipo_conta)");
 
     if (filters?.estado) query = query.eq("endereco->>estado", filters.estado);
     if (filters?.cidade) query = query.eq("endereco->>cidade", filters.cidade);
@@ -65,7 +72,7 @@ export async function searchEvents(
     query: string,
     filters?: { estado?: string; cidade?: string; categoria?: string }
 ): Promise<Evento[]> {
-    let q = supabase.from("evento").select("*, inscricao(count)").ilike("nome", `%${escapeLike(query)}%`);
+    let q = supabase.from("evento").select("*, inscricao(count), usuario!id_organizador(tipo_conta)").ilike("nome", `%${escapeLike(query)}%`);
     if (filters?.estado) q = q.eq("endereco->>estado", filters.estado);
     if (filters?.cidade) q = q.eq("endereco->>cidade", filters.cidade);
     if (filters?.categoria) q = q.eq("categoria", filters.categoria);
@@ -123,7 +130,7 @@ export async function getEventsByFriends(userId: string): Promise<Evento[]> {
 
     const { data } = await supabase
         .from("inscricao")
-        .select("evento(*, inscricao(count))")
+        .select("evento(*, inscricao(count), usuario!id_organizador(tipo_conta))")
         .in("id_usuario", friendIds);
 
     const seen = new Set<number>();

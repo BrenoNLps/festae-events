@@ -67,6 +67,7 @@ export interface Evento {
     created_at?: string;
     categoria?: EventCategory;
     inscritos?: number;
+    organizador_tipo_conta?: AccountType;
 }
 
 export interface Usuario {
