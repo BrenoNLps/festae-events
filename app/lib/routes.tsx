@@ -10,6 +10,7 @@ export const ROUTES = {
     chat: '/chat',
     agenda: '/agenda',
     profile: '/profile',
+    verify: (codigo: string) => `/verify/${codigo}`,
 }
 
 export const PROTECTED_ROUTES = [
