@@ -52,6 +52,7 @@ export default function CompleteProfile() {
                         {errors.cnpj && <span className={styles.error}>{errors.cnpj.message}</span>}
                     </div>
                 )}
+                {errors.root && <span className={styles.error}>{errors.root.message}</span>}
                 <button className={styles.submitButton} type="submit" disabled={loading}>
                     Salvar e continuar
                 </button>

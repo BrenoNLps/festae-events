@@ -30,7 +30,11 @@ export function useCompleteProfile() {
             imagem_url = await uploadImage('avatars', user.id, imageFileRef.current) ?? undefined
         }
         const { error } = await completeProfile(user.id, { ...data, imagem_url })
-        if (!error) router.push(ROUTES.events)
+        if (error) {
+            form.setError('root', { message: 'Erro ao salvar perfil. Tente novamente.' })
+            return
+        }
+        router.push(ROUTES.events)
     }
 
     return { form, onSubmit, loading, setImageFile: (file: File) => { imageFileRef.current = file } }

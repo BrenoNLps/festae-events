@@ -14,6 +14,7 @@ export function useCreateEvent() {
     const { user, loading } = useCurrentUser()
     const router = useRouter()
     const coverFileRef = useRef<File | null>(null)
+    const inFlight = useRef(false)
 
     const form = useForm({
         resolver: zodResolver(eventSchema),
@@ -31,16 +32,21 @@ export function useCreateEvent() {
     })
 
     async function onSubmit(data: EventFormData) {
-        if (!user) return
-        const { data: created, error } = await createEvent({ ...data, id_organizador: user.id })
-        if (error || !created) return
-        if (coverFileRef.current) {
-            const imagem_url = await uploadImage('event-covers', user.id, coverFileRef.current, created.id) ?? undefined
-            if (imagem_url) await updateEvent(created.id, { imagem_url })
+        if (!user || inFlight.current) return
+        inFlight.current = true
+        try {
+            const { data: created, error } = await createEvent({ ...data, id_organizador: user.id })
+            if (error || !created) return
+            if (coverFileRef.current) {
+                const imagem_url = await uploadImage('event-covers', user.id, coverFileRef.current, created.id) ?? undefined
+                if (imagem_url) await updateEvent(created.id, { imagem_url })
+            }
+            const friendIds = await getFriendIds(user.id)
+            await insertNotificationsForFriends(friendIds, 'evento')
+            router.push(ROUTES.events)
+        } finally {
+            inFlight.current = false
         }
-        const friendIds = await getFriendIds(user.id)
-        await insertNotificationsForFriends(friendIds, 'evento')
-        router.push(ROUTES.events)
     }
 
     return { form, onSubmit, loading, setCoverFile: (file: File) => { coverFileRef.current = file } }

@@ -3,6 +3,7 @@ import {
   checkRegistration,
   createRegistration,
   deleteRegistration,
+  ensureCodigo,
   getRegistrationCount,
 } from "../services/database/registrationService";
 
@@ -15,6 +16,7 @@ export function useEventRegistration(
   const [checking, setChecking] = useState(false);
   const [loading, setLoading] = useState(false);
   const [registrationCount, setRegistrationCount] = useState(0);
+  const [codigo, setCodigo] = useState<string | null>(null);
   const inFlight = useRef(false);
 
   useEffect(() => {
@@ -28,8 +30,16 @@ export function useEventRegistration(
     ];
     if (userId) {
       checks.push(
-        checkRegistration(userId, eventId).then(({ data }) => {
-          if (!cancelled) setIsRegistered(!!data);
+        checkRegistration(userId, eventId).then(async ({ data }) => {
+          if (!cancelled) {
+            setIsRegistered(!!data);
+            if (data && !data.codigo) {
+              const novo = await ensureCodigo(userId, eventId);
+              if (!cancelled) setCodigo(novo);
+            } else {
+              setCodigo(data?.codigo ?? null);
+            }
+          }
         })
       );
     }
@@ -46,10 +56,11 @@ export function useEventRegistration(
     inFlight.current = true;
     setLoading(true);
     try {
-      const { error } = await createRegistration({ id_usuario: userId, id_evento: eventId });
+      const { data, error } = await createRegistration({ id_usuario: userId, id_evento: eventId });
       if (!error) {
         setIsRegistered(true);
         setRegistrationCount((c) => c + 1);
+        setCodigo(data?.codigo ?? null);
       }
     } finally {
       inFlight.current = false;
@@ -73,5 +84,5 @@ export function useEventRegistration(
     }
   }
 
-  return { isRegistered, checking, loading, register, unregister, registrationCount, isFull };
+  return { isRegistered, checking, loading, register, unregister, registrationCount, isFull, codigo };
 }

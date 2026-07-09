@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Calendar, Clock, MapPin, Users } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Calendar, Clock, MapPin, User, Users } from "lucide-react";
 import { EventImage } from "@/app/components/events/EventImage";
 import { ConfirmDialog } from "@/app/components/ui/ConfirmDialog";
 import { getEventById, deleteEvent } from "@/app/lib/services/database/eventService";
@@ -11,9 +11,11 @@ import { useCurrentUser } from "@/app/lib/hooks/useCurrentUser";
 import { useEventRegistration } from "@/app/lib/hooks/useEventRegistration";
 import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
-import { Evento, EVENT_CATEGORY_LABELS } from "@/app/lib/types";
+import { AccountType, Evento, EVENT_CATEGORY_LABELS } from "@/app/lib/types";
 import { FriendsAtEvent } from "@/app/components/events/FriendsAtEvent";
 import { EventShareButton } from "@/app/components/events/EventShareButton";
+import { UserProfileSheet } from "@/app/components/ui/UserProfileSheet";
+import { RegistrationQRModal } from "@/app/components/ui/RegistrationQRModal";
 import { ROUTES } from "@/app/lib/routes";
 
 function RegistrationAction({
@@ -33,6 +35,8 @@ function RegistrationAction({
   onDelete,
   deleting,
   registrationCount,
+  codigo,
+  onShowQR,
 }: {
   isOrganizer: boolean;
   checking: boolean;
@@ -50,6 +54,8 @@ function RegistrationAction({
   onDelete: () => void;
   deleting: boolean;
   registrationCount: number;
+  codigo: string | null;
+  onShowQR: () => void;
 }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -100,6 +106,14 @@ function RegistrationAction({
         ) : (
           <>
             <p className="text-center text-sm text-green-600 font-medium">Você está inscrito</p>
+            {codigo && (
+              <button
+                onClick={onShowQR}
+                className="w-full py-3 rounded-xl text-sm font-semibold border border-purple-600 text-purple-600 hover:bg-purple-50 transition"
+              >
+                Ver comprovante
+              </button>
+            )}
             {canCancel ? (
               <button
                 onClick={() => setShowCancelDialog(true)}
@@ -158,8 +172,10 @@ export default function EventDetail() {
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showOrganizer, setShowOrganizer] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
-  const { isRegistered, checking, loading: registering, register, unregister, isFull, registrationCount } =
+  const { isRegistered, checking, loading: registering, register, unregister, isFull, registrationCount, codigo } =
     useEventRegistration(user?.id ?? null, event?.id ?? null, event?.vagas ?? undefined);
 
   async function handleDelete() {
@@ -309,6 +325,20 @@ export default function EventDetail() {
               {location}
             </span>
           )}
+          {event.organizador && (
+            <span className="flex items-center gap-2 text-sm text-gray-600">
+              <User className="h-4 w-4 text-purple-400 shrink-0" />
+              <button
+                onClick={() => setShowOrganizer(true)}
+                className="flex items-center gap-1 hover:text-purple-600 transition"
+              >
+                Organizador: {event.organizador.nome || event.organizador.username}
+                {event.organizador.tipo_conta === AccountType.EMPRESA && (
+                  <BadgeCheck className="h-4 w-4 text-purple-500 shrink-0" />
+                )}
+              </button>
+            </span>
+          )}
           <span className="flex items-center gap-2 text-sm text-gray-600">
             <Users className="h-4 w-4 text-purple-400 shrink-0" />
             {checking ? (
@@ -357,10 +387,24 @@ export default function EventDetail() {
             onDelete={handleDelete}
             deleting={deleting}
             registrationCount={registrationCount}
+            codigo={codigo}
+            onShowQR={() => setShowQR(true)}
           />
         </div>
       </div>
 
+      <UserProfileSheet
+        user={event.organizador ?? null}
+        open={showOrganizer}
+        onClose={() => setShowOrganizer(false)}
+      />
+      {codigo && (
+        <RegistrationQRModal
+          codigo={codigo}
+          open={showQR}
+          onClose={() => setShowQR(false)}
+        />
+      )}
     </div>
   );
 }

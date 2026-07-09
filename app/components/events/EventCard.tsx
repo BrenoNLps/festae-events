@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, MapPin } from "lucide-react";
-import { Evento, EVENT_CATEGORY_LABELS } from "@/app/lib/types";
+import { Calendar, MapPin, BadgeCheck } from "lucide-react";
+import { AccountType, Evento, EVENT_CATEGORY_LABELS } from "@/app/lib/types";
 import { formatDateRange } from "@/app/lib/utils/date";
 import { formatPrice, formatLocation } from "@/app/lib/utils/event";
 import { EventImage } from "./EventImage";
@@ -54,9 +54,12 @@ export function EventCard({ event }: { event: Evento }) {
           )}
 
           <div className="flex items-center justify-between mt-0.5">
-            <span className="text-xs text-gray-400">
-                {event.inscritos !== undefined ? `${event.inscritos}/${event.vagas} vagas` : `${event.vagas} vagas`}
-              </span>
+            <span className="text-xs text-gray-400 flex items-center gap-1">
+              {event.inscritos !== undefined ? `${event.inscritos}/${event.vagas} vagas` : `${event.vagas} vagas`}
+              {event.organizador_tipo_conta === AccountType.EMPRESA && (
+                <BadgeCheck className="h-3.5 w-3.5 text-purple-500 shrink-0" aria-label="Organizado por empresa" />
+              )}
+            </span>
             {event.categoria && (
               <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
                 {EVENT_CATEGORY_LABELS[event.categoria]}
